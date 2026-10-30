@@ -1,0 +1,94 @@
+XFAMILY Android 0.12.0 交付说明
+日期：2026-10-18
+项目：D:\xfriend-suite
+版本：versionCode 12 / versionName 0.12.0（XFriend、XSalers 两个独立 APK）
+状态：功能代码、正式 APK、两 flavor 单测与模拟器验证已完成；7 张截图已回填
+
+一、本次变更（0.12.0：XSalers 通话录音接管）
+XSalers 新增「通话录音接管」：接管系统/录音机已经保存的通话录音，复制或解码到 App 私有目录，复用既有「语音转写 → 复盘」链路；文字保存后可删除源音频，只保留文字与复盘报告。
+XFriend 无新增功能；视觉系统、组件、图标、主题沿用 0.11，不新增设计令牌或组件。
+功能说明：D:\xfriend-suite\docs\CALL-RECORDING-0.12.md
+交付报告：D:\xfriend-suite\docs\DELIVERY-0.12.html
+验收记录：D:\xfriend-suite\docs\verification-0.12.json
+
+二、能力与边界（如实说明）
+1. 不支持通话中录音：Android 10（API 29）起第三方应用无法在通话中直接录音；本功能只接管已经落盘的通话录音文件。
+2. 无后台常驻/定时服务：打开 App 后自动扫描一次（可在设置关闭），页面提供「重新扫描」；不做通话监听。
+3. 扫描来源：系统音频库（MediaStore，需音频读取权限）+ App 私有外部目录 files/recordings（无需系统权限）。
+4. 识别规则：文件名/目录关键词、手机号/座机号、可解析日期时间、音频扩展名；单条 ≤ 4 小时、≤ 4 GB；候选最多 200 条。
+5. 接管动作：复制应用内录音，或用 MediaExtractor/MediaCodec 解码为 PCM16 WAV 到 App 私有目录，生成 kind=audio 的沟通记录。
+6. 转写需要模型：配置模型/试用额度后自动转写；未配置时只导入，并提示「配置模型后可打开记录开始转写」。
+7. 删除源录音：文字保存后出现「待清理源录音」；二次确认后删除。API 30+ 的系统媒体库删除走 MediaStore.createDeleteRequest 系统确认；API 26–29 直接删除；App 内录音直接删源文件；删除后文字、原文、复盘报告保留，sourceDeleted=true 后不再提示。
+8. 客户匹配：从文件名解析电话并与客户电话归一化匹配；匹配不到显示「未匹配客户」，仍可接管。
+9. 去重：已接管（sourceUri/sourceName）、已忽略（callSkipped，最多 500 条）、本次已见 key 均排除；再次扫描不重复。
+
+三、入口与页面
+- 今日页快捷入口：「接管通话录音」（SalesScreen.kt:238）；我的页设置行「通话录音接管」，副标题「接管系统通话录音 · 转写后清理源文件」（SalesScreen.kt:395）；页面标题「通话录音接管」（SalesCallRecordingsScreen.kt:88）。
+- 页面分区：顶部栏 → 说明卡 → 权限 banner（未授权时）→ 可接管录音（标题/重新扫描、空状态或候选列表、全选/单选）→ 接管动作（接管并转写/忽略所选）→ 设置（自动扫描、转写后提示删除源录音）→ 待清理源录音 → 删除确认弹窗。
+
+四、技术实现
+新增：
+- app/src/main/java/com/singu/xfriend/SalesCallRecordings.kt（239 行）：CallRecording / CallRecordingSettings / CallRecordings；扫描、权限、识别、标题/日期/时长/大小格式化、客户匹配、删除本地源。
+- app/src/main/java/com/singu/xfriend/SalesCallRecordingsScreen.kt（329 行）：页面 UI 与交互。
+- app/src/test/java/com/singu/xfriend/SalesCallRecordingsTest.kt（111 行，12 个单测）。
+修改：
+- SalesViewModel.kt：自动/手动扫描、接管、忽略、设置持久化、待清理列表、删除源录音（API<30 分支）、confirmSourceDeleted。
+- SalesDomain.kt: Communication 增加 sourceUri/sourceName/sourceDeleted（JSON 向后兼容）。
+- SalesStore.kt: SalesData 增加 callAutoScan/callDeleteAfterTranscribe/callSkipped（旧 JSON 默认 true/true/空）。
+- SalesScreen.kt：今日页入口、我的页设置行、页面路由。
+- app/src/xsalers/AndroidManifest.xml：新增 READ_MEDIA_AUDIO、READ_EXTERNAL_STORAGE（maxSdkVersion=32）。
+- 复用：SalesMedia.kt 的 decodeAudio（MediaExtractor/MediaCodec 解码为 PCM16 WAV，限制 4 小时）；既有 analyzeNow 转写/复盘管道。0.12 不新增第三方依赖；页面使用既有 Xf 组件与 0.11 设计令牌。
+
+五、测试与构建证据
+XFriend debug 单元测试：38 suites / 300 tests，0 failures / 0 errors（app/build/test-results/testXfriendDebugUnitTest/，2026-10-18）。
+XSalers debug 单元测试：38 suites / 300 tests，0 failures / 0 errors（.../testXsalersDebugUnitTest/，2026-10-18）；其中 SalesCallRecordingsTest 12 项。
+两 flavor 合计：600 tests，0 failures / 0 errors；0.11 基线 574 项通过。
+正式 0.12 构建：build-0.12-release.log，BUILD SUCCESSFUL in 13m 58s；93 actionable tasks（45 executed / 48 up-to-date）；0 compile errors / 16 warnings；同日志含两 flavor 单测。
+QA fixture 构建：build-callrec-qa5.log，BUILD SUCCESSFUL in 10m37s（历史，仅界面验收用）。
+注意：0.11 的 build-0.11-final.log / APK 值仅作历史证据；0.12 正式构建已通过。
+
+六、APK 信息
+正式 APK 已构建（2026-10-18，debug 双 flavor，-PsalesUiFixture=false）：
+- XFriend：D:\xfriend-suite\.artifacts\0.12-release\Xfriend-0.12.0.apk 与 D:\build_apk\Xfriend-0.12.0.apk；bytes=26499349；SHA-256=C3457F4301E1814D824A31BA34ABE63CA838DE78FA02E5A1FEF1740D0AA33C63；mtime=2026-10-18 03:28:27；aapt2 校验通过。
+- XSalers：D:\xfriend-suite\.artifacts\0.12-release\Xsalers-0.12.0.apk 与 D:\build_apk\Xsalers-0.12.0.apk；bytes=26499509；SHA-256=8B6FB83D686142C87478B7CE82FCF155E77829706932AC4015B41861B2CFC9C8；mtime=2026-10-18 03:25:49；aapt2 校验通过。
+版本校验：versionCode 12 / versionName 0.12.0；包名 com.singu.xfriend.mobile / com.singu.xsalers.mobile；minSdk 26 / targetSdk 34；compileSdk 34。
+交付副本：D:\build_apk（两处同文件同 SHA-256）；QA fixture：.artifacts\0.12-qa\Xsalers-0.12-qa.apk（28,336,288 bytes，仅界面验收，不对外）。
+
+七、模拟器验证
+环境：Pixel_9 模拟器，Android 37，1080x2424 / 420dpi；独立 QA fixture 包 com.singu.xsalers.mobile.qa（不属于交付安装包）。
+已验证：未授权时显示权限提示+授权按钮，pm grant READ_MEDIA_AUDIO 后提示消失、候选正常；全选→接管并转写(1)→今日「待分析」1→2、新增「通话录音」记录；去重后仅剩 1 条候选；删除源录音→确认→卡片消失、外部文件 通话录音_20261016_1432.wav 已删除、文字/报告保留；crash buffer 为空。
+未验证：真实 ASR 转写端到端（fixture 无法配置模型，接管只完成复制/解码并生成待分析记录；删除链路用已转写种子记录验证）；权限拒绝后再次授权；厂商录音机目录；API 26–29 删除分支；真机、字体缩放、TalkBack、对比度。
+截图：docs/qa-0.12/callrec-01-home.png ~ callrec-07-deleted.png，共 7 张已回填；callrec-06-pending-delete.png 是 callrec-04-granted.png 底部「待清理源录音」卡片的裁剪（1080x540，非独立全屏）；尺寸/SHA-256 见 verification-0.12.json。
+
+八、隐私与音频
+接管、复制、解码在本机完成；解码产物是 App 私有目录的 WAV，不写入本应用自有服务器。
+转写沿用现有模型链路：会把音频发送给用户配置的 ASR 服务；默认 ModelProfile.asr=mimo-v2.5-asr、默认端点 https://api.xiaomimimo.com/v1。音频是否离开本机取决于模型配置；本应用不保留、不写入自有服务器。
+页面文案已改为：「接管、复制与解码都在本机完成；点开始转写后，音频会按当前模型配置发送给对应的 ASR 服务（默认 MiMo 云端），不会写入本应用的服务器。」交付说明以本节为准。
+
+九、已知限制
+1. 正式 APK 为 debug 双 flavor、开发签名；不是应用商店发布包。
+2. 两 flavor 单测 600 项通过；lint 未执行（非阻断），不写成通过。
+3. 截图 7 张已回填；06-pending-delete.png 是 04-granted.png 底部卡片裁剪，非独立全屏。
+4. fixture 无法配置模型，真实 ASR 转写未端到端；删除链路用「已转写」种子记录验证，不能宣称真实转写全流程通过。
+5. 不支持通话中录音；无后台常驻/定时扫描。
+6. 机型/厂商差异：录音保存位置、命名规则、媒体库索引不同，启发式识别可能漏识别。
+7. 删除不可恢复；系统媒体库删除需系统确认；App 内录音直接删除。
+8. 模拟器合成数据验收，不代表真机；MP3/高采样率/无权限/外部存储异常路径由 SalesCallRecordingsTest 单测覆盖。
+
+十、构建与安装
+构建命令（实际已执行，产物见六）：
+gradlew --no-daemon --max-workers=4 -Pkotlin.compiler.execution.strategy=in-process -PsalesUiFixture=false :app:assembleXfriendDebug :app:assembleXsalersDebug :app:testXfriendDebugUnitTest :app:testXsalersDebugUnitTest --console=plain
+完整验证：.\build.ps1 -JavaHome 'C:\Program Files\Java\jdk-20'
+脚本说明：scripts\release-0.11.ps1 是 0.11 版本固定脚本（产物/日志名仍为 0.11），仅历史；0.12 实际构建日志为 build-0.12-release.log。
+安装：两个 APK 独立安装，使用开发签名；建议覆盖安装同签名旧版，不要先卸载，以免删除已有本机数据。
+外观：沿用「我的 → 外观」切换浅色/深色/跟随系统与 5 组主色；偏好只保存在本机。
+
+十一、相关文档
+D:\xfriend-suite\README.md
+D:\xfriend-suite\docs\README.md（文档索引）
+D:\xfriend-suite\docs\CALL-RECORDING-0.12.md
+D:\xfriend-suite\docs\DELIVERY-0.12.html
+D:\xfriend-suite\docs\verification-0.12.json
+D:\xfriend-suite\docs\XFRIEND-REDESIGN-0.11.md
+D:\xfriend-suite\docs\design\redesign-concept-android-spec.md
+D:\xfriend-suite\docs\qa-0.12\（7 张截图，06 为裁剪图）

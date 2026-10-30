@@ -1,0 +1,49 @@
+XFriend Android model protocol adaptations
+
+The following desktop protocol references were reimplemented in Kotlin. Their plugins, runtimes and scripts are not executed or bundled.
+
+Native model protocol adaptations
+
+Source: https://github.com/qikairo7/dsh-gemini-pool
+Version: 0.8.2; commit 7f41134c1bf9ce1dcfcb9bd953adadf413cf39b4
+Copyright (c) 2026 antigravity-pool contributors
+License: MIT (full permission and warranty notice below).
+Antigravity/CloudCode compatibility protocol reimplemented in Python;
+the DSH plugin, its runtime, and its scripts are not executed or required.
+
+Source: https://github.com/WSL043/dsh-codex-subscription
+Copyright (c) 2026 WSL043
+
+Source: https://github.com/corrinehu/dsh-workbuddy-connect
+Copyright (c) 2026 Corrine Hu
+
+Source: https://github.com/farion1231/cc-switch
+Copyright (c) 2025 Jason Young
+
+Source: https://github.com/earendil-works/pi
+Copyright (c) 2025 Mario Zechner
+
+The wire behavior is reimplemented in Python. WorkBuddy upstream.ts credits
+Sliverkiss/workbuddy2api (MIT) as the basis of its HTTP protocol implementation.
+Codex protocol reference: https://github.com/earendil-works/pi (MIT).
+Their packages are not vendored or started by the native connector.
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

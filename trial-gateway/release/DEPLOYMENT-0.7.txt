@@ -1,0 +1,95 @@
+Xfriend trial-gateway 0.7.0 — 服务包交接
+日期：2026-10-13；交付状态：仅本地打包，未部署。
+
+部署阻断：113.219.170.192 的 SSH hostkey 尚未核验（用户报告 mismatch）。
+父任务须通过可信渠道核对指纹后再决定部署；不得跳过 hostkey 校验。
+本轮未连接远端、未安装远端依赖、未重启服务。用户此前报告公网 TLS EOF，
+激活站 /xfriendmanager/health 200；这些不是本轮实测，也不能证明内省可用。
+
+包内容与验证
+- 四个运行模块、pyproject.toml/uv.lock、协议、三份测试、交接文档、systemd参考模板、
+  release/nginx-v2-location.conf、无秘密的 gateway.env.example、测试证据。
+- 包内 MANIFEST.sha256 覆盖所有其他文件；包外 SHA256SUMS 校验 tar.gz 和 zip。
+- 明确排除实际 env/secret、数据库/WAL/SHM、cache-key、上传媒体、缓存、虚拟环境、
+  证书私钥和激活脚本。旧根目录 nginx.conf 不入包，避免误用 30m 上传限制。
+- 这是源代码服务包，不是离线依赖包；Python/uv及锁定轮子需在目标环境另行具备，
+  本次未下载 Linux wheels，也未验证目标 Linux 的安装或 systemd/nginx 运行。
+
+精确运行依赖
+- Linux/systemd + Nginx（现有 TLS/续期设施沿用），Python >=3.12，uv 用于锁定依赖安装。
+- aiohttp >=3.12,<4、cryptography >=44、Pillow >=11,<13；精确版本及哈希见 uv.lock。
+- 无 Redis/Celery/外部队列。单进程 aiohttp，绑定 127.0.0.1:PORT，默认 8787。
+- 本版不调用 FFmpeg，不需安装 FFmpeg 或 ffmpeg-python。音频必须由客户端转成
+  完整 PCM WAV；AAC/M4A/MP3 直接上传不支持。若必须接收这些格式，需另做解码实现。
+
+环境变量（仅这些由当前生产入口读取）
+MIMO_API_KEY：必填，由运维在目标主机安全注入；空值拒绝启动；包中无真实值。
+XFRIEND_TRIAL_DB：建议 /var/lib/xfriend-trial/trial.sqlite；省略默认 data/trial.sqlite。
+  必须沿用已有账本路径，保留相邻 trial.cache-key 和 trial.sqlite.media 目录。
+PORT：默认 8787；若变更，必须同步 Nginx proxy_pass。
+XFRIEND_SESSION_INTROSPECTION_URL：可选，受信任的实际 HTTPS 会话内省 URL。
+  未配置时继续使用已有 X-Xfriend-Lease；新 bearer 返回401。不能填 health URL。
+XFRIEND_GATEWAY_INTROSPECTION_SECRET：启用上述内省时必填，只从网关进程 env 读取，
+  必须与激活服务同名 env 的值相同。使用32..200字符的无空白可打印ASCII随机secret；
+  不下发Android、不接受客户端提供、不记录日志、不写入交付包。更换后重启网关。
+
+激活接口内省互通契约
+- 契约已对照 D:/xfriend-activation/src/xfriend_activation/sync_api.py：
+  POST /api/v2/auth/introspect（公网URL是否包含反向代理前缀由父任务核对）。
+  网关向配置 URL 发 POST，JSON body {"token":"客户端访问token"}，
+  Authorization: Bearer <XFRIEND_GATEWAY_INTROSPECTION_SECRET>。
+  这不是自定义secret头；客户端访问token必须20..200字符，不能放在服务Authorization头。
+- 对端成功返回 HTTP200 JSON {"active":true,"user_id":"canonical-account-id"}。
+  user_id 必须与现有签名租约完全一致，不能使用会话ID、设备ID、空间ID替代账号ID。
+- 同时携带租约与 bearer 时两者身份必须一致；现有 Ed25519 租约验证器保持使用。
+- 禁止跳转，10秒超时，响应限64KiB，禁用环境代理；使用正常 HTTPS 证书验证。
+- 不活跃/身份不匹配/无效会话返回401；缺失/无效服务secret、上游401/403、网络故障
+  或损坏响应返回通用503。缺secret时不发出内省请求，租约认证仍可用。
+- 会话 token 来自每次请求，不写入服务器 env。实际内省端点与真实 bearer 联调尚未验证。
+
+文件布局与安装步骤（仅供父任务核验后执行，未执行这些部署命令）
+1. 核对线上 unit、运行用户、ExecStart、WorkingDirectory、数据库、证书/续期位置。
+   参考：代码 /opt/xfriend-trial，服务 xfriend-trial.service，用户/组 xfriend-trial，
+   env /etc/xfriend-trial/gateway.env，venv /opt/xfriend-trial/venv。
+2. 校验包外 SHA256SUMS，解包到临时发布目录，执行 sha256sum -c MANIFEST.sha256。
+   停止旧网关后备份数据库与密钥；活动库须用 SQLite backup API，不能忽略 WAL。
+3. 更新代码和锁文件，保持现有状态目录；不要用空账本替换生产库。
+   在已确认的代码目录，使用实际服务解释器所在环境：
+   UV_PROJECT_ENVIRONMENT=/opt/xfriend-trial/venv uv sync --frozen --no-dev --inexact
+   此命令需要本地轮子缓存或受控依赖下载能力；本服务包不包含依赖轮子。
+   --inexact 保留已有额外包，避免共享环境中的 Certbot 被删除。
+   验证该 Python 可 import aiohttp, cryptography, PIL，并检查原 Certbot 仍可运行。
+4. env 文件由 root 安全维护（建议0600），不直接覆盖已有秘密；示例只有空占位。
+   非 root 服务用户需要数据库、WAL/SHM、密钥、媒体目录写权限；UMask=0077。
+   模板 StateDirectory/ReadWritePaths 为 /var/lib/xfriend-trial；自定义 DB 路径须对应调整。
+   保持 Restart=on-failure 和已有沙箱，单实例运行；不启动多个 gunicorn worker。
+5. 将 nginx-v2-location.conf 合并到已有可信 TLS server 块，保留 v1 原配置。
+   v2 client_max_body_size 130m、client_body_timeout 120s、HTTP/1.1、request buffering off、
+   response buffering/cache/gzip off、read/send timeout 640s。不要记录鉴权头。
+   Authorization、X-Xfriend-Lease、Last-Event-ID 必须透传。
+   nginx -t 成功后才 reload；变更 unit 时 daemon-reload。之后由父任务启动网关。
+
+容量与持久性要求
+- 音频 <=128MiB/文件，图片<=10MiB，文本<=2MiB，最多100源；总音频实际PCM时长<=3600秒。
+  推荐16kHz单声道16-bit，60分钟约115.2MB。不要将长录音切尾或改传摘要。
+- 内存中上传/加密/解密会有多份缓冲，RSS高于媒体大小；未做生产容量压测，无虚构最低RAM。
+  按主机容量控制并发上传，预留SQLite、媒体与备份空间。
+- 成功结果和扣次同事务；同ID重复/内部重试只计一次，完成前取消释放预留，完成后不退款。
+  同账号跨租约仍共用5次。worker租约60秒、15秒续租，持久检查点支持崩溃恢复。
+- 原始媒体终态24小时删除，30秒清理周期；停机后重启补清理。文本证据/结果/账本长期保留。
+- 不得直接回滚旧版本处理尚未结束的v2任务：旧启动逻辑可能清除预留。
+  先排空/取消v2任务，保留最新账本，不能用旧备份恢复已经消费的额度。
+
+验收与证据边界
+- 本地57项测试证据见 evidence/pytest.txt、pytest.xml；真实模型E2E、APK E2E未做。
+- 新增6项loopback mockHTTP内省契约测试：成功、缺secret、过短secret、服务凭据被拒、
+  会话inactive、拒绝重定向；断言客户端不能注入服务secret，secret/token不进入响应或日志。
+- 本地完整mockHTTP测试上传22,400,044字节/700秒WAV，逐字节核对ASR来源窗口，
+  ASR max_tokens截断拆分、摘要length重试、工作者中断恢复、尾部TAIL700保留，
+  最终引用/artifact完整，SSE编号重放，同ID与换租约只扣1次，剩余4次。
+- 另有完整60分钟、超过旧30MiB上限的WAV上传测试；不是公网代理验收。
+- 上线后父任务须独立检查：可信TLS /health、无认证401、v1/TTS兼容、>30MiB公网上传、
+  GET/SSE恢复及取消/重复/断点账本；真实模型成功复盘会实际消费测试账号一次额度。
+- UI仅显示percent；最终产物字段是result（含report/analysisJson/evidence等），
+  不是名为artifact的顶层字段；只有succeeded可应用建议，未成功result为null。
+  具体请求/响应以 review-protocol.json 为准。

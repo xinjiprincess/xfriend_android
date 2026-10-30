@@ -1,0 +1,31 @@
+﻿=== 0.11 install 2026-10-17T23:49:06.0586326+08:00 ===
+release xfriend: Performing Streamed Install
+release xfriend: Success
+release xsalers: Performing Streamed Install
+release xsalers: Success
+qa xfriend: Performing Streamed Install
+qa xfriend: Success
+qa xsalers: Performing Streamed Install
+qa xsalers: Success
+
+=== versionName check (dumpsys package) ===
+--- com.singu.xfriend.mobile
+    versionName=0.11.0
+    versionCode=11 minSdk=26 targetSdk=34
+    lastUpdateTime=2026-10-17 15:49:06
+    fixtureActivity: (not in dump)
+--- com.singu.xsalers.mobile
+    versionName=0.11.0
+    versionCode=11 minSdk=26 targetSdk=34
+    lastUpdateTime=2026-10-17 15:49:11
+    fixtureActivity: (not in dump)
+--- com.singu.xfriend.mobile.qa
+    versionName=0.11.0
+    versionCode=11 minSdk=26 targetSdk=34
+    lastUpdateTime=2026-10-17 15:49:15
+    fixtureActivity: (not in dump)
+--- com.singu.xsalers.mobile.qa
+    versionName=0.11.0
+    versionCode=11 minSdk=26 targetSdk=34
+    lastUpdateTime=2026-10-17 15:49:19
+    fixtureActivity: (not in dump)

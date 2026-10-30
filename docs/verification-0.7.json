@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-13",
+  "version": "0.7.0",
+  "build": "passed",
+  "products": {
+    "Xfriend": {
+      "package": "com.singu.xfriend.mobile",
+      "certificate_sha256": "49c46c8c258586bb93c3c75dc0025720fe101b9f86e6d7e70c5cf32552e1f6db",
+      "upgrade_signature_matches": true,
+      "tests": 174,
+      "failures": 0,
+      "lint_errors": 0,
+      "lint_warnings": 12,
+      "qa_fixture_excluded": true,
+      "shared_api_key_pattern_absent": true,
+      "apk_bytes": 24810221,
+      "sha256": "e7a517f0099aa6168fd500f89a2113108b79d950808aa3164ff08594ba34ce15"
+    },
+    "Xsalers": {
+      "package": "com.singu.xsalers.mobile",
+      "certificate_sha256": "49c46c8c258586bb93c3c75dc0025720fe101b9f86e6d7e70c5cf32552e1f6db",
+      "upgrade_signature_matches": true,
+      "tests": 174,
+      "failures": 0,
+      "lint_errors": 0,
+      "lint_warnings": 14,
+      "qa_fixture_excluded": true,
+      "shared_api_key_pattern_absent": true,
+      "apk_bytes": 26000220,
+      "sha256": "4076d27491da35e6d452174327ec3f87d4ce3313f0575f87af30dda696aa00a5"
+    }
+  },
+  "limits": [
+    "113试用服务器SSH身份未核验，新v2试用网关未部署",
+    "真实模型长录音端到端未验收",
+    "手机—电脑实际账号媒体端到端未验收",
+    "真机节能与权限差异未测试",
+    "订阅支付为预留入口",
+    "桌面全量make all未执行；执行了本次功能相关检查与前端构建"
+  ],
+  "cloud_deployment": {
+    "account_server": "43.136.175.19",
+    "ready": 200,
+    "unauthenticated_sync": 401,
+    "backup_verified": true,
+    "signing_key_preserved": true,
+    "production_user_write_test": false
+  },
+  "ui_evidence": {
+    "environment": "Android 35 emulator 720x1600",
+    "synthetic_only": true,
+    "screens": [
+      "home",
+      "customers",
+      "customer-detail",
+      "customer-records",
+      "report",
+      "transcript",
+      "review",
+      "experts"
+    ],
+    "passed": true
+  },
+  "ui_screenshots": [
+    "suite-0.7-home.png",
+    "suite-0.7-customers.png",
+    "suite-0.7-customer-detail.png",
+    "suite-0.7-customer-records.png",
+    "suite-0.7-report.png",
+    "suite-0.7-transcript.png",
+    "suite-0.7-review.png",
+    "suite-0.7-experts.png"
+  ],
+  "ui_checks": {
+    "physical_device": "未测试",
+    "visual_acceptance": "以本次 QA 证据记录为准"
+  },
+  "android_audio_import": {
+    "environment": "Android 35 emulator 1080x2400",
+    "synthetic_only": true,
+    "service_started": true,
+    "app_sent_to_background": true,
+    "result": {
+      "synthetic_only": true,
+      "tasks": [
+        {
+          "id": "qa-audio-highrate",
+          "operation": "import",
+          "title": "QA 大录音测试 0",
+          "payload": "redacted",
+          "status": "done",
+          "detail": "正在复盘 · 100%",
+          "created": 1791896892100,
+          "progress": 100,
+          "recordId": "qa-audio-highrate"
+        },
+        {
+          "id": "qa-audio-long",
+          "operation": "import",
+          "title": "QA 大录音测试 1",
+          "payload": "redacted",
+          "status": "done",
+          "detail": "正在复盘 · 100%",
+          "created": 1791896892948,
+          "progress": 100,
+          "recordId": "qa-audio-long"
+        }
+      ],
+      "records": [
+        {
+          "id": "qa-audio-long",
+          "rate": 16000,
+          "channels": 1,
+          "bytes": 26214400,
+          "segments": 10
+        },
+        {
+          "id": "qa-audio-highrate",
+          "rate": 16000,
+          "channels": 1,
+          "bytes": 5760000,
+          "segments": 2
+        }
+      ]
+    },
+    "passed": true,
+    "migration": {
+      "passed": true,
+      "synthetic_only": true,
+      "legacy_preserved": true,
+      "idempotent_load": true,
+      "room_database_exists": true
+    }
+  }
+}

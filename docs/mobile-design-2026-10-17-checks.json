@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-17",
+  "artifact": "design prototype only",
+  "page_errors": [],
+  "width_checks": [
+    {
+      "width": 360,
+      "horizontal_overflow": false
+    },
+    {
+      "width": 390,
+      "horizontal_overflow": false
+    },
+    {
+      "width": 430,
+      "horizontal_overflow": false
+    }
+  ],
+  "tabs_filter_mode_theme": true
+}

@@ -1,0 +1,1435 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light" data-accent="indigo">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280, initial-scale=0.9" />
+<title>XFamily 0.12 · 文档 / 插件 / 引擎 产品原型 v1</title>
+<style>
+/* ==========================================================================
+   XFamily 0.12 prototype — "Office, Plugins & DSH engine on mobile"
+   Design language: Xf (2026-10-17 redesign) — warm paper canvas, one accent,
+   one line-icon family, light + dark, 4 accent palettes.
+   This file is a self-contained review prototype. Sample data only.
+   ========================================================================== */
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Noto Sans SC",sans-serif;
+  --font-mono:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;
+  --r-xs:6px; --r-sm:8px; --r-md:10px; --r-lg:14px; --r-xl:18px;
+  --ease:cubic-bezier(.2,.7,.3,1);
+}
+html[data-theme="light"]{
+  --canvas:#F6F5F1; --canvas2:#EFEDE7; --surface:#FFFFFF; --surface2:#F7F6F2; --surface3:#EEECE6;
+  --line:#E5E2DA; --line-strong:#D6D2C7;
+  --ink:#1B1C1F; --ink2:#57585F; --ink3:#8C8D94; --ink4:#B6B7BD;
+  --green:#1F9D6B; --amber:#C27C0E; --red:#D5443B; --blue:#3B82F6;
+  --shadow-1:0 1px 2px rgba(24,22,16,.05),0 1px 1px rgba(24,22,16,.03);
+  --shadow-2:0 10px 30px -16px rgba(24,22,16,.24),0 2px 6px rgba(24,22,16,.04);
+  --shadow-3:0 28px 60px -28px rgba(24,22,16,.36);
+  --overlay:rgba(20,18,12,.28);
+  --studio-bg:#0B0C0F; --studio-panel:#121419; --studio-line:#22252D; --studio-text:#E9EAEE; --studio-muted:#7C8089;
+}
+html[data-theme="dark"]{
+  --canvas:#0E0F12; --canvas2:#131418; --surface:#181A1F; --surface2:#1E2026; --surface3:#24262D;
+  --line:#282A31; --line-strong:#373A43;
+  --ink:#F1F2F4; --ink2:#AAAEB8; --ink3:#7B7F89; --ink4:#565A64;
+  --green:#37C08A; --amber:#E0A33A; --red:#F06B62; --blue:#6FA8FF;
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);
+  --shadow-2:0 12px 32px -16px rgba(0,0,0,.7),0 2px 6px rgba(0,0,0,.35);
+  --shadow-3:0 32px 72px -32px rgba(0,0,0,.9);
+  --overlay:rgba(0,0,0,.5);
+  --studio-bg:#07080A; --studio-panel:#101216; --studio-line:#1D2027; --studio-text:#E9EAEE; --studio-muted:#6E727D;
+}
+html[data-accent="indigo"]{--accent:#4F5DF0;--accent-solid:#4351E8;--accent-ink:#3B47CC;--accent-soft:#ECEEFE;--accent-line:#D9DEFB;}
+html[data-accent="teal"]{--accent:#0E9384;--accent-solid:#0B7F73;--accent-ink:#0A7568;--accent-soft:#E4F6F2;--accent-line:#C6EDE5;}
+html[data-accent="amber"]{--accent:#B26B00;--accent-solid:#996000;--accent-ink:#8F5600;--accent-soft:#FCF1DF;--accent-line:#F4DFB9;}
+html[data-accent="rose"]{--accent:#D94F6B;--accent-solid:#C74059;--accent-ink:#B33B54;--accent-soft:#FDECEF;--accent-line:#F8D3DB;}
+html[data-theme="dark"][data-accent="indigo"]{--accent:#8B95FF;--accent-solid:#4F5DF0;--accent-ink:#A6AEFF;--accent-soft:rgba(139,149,255,.13);--accent-line:rgba(139,149,255,.28);}
+html[data-theme="dark"][data-accent="teal"]{--accent:#4FD1C5;--accent-solid:#0B7F73;--accent-ink:#7EE3D9;--accent-soft:rgba(79,209,197,.12);--accent-line:rgba(79,209,197,.26);}
+html[data-theme="dark"][data-accent="amber"]{--accent:#E8B05A;--accent-solid:#8F5600;--accent-ink:#F2C778;--accent-soft:rgba(232,176,90,.12);--accent-line:rgba(232,176,90,.26);}
+html[data-theme="dark"][data-accent="rose"]{--accent:#FF8FA3;--accent-solid:#C2435C;--accent-ink:#FFAEBE;--accent-soft:rgba(255,143,163,.12);--accent-line:rgba(255,143,163,.28);}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font-sans); background:var(--studio-bg); color:var(--studio-text);
+  -webkit-font-smoothing:antialiased; font-size:14px;
+}
+button{font-family:inherit;cursor:pointer}
+.ic{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.ic.sm{width:16px;height:16px}
+.ic.xs{width:14px;height:14px}
+.ic.lg{width:20px;height:20px}
+
+/* ---------- studio chrome ---------- */
+.studio{min-height:100vh;display:flex;flex-direction:column}
+.studio-bar{
+  position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;
+  padding:10px 22px;background:rgba(10,11,14,.86);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--studio-line);
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{width:28px;height:28px;border-radius:9px;background:linear-gradient(140deg,var(--accent),var(--accent-solid));display:grid;place-items:center;color:#fff;box-shadow:0 2px 8px -2px var(--accent)}
+.brand b{font-size:13.5px;font-weight:650;letter-spacing:-.01em;color:#F2F3F5;white-space:nowrap}
+.brand span{font-size:11px;color:var(--studio-muted);border-left:1px solid var(--studio-line);padding-left:12px;white-space:nowrap}
+.studio-nav{display:flex;gap:2px;margin:0 auto;background:#111318;border:1px solid #1C1F26;border-radius:10px;padding:3px}
+.studio-nav button{
+  height:30px;padding:0 15px;border:0;border-radius:8px;background:transparent;color:#8B8F99;
+  font-size:12.5px;font-weight:550;transition:all .15s var(--ease);white-space:nowrap;
+}
+.studio-nav button:hover{color:#E8E9ED}
+.studio-nav button.is-active{background:#24272F;color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.studio-right{display:flex;align-items:center;gap:12px;flex:none}
+.accent-picker{display:flex;align-items:center;gap:7px}
+.accent-dot{width:15px;height:15px;border-radius:50%;border:0;padding:0;position:relative;transition:transform .15s var(--ease)}
+.accent-dot:hover{transform:scale(1.15)}
+.accent-dot.is-active{box-shadow:0 0 0 2px #0B0C0F,0 0 0 3.5px rgba(255,255,255,.8)}
+.theme-seg{display:flex;background:#111318;border:1px solid #1C1F26;border-radius:8px;padding:3px;gap:2px}
+.theme-seg button{width:28px;height:25px;border:0;border-radius:6px;background:transparent;color:#7B7F8A;display:grid;place-items:center}
+.theme-seg button.is-active{background:#24272F;color:#F4F5F7}
+.studio-hint{font-size:11px;color:#5F636D;white-space:nowrap}
+
+/* ---------- sections ---------- */
+.page{padding:30px 34px 70px;max-width:1320px;margin:0 auto;width:100%;display:none}
+.page.is-active{display:block}
+.page-head{display:flex;align-items:flex-end;gap:22px;margin-bottom:22px}
+.page-kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:650;margin-bottom:8px}
+.page-title{margin:0;font-size:27px;line-height:1.2;font-weight:650;letter-spacing:-.02em;color:#F2F3F5}
+.page-sub{margin:8px 0 0;font-size:13px;line-height:1.65;color:#9AA0AB;max-width:760px}
+.page-tag{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:11px;color:#9AA0AB;border:1px solid #262A32;border-radius:999px;padding:5px 10px;background:#12141A;white-space:nowrap}
+.tag b{color:#E8E9ED;font-weight:600}
+
+.flow-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 26px;color:#7E838E;font-size:12px}
+.flow-strip .step{display:flex;align-items:center;gap:8px;background:#101217;border:1px solid #1D2028;border-radius:9px;padding:7px 11px}
+.flow-strip .step i{width:19px;height:19px;border-radius:6px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;font-style:normal;font-size:10.5px;font-weight:700}
+.flow-strip .arrow{color:#3C414C}
+
+.phones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px 26px}
+.phone-cell{display:flex;flex-direction:column;align-items:center;min-width:0}
+.phone-cap{display:flex;align-items:center;gap:8px;margin-bottom:10px;align-self:flex-start;width:100%}
+.phone-cap .num{font-family:var(--font-mono);font-size:10.5px;color:var(--accent);background:rgba(120,130,255,.1);border:1px solid var(--accent-line);border-radius:6px;padding:2px 6px}
+.phone-cap b{font-size:12.5px;font-weight:600;color:#D8DAE1;letter-spacing:.01em}
+.phone-cap span{font-size:11px;color:#666B76;margin-left:auto;white-space:nowrap}
+
+.phone{
+  width:362px;height:768px;border-radius:42px;padding:10px;background:#05060A;
+  border:1px solid #2A2E38;box-shadow:0 30px 70px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.02) inset;
+  position:relative;flex:none;
+}
+.phone::after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:6px;width:112px;height:4px;border-radius:99px;background:rgba(255,255,255,.28)}
+.screen{
+  width:100%;height:100%;border-radius:33px;overflow:hidden;position:relative;
+  background:var(--canvas);color:var(--ink);display:flex;flex-direction:column;
+}
+.statusbar{height:38px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:11.5px;font-weight:600;color:var(--ink);letter-spacing:.01em}
+.statusbar .sb-right{display:flex;align-items:center;gap:5px;color:var(--ink)}
+.sig{display:flex;align-items:flex-end;gap:1.5px;height:9px}
+.sig i{width:2.5px;border-radius:1px;background:currentColor;display:block}
+.sig i:nth-child(1){height:3px}.sig i:nth-child(2){height:5px}.sig i:nth-child(3){height:7px}.sig i:nth-child(4){height:9px}
+.batt{width:19px;height:9px;border:1.2px solid currentColor;border-radius:3px;position:relative;opacity:.9}
+.batt::before{content:"";position:absolute;inset:1.5px;right:5px;background:currentColor;border-radius:1px}
+.batt::after{content:"";position:absolute;right:-3px;top:2.5px;width:1.6px;height:4px;border-radius:1px;background:currentColor}
+
+#page-doc .phone-cell:nth-child(4){grid-column:2}
+
+/* ---------- in-app primitives (Xf tokens) ---------- */
+.app{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.sb-top{flex:none;display:flex;align-items:center;gap:9px;padding:8px 16px 8px}
+.brand-tile{width:28px;height:28px;border-radius:9px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--accent);flex:none}
+.brand-tile .ic{width:15px;height:15px}
+.sb-title{font-size:15.5px;font-weight:650;letter-spacing:-.01em;color:var(--ink)}
+.sb-sub{font-size:11px;color:var(--ink3)}
+.sb-actions{margin-left:auto;display:flex;align-items:center;gap:2px}
+.icon-btn{width:34px;height:34px;border:0;border-radius:10px;background:transparent;color:var(--ink2);display:grid;place-items:center}
+.icon-btn:hover{background:var(--surface2)}
+.scroll{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 14px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.bottom-nav{flex:none;border-top:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,transparent);padding:7px 6px 9px;display:flex;align-items:center}
+.bottom-nav .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;color:var(--ink3);padding:2px 0;border-radius:11px}
+.bottom-nav .tab .pill{height:26px;min-width:42px;border-radius:99px;display:grid;place-items:center}
+.bottom-nav .tab.is-active{color:var(--accent)}
+.bottom-nav .tab.is-active .pill{background:var(--accent-soft)}
+.bottom-nav .tab b{font-size:9.5px;font-weight:550;letter-spacing:.01em}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-1)}
+.card.pad{padding:15px}
+.card.tight{padding:12px}
+.row{display:flex;align-items:center;gap:10px}
+.col{display:flex;flex-direction:column}
+.grow{flex:1;min-width:0}
+.muted{color:var(--ink3)}
+.tiny{font-size:10.5px;line-height:1.55;color:var(--ink3)}
+.meta{font-size:11px;color:var(--ink3)}
+.body{font-size:13px;line-height:1.62;color:var(--ink)}
+.h-title{font-size:21px;line-height:1.2;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.h-mid{font-size:16px;font-weight:650;line-height:1.3;color:var(--ink);letter-spacing:-.01em}
+.h-sm{font-size:13.5px;font-weight:650;color:var(--ink)}
+.section-label{font-size:10.5px;font-weight:650;letter-spacing:.07em;color:var(--ink3);text-transform:uppercase;margin:16px 2px 7px}
+.hr{height:1px;background:var(--line);margin:2px 0}
+
+.btn{height:38px;border-radius:10px;border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:600;padding:0 15px;background:var(--accent-solid);color:#fff}
+.btn .ic{width:16px;height:16px}
+.btn.block{width:100%}
+.btn.secondary{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink2);border-color:transparent}
+.btn.danger{background:var(--red);color:#fff}
+.btn.sm{height:31px;border-radius:8px;font-size:11.5px;padding:0 11px}
+.btn.sm .ic{width:14px;height:14px}
+.btn:disabled{opacity:.45;pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:8px;border:1px solid var(--line);background:var(--surface2);color:var(--ink2);font-size:11px;font-weight:550;white-space:nowrap}
+.chip.accent{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent-ink)}
+.chip.ok{background:color-mix(in srgb,var(--green) 11%,var(--surface));border-color:color-mix(in srgb,var(--green) 26%,transparent);color:var(--green)}
+.chip.warn{background:color-mix(in srgb,var(--amber) 13%,var(--surface));border-color:color-mix(in srgb,var(--amber) 26%,transparent);color:color-mix(in srgb,var(--amber) 82%,var(--ink))}
+.chip.red{background:color-mix(in srgb,var(--red) 11%,var(--surface));border-color:color-mix(in srgb,var(--red) 24%,transparent);color:var(--red)}
+.chip .ic{width:12px;height:12px}
+.seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
+.seg button{flex:1;height:30px;border:0;border-radius:8px;background:transparent;color:var(--ink3);font-size:11.5px;font-weight:550;white-space:nowrap}
+.seg button.is-active{background:var(--surface);border:1px solid var(--line);color:var(--ink);font-weight:650}
+.search{height:38px;border-radius:10px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:0 11px;color:var(--ink4);font-size:12.5px}
+.search .ic{width:15px;height:15px}
+.avatar{width:38px;height:38px;border-radius:12px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;flex:none;font-size:13px;font-weight:700}
+.avatar.round{border-radius:50%;background:var(--surface3);color:var(--ink2)}
+.tile{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.tile.grey{background:var(--surface2);color:var(--ink2)}
+.tile.green{background:color-mix(in srgb,var(--green) 12%,var(--surface));color:var(--green)}
+.tile.amber{background:color-mix(in srgb,var(--amber) 13%,var(--surface));color:var(--amber)}
+.list-row{display:flex;align-items:center;gap:10px;padding:11px 2px}
+.list-row + .list-row{border-top:1px solid var(--line)}
+.switch{width:36px;height:21px;border-radius:99px;background:var(--surface3);border:1px solid var(--line-strong);position:relative;flex:none;transition:background .15s var(--ease)}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--ink3);transition:transform .15s var(--ease),background .15s var(--ease)}
+.switch.is-on{background:var(--accent-solid);border-color:var(--accent-solid)}
+.switch.is-on::after{transform:translateX(15px);background:#fff}
+.progress{height:4px;border-radius:99px;background:var(--surface3);overflow:hidden}
+.progress i{display:block;height:100%;border-radius:99px;background:var(--accent);width:0%;transition:width .4s var(--ease)}
+.banner{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 11px;display:flex;gap:8px;align-items:flex-start;font-size:11.5px;line-height:1.55;color:var(--ink2)}
+.banner .ic{width:15px;height:15px;margin-top:1px;color:var(--accent)}
+.banner.warn{background:color-mix(in srgb,var(--amber) 9%,var(--surface));border-color:color-mix(in srgb,var(--amber) 22%,transparent);color:color-mix(in srgb,var(--amber) 80%,var(--ink))}
+.banner.ok{background:color-mix(in srgb,var(--green) 9%,var(--surface));border-color:color-mix(in srgb,var(--green) 22%,transparent);color:color-mix(in srgb,var(--green) 82%,var(--ink))}
+.banner.danger{background:color-mix(in srgb,var(--red) 9%,var(--surface));border-color:color-mix(in srgb,var(--red) 22%,transparent);color:var(--red)}
+
+/* chat */
+.chat{display:flex;flex-direction:column;gap:12px;padding-top:4px}
+.msg{display:flex;gap:8px;align-items:flex-start}
+.msg .who{width:26px;height:26px;border-radius:9px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.msg .who .ic{width:14px;height:14px}
+.bubble{max-width:82%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.65;color:var(--ink);box-shadow:var(--shadow-1)}
+.msg.user{flex-direction:row-reverse}
+.msg.user .who{background:var(--surface3);color:var(--ink2);border-radius:50%}
+.msg.user .bubble{background:var(--accent-solid);border-color:transparent;color:#fff}
+.msg-name{font-size:10.5px;color:var(--ink3);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.chat-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chat-actions .chip{height:26px;font-size:11px}
+.composer{margin-top:auto;border-top:1px solid var(--line);background:var(--surface);padding:9px 12px 12px}
+.composer-inner{display:flex;align-items:center;gap:8px}
+.composer-box{flex:1;height:38px;border-radius:11px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;padding:0 11px;font-size:12px;color:var(--ink4)}
+.send{width:36px;height:36px;border-radius:50%;background:var(--accent-solid);border:0;color:#fff;display:grid;place-items:center;flex:none}
+.send .ic{width:17px;height:17px}
+
+/* bottom sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top-left-radius:20px;border-top-right-radius:20px;border:1px solid var(--line);border-bottom:0;box-shadow:var(--shadow-3);padding:8px 15px 16px;z-index:5}
+.sheet-handle{width:32px;height:3.5px;border-radius:99px;background:var(--line-strong);margin:2px auto 12px}
+.scrim{position:absolute;inset:0;background:var(--overlay);z-index:4}
+
+/* doc cards */
+.doc-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.doc-type{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:11px;text-align:left;display:flex;flex-direction:column;gap:7px;color:var(--ink)}
+.doc-type .tile{width:30px;height:30px;border-radius:9px}
+.doc-type b{font-size:12px;font-weight:650}
+.doc-type span{font-size:10px;line-height:1.5;color:var(--ink3)}
+.doc-type.is-selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.doc-type.is-selected::after{content:"✓";position:absolute;top:8px;right:9px;width:15px;height:15px;border-radius:50%;background:var(--accent);color:#fff;font-size:9px;display:grid;place-items:center;font-weight:700}
+.doc-type[data-lock="1"]{opacity:.75}
+.doc-type .lock{position:absolute;top:9px;right:9px;font-size:9px;color:var(--ink3);background:var(--surface2);border:1px solid var(--line);border-radius:5px;padding:1px 4px}
+
+.doc-row{display:flex;align-items:center;gap:10px;padding:10px 2px}
+.doc-row + .doc-row{border-top:1px solid var(--line)}
+.doc-icon{width:36px;height:42px;border-radius:7px;background:var(--surface2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex:none;font-size:8px;font-weight:700;letter-spacing:.02em;color:var(--ink2)}
+.doc-icon.doc{color:#2B5FC7}.doc-icon.sheet{color:#1F8354}.doc-icon.slides{color:#C05621}.doc-icon.md{color:var(--ink2)}
+.doc-icon .ic{width:14px;height:14px}
+
+.preview-shell{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-2)}
+.preview-bar{display:flex;align-items:center;gap:7px;padding:7px 10px;border-bottom:1px solid var(--line);background:var(--surface2);font-size:10.5px;color:var(--ink3)}
+.preview-body{padding:12px}
+.doc-page{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:13px 14px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.doc-page .d-title{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.doc-page .d-sub{font-size:9px;color:var(--ink3);margin-bottom:9px}
+.doc-page h4{font-size:10px;margin:9px 0 3px;color:var(--ink);font-weight:700}
+.doc-page p{font-size:8.5px;line-height:1.7;color:var(--ink2);margin:0 0 4px}
+.doc-table{width:100%;border-collapse:collapse;margin-top:5px}
+.doc-table th,.doc-table td{font-size:7.5px;border:1px solid var(--line);padding:3px 4px;text-align:left;color:var(--ink2)}
+.doc-table th{background:var(--surface2);font-weight:700;color:var(--ink)}
+.md-preview{font-size:8.5px;line-height:1.8;color:var(--ink2)}
+.md-preview b{color:var(--ink)}
+.md-preview code{font-family:var(--font-mono);background:var(--surface2);border-radius:3px;padding:0 2px;font-size:8px}
+.slide-thumbs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.slide{aspect-ratio:16/9;border:1px solid var(--line);border-radius:5px;background:var(--surface);padding:7px 8px;display:flex;flex-direction:column;gap:3px}
+.slide b{font-size:7px;color:var(--ink);font-weight:700}
+.slide span{font-size:5.7px;color:var(--ink2);line-height:1.5}
+.slide .bar{height:3px;border-radius:2px;background:var(--accent-soft);margin-top:auto}
+
+/* plugin cards */
+.plugin-row{display:flex;align-items:center;gap:10px;padding:10px 2px}
+.plugin-row + .plugin-row{border-top:1px solid var(--line)}
+.plugin-logo{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none;background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent-ink)}
+.plugin-logo .ic{width:18px;height:18px}
+.plugin-row .p-meta{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap}
+.plugin-row .p-tag{font-size:8.5px;padding:1px 5px;border-radius:4px;border:1px solid var(--line);color:var(--ink3);background:var(--surface2);white-space:nowrap}
+.plugin-row .p-tag.tag-phone{color:var(--green);border-color:color-mix(in srgb,var(--green) 30%,transparent);background:color-mix(in srgb,var(--green) 8%,var(--surface))}
+.plugin-row .p-tag.tag-pc{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 30%,transparent);background:color-mix(in srgb,var(--amber) 8%,var(--surface))}
+.plugin-row .p-tag.ui{color:var(--accent-ink);border-color:var(--accent-line);background:var(--accent-soft)}
+.result-card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px;box-shadow:var(--shadow-1)}
+.result-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.result-head .tile{width:28px;height:28px;border-radius:9px}
+.result-head b{font-size:12px;font-weight:650;color:var(--ink)}
+.result-head span{font-size:9.5px;color:var(--ink3);margin-left:auto}
+.aqi-wrap{display:flex;align-items:center;gap:12px}
+.aqi-ring{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(color-mix(in srgb,var(--green) 80%,transparent) 0 42%,var(--surface3) 42% 100%);position:relative}
+.aqi-ring::before{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--surface)}
+.aqi-ring b{position:relative;font-size:18px;font-weight:700;color:var(--green);line-height:1}
+.aqi-ring span{position:relative;font-size:8px;color:var(--ink3);margin-top:1px}
+.aqi-vals{display:flex;flex-direction:column;gap:5px;flex:1}
+.kv{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--ink2)}
+.kv b{font-weight:650;color:var(--ink)}
+
+/* engine */
+.engine-opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-align:left;position:relative;width:100%;color:var(--ink)}
+.engine-opt + .engine-opt{margin-top:8px}
+.engine-opt.is-selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.engine-opt .radio{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--line-strong);flex:none;margin-top:2px;display:grid;place-items:center}
+.engine-opt.is-selected .radio{border-color:var(--accent)}
+.engine-opt.is-selected .radio::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.engine-opt b{font-size:12.5px;font-weight:650;display:flex;align-items:center;gap:6px}
+.engine-opt .rec{font-size:8.5px;color:var(--accent-ink);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:5px;padding:1px 5px;font-weight:650}
+.engine-opt span{display:block;font-size:10.5px;line-height:1.55;color:var(--ink3);margin-top:3px}
+.matrix{width:100%;border-collapse:collapse}
+.matrix th,.matrix td{font-size:9.5px;padding:5px 4px;border-bottom:1px solid var(--line);text-align:center;color:var(--ink2)}
+.matrix th{color:var(--ink3);font-weight:600;font-size:9px}
+.matrix td:first-child,.matrix th:first-child{text-align:left}
+.matrix .yes{color:var(--green);font-weight:700}
+.matrix .no{color:var(--ink4)}
+.events{display:flex;flex-direction:column;gap:8px}
+.event{display:flex;gap:8px;align-items:flex-start;font-size:10.5px;line-height:1.55}
+.event .dot{width:18px;height:18px;border-radius:6px;display:grid;place-items:center;flex:none;background:var(--surface2);border:1px solid var(--line);color:var(--ink2)}
+.event .dot .ic{width:11px;height:11px}
+.event .ev-body{flex:1;min-width:0;color:var(--ink2)}
+.event code{font-family:var(--font-mono);font-size:9.5px;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:4px;padding:0 3px}
+.event.ok .dot{background:color-mix(in srgb,var(--green) 10%,var(--surface));border-color:color-mix(in srgb,var(--green) 25%,transparent);color:var(--green)}
+.event.run .dot{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent-ink)}
+.approve{border:1px solid color-mix(in srgb,var(--amber) 26%,transparent);background:color-mix(in srgb,var(--amber) 8%,var(--surface));border-radius:11px;padding:11px}
+.approve b{font-size:11.5px;color:color-mix(in srgb,var(--amber) 80%,var(--ink))}
+.approve p{margin:4px 0 9px;font-size:10px;line-height:1.55;color:var(--ink2)}
+.approve .btns{display:flex;gap:7px}
+
+/* legend / notes */
+.phone-note{margin-top:11px;font-size:11px;line-height:1.62;color:#7B808B;width:100%}
+.phone-note b{color:#AEB3BE;font-weight:600}
+.phone-note .k{color:var(--accent);font-weight:600}
+.section-head{display:flex;align-items:center;gap:10px;margin:36px 0 6px}
+.section-head .n{font-family:var(--font-mono);font-size:11px;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:6px;padding:3px 7px}
+.section-head h3{margin:0;font-size:16px;font-weight:650;color:#E6E8ED;letter-spacing:-.01em}
+.section-head p{margin:0;font-size:12px;color:#7B808B}
+.section-head .line{flex:1;height:1px;background:#1C1F27;margin-left:6px}
+
+/* review */
+.review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+.review-card{background:#101216;border:1px solid #20242C;border-radius:14px;padding:16px}
+.review-card h4{margin:0 0 4px;font-size:13.5px;font-weight:650;color:#EDEFF3;display:flex;align-items:center;gap:8px}
+.review-card h4 .n{font-family:var(--font-mono);font-size:10px;color:var(--accent);background:rgba(120,130,255,.1);border:1px solid var(--accent-line);border-radius:5px;padding:1px 5px}
+.review-card p{margin:0 0 10px;font-size:11.5px;line-height:1.7;color:#8D929D}
+.review-card ul{margin:0;padding-left:16px;font-size:11.5px;line-height:1.8;color:#9EA4AF}
+.review-card li b{color:#E2E5EA}
+.review-card .pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.review-card .pill{font-size:10.5px;color:#A8AEB9;background:#171A20;border:1px solid #262B34;border-radius:999px;padding:3px 9px}
+.review-card .pill b{color:var(--accent)}
+.decision{border-color:color-mix(in srgb,var(--accent) 30%,#20242C);background:linear-gradient(180deg,rgba(79,93,240,.06),#101216)}
+.decision ol{margin:0;padding-left:18px;font-size:11.5px;line-height:1.85;color:#A8AEB9}
+.decision li b{color:#EDEFF3}
+.decision .ask{margin-top:10px;font-size:11px;color:#7E8490;border-top:1px solid #20242C;padding-top:9px}
+.table-wrap{overflow:auto;margin-top:8px;border:1px solid #20242C;border-radius:10px}
+.cmp{width:100%;border-collapse:collapse;font-size:11px}
+.cmp th,.cmp td{padding:8px 10px;border-bottom:1px solid #1C2027;text-align:left;color:#9EA4AF;vertical-align:top}
+.cmp th{color:#C9CDD5;font-weight:600;background:#14171C;font-size:10.5px;white-space:nowrap}
+.cmp tr:last-child td{border-bottom:0}
+.cmp td b{color:#E2E5EA;font-weight:600}
+.cmp .best{color:var(--green)}
+.cmp .warn{color:var(--amber)}
+.footer{margin-top:34px;padding-top:16px;border-top:1px solid #1C1F27;display:flex;gap:16px;align-items:center;font-size:11px;color:#5F646E;flex-wrap:wrap}
+.footer b{color:#8E939E;font-weight:600}
+.badge-live{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:#8E939E;border:1px solid #262A32;border-radius:999px;padding:4px 9px}
+.badge-live i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(31,157,107,.12)}
+
+@media (max-width:1100px){
+  .phones{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .studio-hint{display:none}
+  .review-grid{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  .phones{grid-template-columns:1fr}
+  .page{padding:22px 16px 50px}
+  .studio-bar{flex-wrap:wrap}
+  .studio-nav{order:3;width:100%;justify-content:center;overflow:auto}
+}
+</style>
+</head>
+<body>
+<!-- icon defs -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-brand" viewBox="0 0 24 24"><path d="M12 2.4c.62 4.94 2.62 6.94 7.56 7.56-4.94.62-6.94 2.62-7.56 7.56-.62-4.94-2.62-6.94-7.56-7.56C9.38 9.34 11.38 7.34 12 2.4Z" fill="currentColor" stroke="none"/><path d="M18.7 15.1c.3 2.36 1.25 3.31 3.61 3.61-2.36.3-3.31 1.25-3.61 3.61-.3-2.36-1.25-3.31-3.61-3.61 2.36-.3 3.31-1.25 3.61-3.61Z" fill="currentColor" stroke="none" opacity=".72"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.5 14.2a2.3 2.3 0 0 1-2.3 2.3H8.4L4 20.5V5.8a2.3 2.3 0 0 1 2.3-2.3H18.2a2.3 2.3 0 0 1 2.3 2.3Z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6.6" height="6.6" rx="2"/><rect x="13.9" y="3.5" width="6.6" height="6.6" rx="2"/><rect x="3.5" y="13.9" width="6.6" height="6.6" rx="2"/><rect x="13.9" y="13.9" width="6.6" height="6.6" rx="2"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.2A2.2 2.2 0 0 1 5.7 5h4l2 2.4h6.6a2.2 2.2 0 0 1 2.2 2.2v7.2a2.2 2.2 0 0 1-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2Z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z"/><path d="M4.6 20.6a7.4 7.4 0 0 1 14.8 0"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4v13H6Z"/><path d="M14 3.5v4h4"/><path d="M9 12h6M9 15.5h6"/></symbol>
+    <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M9 4.5v15M15 4.5v15"/></symbol>
+    <symbol id="i-slides" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></symbol>
+    <symbol id="i-md" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M6.5 15V9l2.6 3.2L11.7 9v6M15 9v4.2M15 13.2l1.8 2 1.8-2"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3.2 13.8 9a2 2 0 0 0 1.2 1.2l5.8 1.8-5.8 1.8A2 2 0 0 0 13.8 15L12 20.8 10.2 15A2 2 0 0 0 9 13.8L3.2 12 9 10.2A2 2 0 0 0 10.2 9Z"/><path d="M5 3.6v4M3 5.6h4M19 16.6v4M17 18.6h4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-task" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="m8.5 12.2 2.3 2.3 4.7-4.8"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.8 2.5 5.1 5.6.8-4 4 1 5.6-5-2.6-5 2.6 1-5.6-4-4 5.6-.8Z"/></symbol>
+    <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5h9.2a3.8 3.8 0 0 0 .5-7.6 5.6 5.6 0 0 0-10.9-1.5A4.6 4.6 0 0 0 7.5 18.5Z"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.4"/><path d="M11 18.6h2"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.2 19 6v5.4c0 4.2-2.8 7.3-7 9.4-4.2-2.1-7-5.2-7-9.4V6Z"/><path d="m8.8 11.8 2.2 2.2 4.2-4.4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5.5 11.5 6.5-6.5 6.5 6.5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m6.5 10.5 5.5 5.5 5.5-5.5"/><path d="M4.5 19.5h15"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3.5v11"/><path d="m7.5 8 4.5-4.5L16.5 8"/><path d="M5 13v6.5h14V13"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M9.5 14.5 14.5 9.5"/><path d="M8 16.5 6.5 18a3.5 3.5 0 0 1-5-5L4 10.5"/><path d="M16 7.5 17.5 6a3.5 3.5 0 0 1 5 5L20 13.5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m5 18 5-5 3.5 3.5L17 13l3 3.5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4l11-11a2.3 2.3 0 0 0-3.2-3.2L4.8 16.8Z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8.6a6 6 0 0 1 12 0c0 6 2.4 7.4 2.4 7.4H3.6S6 14.6 6 8.6"/><path d="M10.2 20.4a2 2 0 0 0 3.6 0"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.3" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3H7l3-3-1-6Z"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/><rect x="10" y="10" width="4" height="4" rx="1"/><path d="M9 3v3.5M15 3v3.5M9 17.5V21M15 17.5V21M3 9h3.5M3 15h3.5M17.5 9H21M17.5 15H21"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><path d="M12 21.5v-5"/><path d="M9 7.5V3M15 7.5V3"/><path d="M17.5 7.5v4.7a4.3 4.3 0 0 1-4.3 4.3h-2.4a4.3 4.3 0 0 1-4.3-4.3V7.5Z"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3.2a8.8 8.8 0 1 0 0 17.6c1.5 0 2.2-.9 2.2-2 0-1.5-1.6-1.7-1.6-3.1 0-1.1.9-1.9 2-1.9h1.5a4.7 4.7 0 0 0 4.7-4.7C20.8 5.9 17.1 3.2 12 3.2Z"/><circle cx="7.6" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="9.8" cy="6.8" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4v13H6Z"/><path d="M14 3.5v4h4"/></symbol>
+    <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="M3.5 7.2A2.2 2.2 0 0 1 5.7 5h4l2 2.4h6.6a2.2 2.2 0 0 1 2.2 2.2v1.9H3.5Z"/><path d="M3.5 11.5h17l-1.8 7.2a2 2 0 0 1-1.9 1.5H6.2a2 2 0 0 1-1.9-1.5Z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><path d="M3.4 12h17.2M12 3.2c2.6 2.4 4 5.4 4 8.8s-1.4 6.4-4 8.8c-2.6-2.4-4-5.4-4-8.8s1.4-6.4 4-8.8Z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M3.5 5.2h4.3a3.5 3.5 0 0 1 3.5 3.5v10.6a3.2 3.2 0 0 0-3.2-2.6H3.5Z"/><path d="M20.5 5.2h-4.3A3.5 3.5 0 0 0 12 8.7v10.6a3.2 3.2 0 0 1 3.2-2.6h5.3Z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M20.5 3.5 3.5 10l7 2.6 2.6 7Z"/><path d="m10.5 12.6 4.6-4.6"/></symbol>
+  </defs>
+</svg>
+
+<div class="studio" id="studio">
+  <!-- ============ studio bar ============ -->
+  <header class="studio-bar">
+    <div class="brand">
+      <span class="brand-mark"><svg class="ic" style="width:15px;height:15px"><use href="#i-brand"/></svg></span>
+      <b>XFamily 0.12</b>
+      <span>文档能力 · 插件移植 · 引擎策略 · 产品原型 v1（2026-10-18）</span>
+    </div>
+    <nav class="studio-nav" id="studioNav">
+      <button data-page="doc" class="is-active">文档</button>
+      <button data-page="plugins">插件</button>
+      <button data-page="engine">引擎</button>
+      <button data-page="review">评审要点</button>
+    </nav>
+    <div class="studio-right">
+      <div class="accent-picker" title="主色">
+        <button class="accent-dot is-active" data-accent="indigo" style="background:#4F5DF0"></button>
+        <button class="accent-dot" data-accent="teal" style="background:#0E9384"></button>
+        <button class="accent-dot" data-accent="amber" style="background:#B26B00"></button>
+        <button class="accent-dot" data-accent="rose" style="background:#D94F6B"></button>
+      </div>
+      <div class="theme-seg" title="明暗">
+        <button data-theme="light" class="is-active" title="浅色"><svg class="ic sm"><use href="#i-sun"/></svg></button>
+        <button data-theme="dark" title="深色"><svg class="ic sm"><use href="#i-moon"/></svg></button>
+      </div>
+      <span class="studio-hint">点击手机内元素可交互 · 示例数据</span>
+    </div>
+  </header>
+
+  <!-- ================= DOC ================= -->
+  <section class="page is-active" id="page-doc">
+    <div class="page-head">
+      <div>
+        <div class="page-kicker">Direction 01 · Document pipeline</div>
+        <h1 class="page-title">把对话与资料，变成可编辑的 Word / Excel / PPT / Markdown</h1>
+        <p class="page-sub">手机端直接生成文件：对话结果一键「整理为文档」，资源中心新增文档库；复杂排版、PDF 预览与打印等高保真能力交给电脑版或云端。不新增底栏 tab，入口放在既有结构里。</p>
+      </div>
+      <div class="page-tag">
+        <span class="tag">建议版本 <b>0.12</b></span>
+        <span class="tag">格式 <b>MD → DOCX → XLSX → PPTX</b></span>
+        <span class="tag">本地生成 · 无网络依赖</span>
+      </div>
+    </div>
+    <div class="flow-strip">
+      <span class="step"><i>1</i>对话 / 复盘 / 资料</span><span class="arrow">→</span>
+      <span class="step"><i>2</i>选择格式与内容来源</span><span class="arrow">→</span>
+      <span class="step"><i>3</i>结构 / 模板选项</span><span class="arrow">→</span>
+      <span class="step"><i>4</i>生成 · 预览 · 导出</span><span class="arrow">→</span>
+      <span class="step"><i>5</i>存入资源 / 分享</span>
+    </div>
+
+    <div class="phones">
+      <!-- 01 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">01</span><b>对话页 · 整理为文档</b><span>入口</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <span class="brand-tile"><svg class="ic"><use href="#i-brand"/></svg></span>
+                <span class="sb-title">XFriend</span>
+                <div class="sb-actions">
+                  <button class="icon-btn"><svg class="ic"><use href="#i-task"/></svg></button>
+                  <button class="icon-btn"><svg class="ic"><use href="#i-more"/></svg></button>
+                </div>
+              </div>
+              <div class="scroll">
+                <div class="chat">
+                  <div class="msg user">
+                    <span class="who"><svg class="ic"><use href="#i-user"/></svg></span>
+                    <div>
+                      <div class="bubble">把刚才的客户复盘整理成一份周报，附上跟进计划表格。</div>
+                    </div>
+                  </div>
+                  <div class="msg">
+                    <span class="who"><svg class="ic"><use href="#i-brand"/></svg></span>
+                    <div>
+                      <div class="bubble">
+                        <b style="font-weight:650">已整理本周 3 次沟通</b><br>
+                        客户关注交付周期与售后响应；预算待采购确认。建议本周确认两件事：交付排期、决策人。
+                        <div class="chat-actions">
+                          <button class="chip" data-doc-action="md"><svg class="ic xs"><use href="#i-md"/></svg>导出 Markdown</button>
+                          <button class="chip accent" data-doc-action="docx"><svg class="ic xs"><use href="#i-doc"/></svg>整理为 Word</button>
+                          <button class="chip" data-doc-action="xlsx"><svg class="ic xs"><use href="#i-sheet"/></svg>生成表格</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="composer">
+                <div class="composer-inner">
+                  <div class="composer-box">继续追问，或输入 / 调用技能…</div>
+                  <button class="send"><svg class="ic"><use href="#i-up"/></svg></button>
+                </div>
+              </div>
+              <div class="scrim"></div>
+              <div class="sheet">
+                <div class="sheet-handle"></div>
+                <div class="row" style="margin-bottom:9px">
+                  <div class="grow">
+                    <div class="h-sm">整理为文档</div>
+                    <div class="tiny">将保留对话结构，可在下一步调整</div>
+                  </div>
+                  <span class="chip accent" id="sheetChoice">Word</span>
+                </div>
+                <div class="doc-type-grid">
+                  <button class="doc-type is-selected" data-pick="docx"><span class="tile"><svg class="ic sm"><use href="#i-doc"/></svg></span><b>Word</b><span>周报 / 纪要 / 报告</span></button>
+                  <button class="doc-type" data-pick="xlsx"><span class="tile green"><svg class="ic sm"><use href="#i-sheet"/></svg></span><b>Excel</b><span>清单 / 计划表</span></button>
+                  <button class="doc-type" data-pick="pptx"><span class="tile amber"><svg class="ic sm"><use href="#i-slides"/></svg></span><b>PPT</b><span>汇报 / 方案</span></button>
+                  <button class="doc-type" data-pick="md"><span class="tile grey"><svg class="ic sm"><use href="#i-md"/></svg></span><b>Markdown</b><span>笔记 / 知识</span></button>
+                </div>
+                <div class="row" style="margin-top:10px">
+                  <button class="btn block">下一步：选择内容与结构 <svg class="ic"><use href="#i-chev"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>入口设计：</b>助手回答完成后直接出现 <span class="k">导出 Markdown / 整理为 Word / 生成表格</span> 三个动作，不跳页打断对话；底部弹出格式选择，确认后再进入向导。</div>
+      </div>
+
+      <!-- 02 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">02</span><b>资源 · 文档中心</b><span>归档</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <span class="brand-tile"><svg class="ic"><use href="#i-folder"/></svg></span>
+                <span class="sb-title">文档</span>
+                <div class="sb-actions">
+                  <button class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></button>
+                  <button class="icon-btn"><svg class="ic"><use href="#i-plus"/></svg></button>
+                </div>
+              </div>
+              <div class="scroll">
+                <div class="search" style="margin-top:2px"><svg class="ic"><use href="#i-search"/></svg>搜索文档、来源或格式</div>
+                <div class="seg" style="margin-top:10px" data-doc-filter>
+                  <button class="is-active" data-filter="all">全部</button>
+                  <button data-filter="docx">Word</button>
+                  <button data-filter="xlsx">Excel</button>
+                  <button data-filter="pptx">PPT</button>
+                  <button data-filter="md">Markdown</button>
+                </div>
+                <button class="btn block" style="margin-top:10px"><svg class="ic"><use href="#i-plus"/></svg>生成新文档</button>
+                <div class="section-label">最近</div>
+                <div class="card pad" style="padding:2px 13px">
+                  <div class="doc-row" data-kind="docx">
+                    <span class="doc-icon doc"><svg class="ic"><use href="#i-doc"/></svg>DOCX</span>
+                    <div class="grow"><div class="h-sm">客户周报 · 第 42 周</div><div class="tiny">来自对话 · 2 页 · 8 分钟前</div></div>
+                    <svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg>
+                  </div>
+                  <div class="doc-row" data-kind="xlsx">
+                    <span class="doc-icon sheet"><svg class="ic"><use href="#i-sheet"/></svg>XLSX</span>
+                    <div class="grow"><div class="h-sm">客户跟进清单</div><div class="tiny">来自客户资料 · 12 行 · 今天</div></div>
+                    <svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg>
+                  </div>
+                  <div class="doc-row" data-kind="pptx">
+                    <span class="doc-icon slides"><svg class="ic"><use href="#i-slides"/></svg>PPTX</span>
+                    <div class="grow"><div class="h-sm">Q4 方案汇报</div><div class="tiny">来自复盘 · 8 张 · 昨天</div></div>
+                    <svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg>
+                  </div>
+                  <div class="doc-row" data-kind="md">
+                    <span class="doc-icon md"><svg class="ic"><use href="#i-md"/></svg>MD</span>
+                    <div class="grow"><div class="h-sm">会议纪要 · 10/17</div><div class="tiny">手动创建 · 1.2 KB · 10/17</div></div>
+                    <svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg>
+                  </div>
+                </div>
+                <div class="section-label">按来源</div>
+                <div class="row" style="gap:6px;flex-wrap:wrap">
+                  <span class="chip"><svg class="ic xs"><use href="#i-chat"/></svg>来自对话 6</span>
+                  <span class="chip"><svg class="ic xs"><use href="#i-mic"/></svg>录音复盘 4</span>
+                  <span class="chip"><svg class="ic xs"><use href="#i-user"/></svg>客户档案 3</span>
+                  <span class="chip"><svg class="ic xs"><use href="#i-file"/></svg>导入 2</span>
+                </div>
+              </div>
+              <div class="bottom-nav">
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-chat"/></svg></span><b>对话</b></button>
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-grid"/></svg></span><b>工作台</b></button>
+                <button class="tab is-active"><span class="pill"><svg class="ic"><use href="#i-folder"/></svg></span><b>资源</b></button>
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-user"/></svg></span><b>我的</b></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>归档位置：</b>文档作为「资源中心」的第 4 个分类（技能 / 知识 / 文件 / <span class="k">文档</span>），与既有资源同层，不增加底栏 tab；可按格式与来源筛选。</div>
+      </div>
+
+      <!-- 03 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">03</span><b>生成向导 · 类型与来源</b><span>选择</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <button class="icon-btn"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-chev"/></svg></button>
+                <span class="sb-title">新建文档</span>
+                <div class="sb-actions"><span class="meta">1 / 3</span></div>
+              </div>
+              <div class="scroll">
+                <div class="row" style="gap:5px;margin:2px 0 12px">
+                  <span style="height:3px;border-radius:99px;background:var(--accent);flex:1"></span>
+                  <span style="height:3px;border-radius:99px;background:var(--surface3);flex:1"></span>
+                  <span style="height:3px;border-radius:99px;background:var(--surface3);flex:1"></span>
+                </div>
+                <div class="h-title" style="font-size:19px;margin-bottom:3px">要生成什么？</div>
+                <div class="meta" style="margin-bottom:12px">选择输出格式，下一步挑选内容来源。</div>
+                <div class="doc-type-grid">
+                  <button class="doc-type is-selected" data-pick2="docx"><span class="tile"><svg class="ic sm"><use href="#i-doc"/></svg></span><b>Word 文档</b><span>报告 · 周报 · 合同纪要</span></button>
+                  <button class="doc-type" data-pick2="xlsx"><span class="tile green"><svg class="ic sm"><use href="#i-sheet"/></svg></span><b>Excel 表格</b><span>客户清单 · 预算 · 数据</span></button>
+                  <button class="doc-type" data-pick2="pptx"><span class="tile amber"><svg class="ic sm"><use href="#i-slides"/></svg></span><b>PPT 演示</b><span>方案 · 汇报 · 复盘</span><span class="lock">版式交由电脑</span></button>
+                  <button class="doc-type" data-pick2="md"><span class="tile grey"><svg class="ic sm"><use href="#i-md"/></svg></span><b>Markdown</b><span>笔记 · 知识 · 导出</span></button>
+                </div>
+                <div class="section-label">内容来源</div>
+                <div class="row" style="gap:6px;flex-wrap:wrap">
+                  <span class="chip accent"><svg class="ic xs"><use href="#i-check"/></svg>当前对话</span>
+                  <span class="chip">录音复盘</span>
+                  <span class="chip">客户资料</span>
+                  <span class="chip">知识库</span>
+                  <span class="chip">导入文件</span>
+                </div>
+                <div class="card pad" style="margin-top:12px">
+                  <div class="row">
+                    <span class="tile"><svg class="ic"><use href="#i-sparkles"/></svg></span>
+                    <div class="grow"><div class="h-sm" id="wizSummary">Word · 当前对话 + 客户资料</div><div class="tiny">预计 2 页 · 中文 · 可编辑</div></div>
+                  </div>
+                  <div class="hr" style="margin:10px 0"></div>
+                  <div class="tiny">将自动生成标题、正文与表格；可在下一步调整模板、语言与是否附目录。</div>
+                </div>
+              </div>
+              <div style="padding:10px 16px 14px;border-top:1px solid var(--line);background:var(--surface)">
+                <button class="btn block" id="wizNext">下一步：设置结构 <svg class="ic"><use href="#i-chev"/></svg></button>
+                <button class="btn ghost block" style="margin-top:6px;height:32px;font-size:11.5px">只导出 Markdown（跳过排版）</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>格式优先级：</b><span class="k">Markdown 先行</span>（纯文本、无兼容风险）→ <span class="k">Word / Excel</span>（手机端可生成，覆盖 80% 场景）→ <span class="k">PPT</span>（手机生成简版，复杂版式与 PDF 由电脑版补全）。</div>
+      </div>
+
+      <!-- 04 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">04</span><b>生成 · 预览 · 导出</b><span>输出</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <button class="icon-btn"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-chev"/></svg></button>
+                <span class="sb-title">生成与预览</span>
+                <div class="sb-actions"><button class="icon-btn"><svg class="ic"><use href="#i-more"/></svg></button></div>
+              </div>
+              <div class="scroll">
+                <div class="card pad" style="padding:12px">
+                  <div class="row" style="margin-bottom:8px">
+                    <span class="h-sm">正在生成 Word</span>
+                    <span class="chip ok" style="margin-left:auto"><svg class="ic xs"><use href="#i-check"/></svg>内容已提取</span>
+                  </div>
+                  <div class="progress"><i id="docProgress" style="width:64%"></i></div>
+                  <div class="tiny" style="margin-top:7px">第 2 / 3 步 · 排版与校验 · 约 6 秒</div>
+                  <div class="row" style="margin-top:8px;gap:6px">
+                    <button class="btn sm secondary"><svg class="ic sm"><use href="#i-pause"/></svg>暂停</button>
+                    <button class="btn sm ghost" style="color:var(--red)">取消</button>
+                  </div>
+                </div>
+                <div class="section-label">预览</div>
+                <div class="seg" data-preview-switch style="margin-bottom:8px">
+                  <button class="is-active" data-preview="docx">Word</button>
+                  <button data-preview="xlsx">Excel</button>
+                  <button data-preview="pptx">PPT</button>
+                  <button data-preview="md">MD</button>
+                </div>
+                <div class="preview-shell">
+                  <div class="preview-bar"><svg class="ic xs"><use href="#i-doc"/></svg><span id="previewName">客户周报 · 第 42 周.docx</span><span style="margin-left:auto">2 页</span></div>
+                  <div class="preview-body">
+                    <div data-preview-body="docx">
+                      <div class="doc-page">
+                        <div class="d-title">客户周报 · 第 42 周</div>
+                        <div class="d-sub">生成于 2026-10-18 · 来源：对话 + 客户档案</div>
+                        <h4>一、本周沟通摘要</h4>
+                        <p>本周与陈经理完成 2 次沟通，核心关注交付周期与售后响应；预算需采购确认，决策人为技术负责人。</p>
+                        <h4>二、跟进计划</h4>
+                        <table class="doc-table">
+                          <tr><th>事项</th><th>负责人</th><th>截止</th></tr>
+                          <tr><td>发送交付排期</td><td>张先生</td><td>10/20</td></tr>
+                          <tr><td>确认采购流程</td><td>张先生</td><td>10/22</td></tr>
+                          <tr><td>安排技术沟通</td><td>陈经理</td><td>10/24</td></tr>
+                        </table>
+                        <h4>三、风险</h4>
+                        <p>交付周期偏紧；若本周内未确认采购节点，可能影响 11 月上线计划。</p>
+                      </div>
+                    </div>
+                    <div data-preview-body="xlsx" hidden>
+                      <div class="doc-page" style="padding:10px">
+                        <div class="d-title" style="font-size:11px">客户跟进清单</div>
+                        <table class="doc-table">
+                          <tr><th>客户</th><th>阶段</th><th>下一步</th><th>截止</th></tr>
+                          <tr><td>陈经理</td><td>方案中</td><td>发送排期</td><td>10/20</td></tr>
+                          <tr><td>李总</td><td>初洽</td><td>电话回访</td><td>10/21</td></tr>
+                          <tr><td>王经理</td><td>已报价</td><td>确认预算</td><td>10/23</td></tr>
+                        </table>
+                        <p style="margin-top:8px">工作表：跟进清单 / 商机汇总 · 共 12 行 · 公式 2 个</p>
+                      </div>
+                    </div>
+                    <div data-preview-body="pptx" hidden>
+                      <div class="slide-thumbs">
+                        <div class="slide"><b>客户周报</b><span>第 42 周 · 销售复盘</span><div class="bar"></div></div>
+                        <div class="slide"><b>本周进展</b><span>2 次沟通 · 1 个商机</span><div class="bar"></div></div>
+                        <div class="slide"><b>风险与阻塞</b><span>交付周期 / 采购节点</span><div class="bar"></div></div>
+                        <div class="slide"><b>下一步</b><span>排期 · 决策人 · 技术沟通</span><div class="bar"></div></div>
+                      </div>
+                      <div class="tiny" style="margin-top:8px">共 4 张 · 可在电脑版继续精修版式</div>
+                    </div>
+                    <div data-preview-body="md" hidden>
+                      <div class="md-preview">
+                        <b># 客户周报 · 第 42 周</b><br><br>
+                        ## 本周沟通摘要<br>
+                        本周与陈经理完成 2 次沟通，核心关注 <b>交付周期</b> 与售后响应。<br><br>
+                        ## 跟进计划<br>
+                        - 发送交付排期（10/20）<br>
+                        - 确认采购流程（10/22）<br>
+                        - 安排技术沟通（10/24）<br><br>
+                        ```<br>来源：对话 · 客户档案
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-top:10px;gap:7px">
+                  <button class="btn grow" id="exportBtn"><svg class="ic"><use href="#i-download"/></svg>导出 Word</button>
+                  <button class="btn secondary" style="width:84px"><svg class="ic"><use href="#i-share"/></svg>分享</button>
+                  <button class="btn secondary" style="width:84px"><svg class="ic"><use href="#i-folder"/></svg>存到资源</button>
+                </div>
+                <div class="tiny" style="margin-top:8px">导出使用系统文件选择器，文件保存在你选择的位置；不上传服务器。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>生成策略：</b>手机本地写出标准 OOXML（docx/xlsx/pptx 本质是 ZIP + XML），<span class="k">Markdown 直接导出</span>；预览用轻量渲染，不引入重依赖。生成失败或复杂排版需求时，给出“在电脑版继续”的明确入口。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PLUGINS ================= -->
+  <section class="page" id="page-plugins">
+    <div class="page-head">
+      <div>
+        <div class="page-kicker">Direction 02 · Plugin porting</div>
+        <h1 class="page-title">把电脑版的插件，分三层带到手机</h1>
+        <p class="page-sub">电脑版现有 28 个内置插件（工具 / 技能 / Hook / UI 卡片）。手机不直接运行 Python 插件与 React UI：技能类直接导入，HTTP 工具类用 Kotlin 原生执行，需要本地能力或 Python 的插件保留在电脑端，由连接桥远程调用。</p>
+      </div>
+      <div class="page-tag">
+        <span class="tag">源 <b>D:\octop 插件体系</b></span>
+        <span class="tag">首批 <b>12–20 个 HTTP 工具</b></span>
+        <span class="tag">UI <b>原生卡片 DSL</b></span>
+      </div>
+    </div>
+    <div class="flow-strip">
+      <span class="step"><i>L1</i>技能类：SKILL.md 直接导入</span><span class="arrow">→</span>
+      <span class="step"><i>L2</i>HTTP 工具类：手机原生执行</span><span class="arrow">→</span>
+      <span class="step"><i>L3</i>Python / 本地能力：电脑端远程执行</span><span class="arrow">→</span>
+      <span class="step"><i>UI</i>声明式卡片替代 React ESM</span>
+    </div>
+
+    <div class="phones">
+      <!-- 05 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">05</span><b>插件中心</b><span>管理</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <span class="brand-tile"><svg class="ic"><use href="#i-plug"/></svg></span>
+                <span class="sb-title">插件</span>
+                <div class="sb-actions">
+                  <button class="icon-btn"><svg class="ic"><use href="#i-search"/></svg></button>
+                  <button class="icon-btn"><svg class="ic"><use href="#i-more"/></svg></button>
+                </div>
+              </div>
+              <div class="scroll">
+                <div class="banner" style="margin-bottom:10px">
+                  <svg class="ic"><use href="#i-laptop"/></svg>
+                  <div><b>已从电脑版同步 28 个插件</b><br>手机可运行 14 个 · 需电脑 9 个 · 含 UI 卡片 8 个</div>
+                </div>
+                <div class="seg" data-plugin-filter>
+                  <button class="is-active" data-filter="all">全部</button>
+                  <button data-filter="on">已启用</button>
+                  <button data-filter="pc">需电脑</button>
+                  <button data-filter="phone">手机可运行</button>
+                </div>
+                <div class="section-label">常用</div>
+                <div class="card pad" style="padding:2px 13px">
+                  <div class="plugin-row" data-tags="phone">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-cloud"/></svg></span>
+                    <div class="grow"><div class="h-sm">天气</div><div class="tiny">按城市查询实时天气与预报</div><div class="p-meta"><span class="p-tag tag-phone">手机运行</span><span class="p-tag ui">卡片</span></div></div>
+                    <button class="switch is-on" data-switch></button>
+                  </div>
+                  <div class="plugin-row" data-tags="phone">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-globe"/></svg></span>
+                    <div class="grow"><div class="h-sm">空气质量</div><div class="tiny">PM2.5 / AQI 与健康建议</div><div class="p-meta"><span class="p-tag tag-phone">手机运行</span><span class="p-tag ui">卡片</span></div></div>
+                    <button class="switch is-on" data-switch></button>
+                  </div>
+                  <div class="plugin-row" data-tags="phone">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-refresh"/></svg></span>
+                    <div class="grow"><div class="h-sm">单位换算</div><div class="tiny">长度 / 重量 / 温度 / 货币</div><div class="p-meta"><span class="p-tag tag-phone">手机运行</span></div></div>
+                    <button class="switch" data-switch></button>
+                  </div>
+                  <div class="plugin-row" data-tags="pc on">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-chat"/></svg></span>
+                    <div class="grow"><div class="h-sm">Slack / 日历</div><div class="tiny">读取团队消息与日程（需电脑授权）</div><div class="p-meta"><span class="p-tag tag-pc">需电脑</span></div></div>
+                    <button class="switch" data-switch></button>
+                  </div>
+                  <div class="plugin-row" data-tags="pc">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-file"/></svg></span>
+                    <div class="grow"><div class="h-sm">PDF 工具箱</div><div class="tiny">合并 / 拆分 / OCR / 转 Word</div><div class="p-meta"><span class="p-tag tag-pc">需电脑</span></div></div>
+                    <button class="switch" data-switch></button>
+                  </div>
+                </div>
+                <div class="section-label">更多</div>
+                <div class="card pad" style="padding:2px 13px">
+                  <div class="plugin-row" data-tags="phone">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-link"/></svg></span>
+                    <div class="grow"><div class="h-sm">IP 查询 / 短链</div><div class="tiny">网络工具合集</div><div class="p-meta"><span class="p-tag tag-phone">手机运行</span></div></div>
+                    <button class="switch is-on" data-switch></button>
+                  </div>
+                  <div class="plugin-row" data-tags="phone">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-chart"/></svg></span>
+                    <div class="grow"><div class="h-sm">GitHub 趋势</div><div class="tiny">热门仓库与语言榜单</div><div class="p-meta"><span class="p-tag tag-phone">手机运行</span><span class="p-tag ui">卡片</span></div></div>
+                    <button class="switch" data-switch></button>
+                  </div>
+                  <div class="plugin-row" data-tags="phone">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-book"/></svg></span>
+                    <div class="grow"><div class="h-sm">专家市场</div><div class="tiny">安装电脑版专家与团队配置</div><div class="p-meta"><span class="p-tag tag-phone">手机运行</span></div></div>
+                    <button class="switch is-on" data-switch></button>
+                  </div>
+                  <div class="plugin-row" data-tags="pc">
+                    <span class="plugin-logo"><svg class="ic"><use href="#i-plug"/></svg></span>
+                    <div class="grow"><div class="h-sm">原生插件运行时</div><div class="tiny">Python 插件与 Hook（保留在电脑）</div><div class="p-meta"><span class="p-tag tag-pc">需电脑</span></div></div>
+                    <button class="switch" data-switch></button>
+                  </div>
+                </div>
+              </div>
+              <div class="bottom-nav">
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-chat"/></svg></span><b>对话</b></button>
+                <button class="tab is-active"><span class="pill"><svg class="ic"><use href="#i-grid"/></svg></span><b>工作台</b></button>
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-folder"/></svg></span><b>资源</b></button>
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-user"/></svg></span><b>我的</b></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>入口位置：</b>工作台 →「扩展与插件」，与技能 / 知识 / 团队同级；首屏显示从电脑版同步的插件清单，并用 <span class="k">手机运行 / 需电脑 / 卡片</span> 标签明确能力边界。</div>
+      </div>
+
+      <!-- 06 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">06</span><b>插件详情 · 权限与运行位置</b><span>安装</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <button class="icon-btn"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-chev"/></svg></button>
+                <span class="sb-title">插件详情</span>
+                <div class="sb-actions"><button class="icon-btn"><svg class="ic"><use href="#i-more"/></svg></button></div>
+              </div>
+              <div class="scroll">
+                <div class="row" style="align-items:flex-start;gap:12px;margin-top:2px">
+                  <span class="plugin-logo" style="width:52px;height:52px;border-radius:15px"><svg class="ic" style="width:24px;height:24px"><use href="#i-globe"/></svg></span>
+                  <div class="grow">
+                    <div class="h-title" style="font-size:19px">空气质量</div>
+                    <div class="tiny" style="margin-top:2px">电脑版插件 · v0.1.0 · 来自 D:\octop 插件库</div>
+                    <div class="p-meta" style="display:flex;gap:4px;margin-top:6px">
+                      <span class="p-tag tag-phone">手机运行</span><span class="p-tag ui">原生卡片</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="card pad" style="margin-top:12px">
+                  <div class="tiny" style="color:var(--ink2);line-height:1.7">查询城市 PM2.5、AQI 与健康建议。电脑版原实现为 Python HTTP 工具；手机版以 Kotlin 原生实现同一接口，返回结构化数据，由手机渲染卡片。</div>
+                </div>
+                <div class="section-label">运行位置</div>
+                <div class="card pad" style="padding:12px">
+                  <div class="row">
+                    <span class="tile green"><svg class="ic"><use href="#i-phone"/></svg></span>
+                    <div class="grow"><div class="h-sm">手机原生执行</div><div class="tiny">HTTP 工具，无需电脑；离线时不可用</div></div>
+                    <span class="chip ok"><svg class="ic xs"><use href="#i-check"/></svg>已就绪</span>
+                  </div>
+                  <div class="hr" style="margin:10px 0"></div>
+                  <div class="row">
+                    <span class="tile grey"><svg class="ic"><use href="#i-laptop"/></svg></span>
+                    <div class="grow"><div class="h-sm">改为电脑执行</div><div class="tiny">使用电脑版 Python 插件实现，需先配对</div></div>
+                    <button class="switch" data-switch></button>
+                  </div>
+                </div>
+                <div class="section-label">权限</div>
+                <div class="row" style="gap:6px;flex-wrap:wrap">
+                  <span class="chip"><svg class="ic xs"><use href="#i-globe"/></svg>网络访问</span>
+                  <span class="chip"><svg class="ic xs"><use href="#i-pin"/></svg>城市位置（可选）</span>
+                  <span class="chip"><svg class="ic xs"><use href="#i-shield"/></svg>无文件权限</span>
+                </div>
+                <div class="section-label">输出示例</div>
+                <div class="result-card">
+                  <div class="result-head">
+                    <span class="tile green"><svg class="ic sm"><use href="#i-globe"/></svg></span>
+                    <b>空气质量 · 杭州</b><span>刚刚更新</span>
+                  </div>
+                  <div class="aqi-wrap">
+                    <div class="aqi-ring"><b>42</b><span>AQI</span></div>
+                    <div class="aqi-vals">
+                      <div class="kv"><span>PM2.5</span><b>12 μg/m³</b></div>
+                      <div class="kv"><span>类别</span><b style="color:var(--green)">优</b></div>
+                      <div class="kv"><span>建议</span><b style="font-weight:550">适合户外活动</b></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="padding:10px 16px 14px;border-top:1px solid var(--line);background:var(--surface)">
+                <div class="row">
+                  <div class="grow"><div class="h-sm">在对话中启用</div><div class="tiny">启用后，助手可自动调用</div></div>
+                  <button class="switch is-on" data-switch></button>
+                </div>
+                <button class="btn ghost block" style="margin-top:8px;height:32px;color:var(--red);font-size:11.5px">卸载插件</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>移植方式：</b>L2 插件按 <span class="k">plugin.yaml → 手机插件清单</span> 转换：保留 id、名称、描述、分类、图标、权限声明；<code>main.py</code> 的 HTTP 逻辑改由 Kotlin 实现。L3 保留“电脑执行”切换，走连接桥。</div>
+      </div>
+
+      <!-- 07 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">07</span><b>对话内插件结果卡</b><span>使用</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <span class="brand-tile"><svg class="ic"><use href="#i-brand"/></svg></span>
+                <span class="sb-title">XFriend</span>
+                <div class="sb-actions"><button class="icon-btn"><svg class="ic"><use href="#i-task"/></svg></button></div>
+              </div>
+              <div class="scroll">
+                <div class="chat">
+                  <div class="msg user">
+                    <span class="who"><svg class="ic"><use href="#i-user"/></svg></span>
+                    <div><div class="bubble">查一下杭州现在的空气质量和今天的天气。</div></div>
+                  </div>
+                  <div class="msg">
+                    <span class="who"><svg class="ic"><use href="#i-brand"/></svg></span>
+                    <div style="flex:1;min-width:0">
+                      <div class="bubble" style="margin-bottom:8px">已调用 2 个手机插件（空气质量、天气），结果如下。</div>
+                      <div class="result-card" style="margin-bottom:8px">
+                        <div class="result-head">
+                          <span class="tile green"><svg class="ic sm"><use href="#i-globe"/></svg></span>
+                          <b>空气质量 · 杭州</b><span>air-quality</span>
+                        </div>
+                        <div class="aqi-wrap">
+                          <div class="aqi-ring"><b>42</b><span>AQI</span></div>
+                          <div class="aqi-vals">
+                            <div class="kv"><span>PM2.5</span><b>12 μg/m³</b></div>
+                            <div class="kv"><span>类别</span><b style="color:var(--green)">优</b></div>
+                            <div class="kv"><span>建议</span><b style="font-weight:550">适合户外活动</b></div>
+                          </div>
+                        </div>
+                        <div class="row" style="margin-top:9px;gap:6px">
+                          <button class="btn sm secondary"><svg class="ic sm"><use href="#i-refresh"/></svg>刷新</button>
+                          <button class="btn sm ghost">加入今日简报</button>
+                        </div>
+                      </div>
+                      <div class="result-card" style="margin-bottom:8px">
+                        <div class="result-head">
+                          <span class="tile amber"><svg class="ic sm"><use href="#i-cloud"/></svg></span>
+                          <b>天气 · 杭州</b><span>weather</span>
+                        </div>
+                        <div class="row" style="gap:12px">
+                          <div><div style="font-size:22px;font-weight:700;color:var(--ink)">21°</div><div class="tiny">多云转晴</div></div>
+                          <div class="grow" style="font-size:10.5px;line-height:1.7;color:var(--ink2)">最高 24° / 最低 16°<br>东南风 2 级 · 降水概率 10%<br>适合外出拜访客户。</div>
+                        </div>
+                      </div>
+                      <div class="tiny" style="display:flex;align-items:center;gap:6px;color:var(--ink3)">
+                        <svg class="ic xs"><use href="#i-cpu"/></svg> air-quality · 120ms · 手机执行 · weather · 180ms
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="composer">
+                <div class="composer-inner">
+                  <div class="composer-box">继续追问，或输入 / 调用技能…</div>
+                  <button class="send"><svg class="ic"><use href="#i-up"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>卡片协议：</b>沿用电脑版 <code>octop_ui</code> 思路，定义手机原生卡片 DSL（text / kv / ring / list / actions），插件只返回结构化 JSON，<span class="k">不执行桌面版 React ESM</span>，同时保留纯文本回退。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ENGINE ================= -->
+  <section class="page" id="page-engine">
+    <div class="page-head">
+      <div>
+        <div class="page-kicker">Direction 03 · Engine strategy</div>
+        <h1 class="page-title">完整 DSH 引擎不整包塞进手机：手机做客户端与轻量引擎</h1>
+        <p class="page-sub">DeepSeek Harness 桌面版由 Electron + Node 24 + Python 3.12 运行时组成，包含 node-pty、koffi（FFI）、sherpa-onnx 等原生依赖与桌面文件系统/进程沙箱。Android 无法直接复用这些组件；建议保留手机轻量引擎，完整 DSH 通过电脑版或云端远程执行。</p>
+      </div>
+      <div class="page-tag">
+        <span class="tag">引擎 <b>DSH 0.2.1 · Node 24</b></span>
+        <span class="tag">手机 <b>轻量引擎（现有）</b></span>
+        <span class="tag">远程 <b>mobile-runs v2</b></span>
+      </div>
+    </div>
+    <div class="flow-strip">
+      <span class="step"><i>1</i>手机轻量引擎：对话 / 文档 / 插件 / 文件</span><span class="arrow">→</span>
+      <span class="step"><i>2</i>电脑版 DSH：完整工具 / 终端 / Office / 原生插件</span><span class="arrow">→</span>
+      <span class="step"><i>3</i>事件流 + 审批同步回手机</span><span class="arrow">→</span>
+      <span class="step"><i>4</i>云端执行：未启用（占位）</span>
+    </div>
+
+    <div class="phones">
+      <!-- 08 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">08</span><b>运行引擎设置</b><span>选择</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <button class="icon-btn"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-chev"/></svg></button>
+                <span class="sb-title">运行引擎</span>
+                <div class="sb-actions"><span class="chip ok">已连接电脑</span></div>
+              </div>
+              <div class="scroll">
+                <div class="banner" style="margin-bottom:10px">
+                  <svg class="ic"><use href="#i-cpu"/></svg>
+                  <div><b>当前：手机轻量引擎</b><br>文档、插件、文件与对话在手机本地执行；完整 DSH 能力需连接电脑版。</div>
+                </div>
+                <div class="section-label">选择执行位置</div>
+                <button class="engine-opt is-selected" data-engine="phone">
+                  <span class="radio"></span>
+                  <div class="grow"><b>手机轻量引擎 <span class="rec">当前</span></b><span>离线可用 · 对话、文档生成、手机可运行插件、工作区文件</span></div>
+                </button>
+                <button class="engine-opt" data-engine="desktop">
+                  <span class="radio"></span>
+                  <div class="grow"><b>电脑版 DSH <span class="rec">推荐完整能力</span></b><span>连接电脑后获得完整工具、终端、Office 处理与 Python 插件；任务在电脑执行，手机查看进度与审批</span></div>
+                </button>
+                <button class="engine-opt" data-engine="cloud">
+                  <span class="radio"></span>
+                  <div class="grow"><b>云端执行 <span class="chip" style="height:18px;font-size:9px">未启用</span></b><span>尚未部署；不会伪造在线状态，入口仅作预留</span></div>
+                </button>
+                <div class="section-label">能力对比</div>
+                <div class="card pad" style="padding:10px 12px">
+                  <table class="matrix">
+                    <tr><th>能力</th><th>手机</th><th>电脑 DSH</th></tr>
+                    <tr><td>对话 / 文档生成</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+                    <tr><td>手机插件</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+                    <tr><td>终端 / 本机进程</td><td class="no">—</td><td class="yes">✓</td></tr>
+                    <tr><td>复杂 Office / PDF</td><td class="warn" style="color:var(--amber)">简版</td><td class="yes">✓</td></tr>
+                    <tr><td>Python 原生插件</td><td class="no">—</td><td class="yes">✓</td></tr>
+                    <tr><td>离线可用</td><td class="yes">✓</td><td class="no">—</td></tr>
+                  </table>
+                </div>
+                <button class="btn block" style="margin-top:10px"><svg class="ic"><use href="#i-laptop"/></svg>配对电脑版（使用 DSH 引擎）</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>为什么不全塞进手机：</b>DSH 引擎依赖 Node 原生模块（node-pty / koffi / sherpa-onnx）、Python 运行时、pnpm 包管理与桌面进程沙箱；整包体积与维护成本都不适合普通 Android App。手机保留轻量执行，完整能力远程化。</div>
+      </div>
+
+      <!-- 09 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">09</span><b>电脑版 DSH 远程会话</b><span>执行</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <button class="icon-btn"><svg class="ic" style="transform:rotate(180deg)"><use href="#i-chev"/></svg></button>
+                <div class="grow">
+                  <div class="sb-title" style="font-size:14px">DSH 会话</div>
+                  <div class="tiny">电脑 · DSH 0.2.1 · 已连接</div>
+                </div>
+                <div class="sb-actions"><span class="chip ok">电脑执行</span></div>
+              </div>
+              <div class="scroll">
+                <div class="banner" style="margin-bottom:10px">
+                  <svg class="ic"><use href="#i-laptop"/></svg>
+                  <div><b>任务在电脑执行</b><br>手机只接收事件与审批；断开后保留最后同步状态，不把任务改写为失败。</div>
+                </div>
+                <div class="msg user" style="margin-bottom:10px">
+                  <span class="who"><svg class="ic"><use href="#i-user"/></svg></span>
+                  <div><div class="bubble">用 DSH 分析这份 30 页合同，生成 Word 审查报告。</div></div>
+                </div>
+                <div class="events">
+                  <div class="event run"><span class="dot"><svg class="ic"><use href="#i-play"/></svg></span><div class="ev-body">开始执行 · <code>ds</code> 会话 · 电脑</div></div>
+                  <div class="event"><span class="dot"><svg class="ic"><use href="#i-file"/></svg></span><div class="ev-body"><code>tool_start</code> read_file(合同.pdf)</div></div>
+                  <div class="event ok"><span class="dot"><svg class="ic"><use href="#i-check"/></svg></span><div class="ev-body"><code>tool_result</code> 30 页 · 已提取 12 个风险条款</div></div>
+                  <div class="event"><span class="dot"><svg class="ic"><use href="#i-sparkles"/></svg></span><div class="ev-body">正在生成审查报告 · 已写入 2 个章节…</div></div>
+                  <div class="approve">
+                    <b>需要确认：写入文件</b>
+                    <p><code>write_file</code> → <b>合同审查报告.docx</b>（尚未执行）</p>
+                    <div class="btns">
+                      <button class="btn sm" data-approve="yes"><svg class="ic sm"><use href="#i-check"/></svg>批准</button>
+                      <button class="btn sm secondary" data-approve="no">拒绝</button>
+                      <span class="tiny" style="margin-left:auto;align-self:center" id="approveState">等待确认</span>
+                    </div>
+                  </div>
+                  <div class="event"><span class="dot"><svg class="ic"><use href="#i-download"/></svg></span><div class="ev-body">完成后可在手机下载 <code>合同审查报告.docx</code>，或继续在电脑版查看</div></div>
+                </div>
+                <div class="row" style="margin-top:12px;gap:7px">
+                  <button class="btn sm secondary"><svg class="ic sm"><use href="#i-pause"/></svg>暂停</button>
+                  <button class="btn sm ghost" style="color:var(--red)"><svg class="ic sm"><use href="#i-stop"/></svg>停止任务</button>
+                  <button class="btn sm secondary" style="margin-left:auto"><svg class="ic sm"><use href="#i-laptop"/></svg>在电脑继续</button>
+                </div>
+                <div class="tiny" style="margin-top:9px">本会话为电脑独立任务，不会无缝迁移手机当前对话；审批由手机或电脑确认后继续。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>复用现有协议：</b>沿用 mobile-runs v2（runs / events / approvals），手机端已经是客户端；只需在 <span class="k">引擎配置</span> 里新增“电脑版 DSH”目标，无需把引擎搬进 APK。终端、Office、Python 插件都在电脑侧执行。</div>
+      </div>
+
+      <!-- 10 -->
+      <div class="phone-cell">
+        <div class="phone-cap"><span class="num">10</span><b>我的 → 插件与引擎入口</b><span>汇总</span></div>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><div class="sb-right"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"></span></div></div>
+            <div class="app">
+              <div class="sb-top">
+                <span class="brand-tile"><svg class="ic"><use href="#i-user"/></svg></span>
+                <span class="sb-title">我的</span>
+                <div class="sb-actions"><button class="icon-btn"><svg class="ic"><use href="#i-bell"/></svg></button></div>
+              </div>
+              <div class="scroll">
+                <div class="card pad" style="display:flex;gap:10px;align-items:center">
+                  <span class="avatar">张</span>
+                  <div class="grow"><div class="h-sm">张先生</div><div class="tiny">个人工作空间 · 已同步</div></div>
+                  <span class="chip ok">正常</span>
+                </div>
+                <div class="section-label">执行与扩展</div>
+                <div class="card pad" style="padding:2px 13px">
+                  <div class="list-row">
+                    <span class="tile"><svg class="ic"><use href="#i-cpu"/></svg></span>
+                    <div class="grow"><div class="h-sm">运行引擎</div><div class="tiny">手机轻量引擎 / 电脑版 DSH / 云端</div></div>
+                    <span class="chip accent">电脑 DSH</span>
+                    <svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg>
+                  </div>
+                  <div class="list-row">
+                    <span class="tile"><svg class="ic"><use href="#i-plug"/></svg></span>
+                    <div class="grow"><div class="h-sm">插件</div><div class="tiny">28 个电脑版插件 · 已启用 6</div></div>
+                    <span class="chip">14 可用</span>
+                    <svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg>
+                  </div>
+                  <div class="list-row">
+                    <span class="tile"><svg class="ic"><use href="#i-folder"/></svg></span>
+                    <div class="grow"><div class="h-sm">文档</div><div class="tiny">Word / Excel / PPT / Markdown</div></div>
+                    <span class="chip">9 份</span>
+                    <svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg>
+                  </div>
+                  <div class="list-row">
+                    <span class="tile grey"><svg class="ic"><use href="#i-palette"/></svg></span>
+                    <div class="grow"><div class="h-sm">外观</div><div class="tiny">主题模式、主色与通知</div></div>
+                    <svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg>
+                  </div>
+                </div>
+                <div class="section-label">账号与数据</div>
+                <div class="card pad" style="padding:2px 13px">
+                  <div class="list-row"><span class="tile grey"><svg class="ic"><use href="#i-shield"/></svg></span><div class="grow"><div class="h-sm">账号与同步</div><div class="tiny">资料、专家与文档配置</div></div><svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg></div>
+                  <div class="list-row"><span class="tile grey"><svg class="ic"><use href="#i-laptop"/></svg></span><div class="grow"><div class="h-sm">连接电脑</div><div class="tiny">配对设备与使用电脑工作空间</div></div><span class="chip ok">已连接</span><svg class="ic sm" style="color:var(--ink4)"><use href="#i-chev"/></svg></div>
+                </div>
+              </div>
+              <div class="bottom-nav">
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-chat"/></svg></span><b>对话</b></button>
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-grid"/></svg></span><b>工作台</b></button>
+                <button class="tab"><span class="pill"><svg class="ic"><use href="#i-folder"/></svg></span><b>资源</b></button>
+                <button class="tab is-active"><span class="pill"><svg class="ic"><use href="#i-user"/></svg></span><b>我的</b></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-note"><b>入口收口：</b>三个新能力集中在「我的 → 执行与扩展」（引擎 / 插件 / 文档）与「工作台 → 扩展」，避免设置项散落；文档同时在资源中心有独立分类。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REVIEW ================= -->
+  <section class="page" id="page-review">
+    <div class="page-head">
+      <div>
+        <div class="page-kicker">Review · 需要你拍板的几个点</div>
+        <h1 class="page-title">先做什么、后做什么、哪些不做</h1>
+        <p class="page-sub">下面是我建议的版本节奏与技术取舍。原型里的页面都是可实现的；真正的分叉点在「PPT 要做到什么程度」「插件是远程还是重写」「DSH 引擎是否需要在手机离线运行」。</p>
+      </div>
+      <div class="page-tag"><span class="tag">建议 <b>0.12 → 0.14</b></span><span class="tag">不改变 0.11 已交付内容</span></div>
+    </div>
+
+    <div class="review-grid">
+      <div class="review-card decision">
+        <h4><span class="n">01</span>建议的版本节奏</h4>
+        <p>三个方向拆成三步，每一步都能单独验收与回滚：</p>
+        <ul>
+          <li><b>0.12 · 文档能力</b>：Markdown 导出 + Word / Excel 生成 + 资源文档中心 + 对话内动作（原型 01–04）。PPT 先出简版（4–8 张、纯文本/表格），不做动画与母版。</li>
+          <li><b>0.13 · 插件移植</b>：插件清单 + 手机原生 HTTP 工具（首批 12–20 个）+ 原生卡片 DSL + 权限页（原型 05–07）；技能类沿用现有导入。</li>
+          <li><b>0.14 · 电脑版 DSH 远程</b>：引擎设置 + DSH 会话（原型 08–10），复用 mobile-runs v2；不做手机端引擎打包。</li>
+          <li><b>后续可选</b>：Chaquopy 嵌入 Python 文档子集（高保真排版 / PDF），或 Node 子集；需要先看 0.12–0.14 的真实使用数据。</li>
+        </ul>
+        <div class="pill-row"><span class="pill">每步独立 APK 验收</span><span class="pill">不改变现有账号/同步协议</span><span class="pill">不新增底栏</span></div>
+      </div>
+
+      <div class="review-card">
+        <h4><span class="n">02</span>技术取舍</h4>
+        <div class="table-wrap">
+          <table class="cmp">
+            <tr><th>方向</th><th>推荐方案</th><th>限制</th><th>结论</th></tr>
+            <tr><td><b>Word / Excel / PPT</b></td><td>Kotlin 原生写 OOXML（ZIP+XML）</td><td>复杂版式、图表、公式保真度有限</td><td class="best">先做，覆盖 80% 场景</td></tr>
+            <tr><td><b>高保真 Office / PDF</b></td><td>电脑版 DSH office-skills（python-docx / openpyxl / python-pptx）</td><td>需要电脑在线，不能离线</td><td class="warn">0.14 起作为补全</td></tr>
+            <tr><td><b>插件：技能类</b></td><td>SKILL.md 直接导入现有技能库</td><td>无执行逻辑</td><td class="best">0.13 即可用</td></tr>
+            <tr><td><b>插件：HTTP 工具</b></td><td>Kotlin 重写接口 + 原生卡片</td><td>每插件需实现与验收</td><td class="best">0.13 首批 12–20 个</td></tr>
+            <tr><td><b>插件：Python / 本地能力</b></td><td>保留在电脑端，经连接桥远程调用</td><td>依赖电脑在线</td><td class="warn">不做手机原生 Python</td></tr>
+            <tr><td><b>DSH 引擎</b></td><td>手机客户端 + 电脑/云端远程执行</td><td>完整引擎不在 APK 内</td><td class="best">0.14，风险最低</td></tr>
+            <tr><td><b>DSH 整包嵌入</b></td><td>Node/Electron + Python 重打包到 Android</td><td>原生模块、体积、进程/沙箱限制、维护成本</td><td class="warn">不建议近期做</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <h4><span class="n">03</span>需要你确认</h4>
+        <div class="pill-row" style="flex-direction:column;align-items:stretch;gap:8px">
+          <span class="pill"><b>Q1</b> 文档格式优先级是否按 MD → DOCX → XLSX → PPTX？（PPT 是否接受“简版手机生成 + 电脑精修”）</span>
+          <span class="pill"><b>Q2</b> 首批插件范围：建议从 28 个里选 12 个手机可运行的 HTTP 工具（天气、空气质量、单位换算、二维码、IP、短链、百科、汇率、趋势、翻译…），是否认可？</span>
+          <span class="pill"><b>Q3</b> 插件入口放“工作台 → 扩展与插件”，文档放“资源 → 文档”，不新增第 5 个底栏 tab——是否同意？</span>
+          <span class="pill"><b>Q4</b> 引擎策略：完整 DSH 只通过电脑版/云端远程，不在手机 APK 内打包——是否接受？（若必须离线，需要单独立项评估体积与性能）</span>
+          <span class="pill"><b>Q5</b> 文档是否需要“模板/品牌样式”（公司抬头、页眉页脚、编号），还是先做通用结构？</span>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <h4><span class="n">04</span>风险与边界</h4>
+        <ul>
+          <li><b>文档保真度</b>：手机生成的 docx/xlsx/pptx 在 Office/WPS 中打开需抽样验证；复杂样式、图表、公式、批注不在首版范围。</li>
+          <li><b>插件安全</b>：HTTP 插件需要域名白名单与权限声明；远程插件沿用审批机制；不执行来源不明的二进制插件。</li>
+          <li><b>离线边界</b>：文档生成与手机插件可离线；电脑 DSH 与 Python 插件依赖电脑在线。</li>
+          <li><b>体积</b>：原生 OOXML 生成只增加少量代码；若后续引入 Python/Node 运行时，APK 会增加数十 MB，需单独评估。</li>
+          <li><b>本原型为评审稿</b>：示例数据与页面结构仅用于讨论，不代表已实现；所有入口与文案可在评审后调整。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="badge-live"><i></i>可交互原型 · 亮/暗与主色可切换</span>
+      <span><b>XFamily 0.12 产品原型 v1</b> · 2026-10-18 · 基于 0.11 Xf 设计系统</span>
+      <span>参考：0.11 模拟器截图 · 电脑版 28 插件 · DSH 0.2.1 运行时</span>
+    </div>
+  </section>
+
+  <!-- sun/moon icons for theme toggle -->
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></symbol>
+  </defs></svg>
+</div>
+
+<script>
+(function(){
+  const studio = document.getElementById('studio');
+  const html = document.documentElement;
+
+  /* ---------- studio nav ---------- */
+  const navBtns = document.querySelectorAll('#studioNav button');
+  const pages = {
+    doc: document.getElementById('page-doc'),
+    plugins: document.getElementById('page-plugins'),
+    engine: document.getElementById('page-engine'),
+    review: document.getElementById('page-review')
+  };
+  function showPage(name){
+    Object.entries(pages).forEach(([k,el]) => el.classList.toggle('is-active', k === name));
+    navBtns.forEach(b => b.classList.toggle('is-active', b.dataset.page === name));
+    if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  navBtns.forEach(b => b.addEventListener('click', () => showPage(b.dataset.page)));
+  const params = new URLSearchParams(location.search);
+  if (params.get('theme')) { html.setAttribute('data-theme', params.get('theme')); document.querySelectorAll('.theme-seg button').forEach(b => b.classList.toggle('is-active', b.dataset.theme === params.get('theme'))); }
+  if (params.get('accent')) { html.setAttribute('data-accent', params.get('accent')); document.querySelectorAll('.accent-dot').forEach(d => d.classList.toggle('is-active', d.dataset.accent === params.get('accent'))); }
+  const initial = (location.hash || '').replace('#','');
+  if (pages[initial]) { Object.entries(pages).forEach(([k,el]) => el.classList.toggle('is-active', k === initial)); navBtns.forEach(b => b.classList.toggle('is-active', b.dataset.page === initial)); }
+
+  /* ---------- theme + accent ---------- */
+  document.querySelectorAll('.theme-seg button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      html.setAttribute('data-theme', btn.dataset.theme);
+      document.querySelectorAll('.theme-seg button').forEach(b => b.classList.toggle('is-active', b === btn));
+    });
+  });
+  document.querySelectorAll('.accent-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      html.setAttribute('data-accent', dot.dataset.accent);
+      document.querySelectorAll('.accent-dot').forEach(d => d.classList.toggle('is-active', d === dot));
+    });
+  });
+
+  /* ---------- helper ---------- */
+  const labelOf = {docx:'Word', xlsx:'Excel', pptx:'PPT', md:'Markdown'};
+
+  /* ---------- 01 sheet type pick ---------- */
+  document.querySelectorAll('[data-pick]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('[data-pick]').forEach(c => c.classList.toggle('is-selected', c === card));
+      const choice = document.getElementById('sheetChoice');
+      if (choice) choice.textContent = labelOf[card.dataset.pick] || card.dataset.pick;
+    });
+  });
+
+  /* ---------- 03 wizard type pick ---------- */
+  document.querySelectorAll('[data-pick2]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('[data-pick2]').forEach(c => c.classList.toggle('is-selected', c === card));
+      const map = {docx:'Word', xlsx:'Excel', pptx:'PPT', md:'Markdown'};
+      const el = document.getElementById('wizSummary');
+      if (el) el.textContent = (map[card.dataset.pick2] || 'Word') + ' · 当前对话 + 客户资料';
+    });
+  });
+  const wizNext = document.getElementById('wizNext');
+  if (wizNext) wizNext.addEventListener('click', () => { wizNext.textContent = '下一步：设置模板与语言'; });
+
+  /* ---------- 02 doc filter ---------- */
+  document.querySelectorAll('[data-doc-filter]').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.toggle('is-active', b === btn));
+        const f = btn.dataset.filter;
+        document.querySelectorAll('#page-doc [data-kind]').forEach(row => {
+          row.style.display = (f === 'all' || row.dataset.kind === f) ? '' : 'none';
+        });
+      });
+    });
+  });
+
+  /* ---------- 04 preview switch ---------- */
+  document.querySelectorAll('[data-preview-switch]').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.toggle('is-active', b === btn));
+        const kind = btn.dataset.preview;
+        document.querySelectorAll('[data-preview-body]').forEach(body => {
+          body.hidden = body.dataset.previewBody !== kind;
+        });
+        const name = document.getElementById('previewName');
+        if (name) name.textContent = ({docx:'客户周报 · 第 42 周.docx', xlsx:'客户跟进清单.xlsx', pptx:'Q4 方案汇报.pptx', md:'客户周报.md'})[kind];
+        const exp = document.getElementById('exportBtn');
+        if (exp) exp.innerHTML = '<svg class="ic"><use href="#i-download"/></svg>导出 ' + (labelOf[kind] || 'Word');
+      });
+    });
+  });
+  const exp = document.getElementById('exportBtn');
+  if (exp) exp.addEventListener('click', () => { exp.innerHTML = '<svg class="ic"><use href="#i-check"/></svg>已导出（示例）'; });
+
+  /* ---------- 05 plugin filter + switches ---------- */
+  document.querySelectorAll('[data-plugin-filter]').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.toggle('is-active', b === btn));
+        const f = btn.dataset.filter;
+        document.querySelectorAll('#page-plugins .plugin-row').forEach(row => {
+          const tags = row.dataset.tags || '';
+          let show = true;
+          if (f === 'phone') show = tags.includes('phone');
+          if (f === 'pc') show = tags.includes('pc');
+          if (f === 'on') show = row.querySelector('.switch.is-on') != null;
+          row.style.display = show ? '' : 'none';
+        });
+      });
+    });
+  });
+  document.querySelectorAll('[data-switch]').forEach(sw => {
+    sw.addEventListener('click', (e) => { e.stopPropagation(); sw.classList.toggle('is-on'); });
+  });
+
+  /* ---------- 08 engine select ---------- */
+  document.querySelectorAll('[data-engine]').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('[data-engine]').forEach(o => o.classList.toggle('is-selected', o === opt));
+    });
+  });
+
+  /* ---------- 09 approval ---------- */
+  document.querySelectorAll('[data-approve]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const state = document.getElementById('approveState');
+      if (state) {
+        state.textContent = btn.dataset.approve === 'yes' ? '已批准 · 继续执行' : '已拒绝 · 任务停止';
+        state.style.color = btn.dataset.approve === 'yes' ? 'var(--green)' : 'var(--red)';
+      }
+      document.querySelectorAll('[data-approve]').forEach(b => b.disabled = true);
+    });
+  });
+})();
+</script>
+</body>
+</html>

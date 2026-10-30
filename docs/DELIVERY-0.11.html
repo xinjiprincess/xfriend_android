@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Xfriend / Xsalers 0.11 · 视觉重塑交付报告</title>
+<style>
+:root{color-scheme:light dark;--bg:#F6F5F1;--surface:#FFFFFF;--text:#1B1C1F;--muted:#57585F;--line:#E5E2DA;--accent:#4F5DF0;--violet:#7055DE;--soft:#ECEEFE}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.75 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}main{max-width:1080px;margin:auto;padding:48px 24px 64px}header{padding-bottom:28px;border-bottom:1px solid var(--line)}h1{font-size:clamp(28px,5vw,42px);line-height:1.25;margin:12px 0}h2{font-size:24px;margin:0 0 16px}h3{font-size:18px;margin:0 0 8px}p{margin:8px 0 16px}a{color:var(--accent);text-underline-offset:4px}a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}nav{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:20px}nav a{min-height:48px;display:inline-flex;align-items:center}.eyebrow,.muted{color:var(--muted)}.eyebrow{font-size:14px;letter-spacing:.08em}.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:14px;background:var(--surface)}section{margin-top:28px;padding:28px;background:var(--surface);border:1px solid var(--line);border-radius:16px;scroll-margin-top:20px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.brand{color:var(--accent)}.sales{color:var(--violet)}ul,ol{padding-left:24px;margin:8px 0}li+li{margin-top:8px}.note{padding:16px;border-left:3px solid var(--line);background:var(--bg);border-radius:0 8px 8px 0}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:var(--bg)}code{font-size:.9em;overflow-wrap:anywhere}.placeholder{padding:24px;border:1px dashed var(--line);border-radius:12px;background:var(--bg)}figure{margin:20px 0}figure img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line)}figcaption{font-size:13px;color:var(--muted);padding:8px}footer{margin-top:28px;color:var(--muted);font-size:14px}
+@media(prefers-color-scheme:dark){:root{--bg:#0E0F12;--surface:#181A1F;--text:#F1F2F4;--muted:#AAAEB8;--line:#282A31;--accent:#8B95FF;--violet:#C5BCFF;--soft:#272A3C}}
+@media(max-width:640px){main{padding:28px 16px 40px}section{padding:20px 16px}.grid{grid-template-columns:1fr}th,td{padding:10px}nav{gap:4px 16px}}
+@media print{main{max-width:none;padding:0}body{background:white;color:black}section{break-inside:avoid}nav{display:none}}
+</style>
+</head>
+<body><main>
+<header>
+<div class="eyebrow">MOBILE DELIVERY · 2026-10-17</div>
+<h1>Xfriend / Xsalers 0.11</h1>
+<p>前端重塑概念稿落地：暖纸画布、单一主色 5 色板、亮/暗主题、统一线性图标与 Xf 组件层</p>
+<span class="tag">0.11.0 · versionCode 11</span>
+<span class="tag">BUILD SUCCESSFUL · 模拟器 QA 回归通过</span>
+<p class="muted">本报告记录 0.11 视觉重塑的实现范围、证据与限制；不把构建成功等同于业务链路、真机视觉或无障碍验收通过。</p>
+<nav aria-label="报告导航"><a href="#change">本次变更</a><a href="#system">设计系统</a><a href="#screens">界面范围</a><a href="#verification">验证记录</a><a href="#shots">截图</a><a href="#limits">已知限制</a></nav>
+</header>
+
+<section id="change"><h2>本次变更（0.11.0 · UI 视觉重塑）</h2>
+<p>本次按「Singu Xfriend 前端重塑概念稿 v1」（本地：<code>D:\octop\docs\design\redesign-concept.html</code>）重做两个 App 的视觉与组件层。改动集中在 UI / 主题文件（约 32 个）；<strong>未改</strong>业务 ViewModel、Android 运行时、网络协议、账号与同步逻辑。</p>
+<div class="grid">
+<article><h3 class="brand">Xfriend</h3><ul>
+<li>底栏保持「对话 / 工作台 / 资源 / 我的」四项，信息架构不变。</li>
+<li>对话、工作台、资源、我的及既有详情（模型/任务/电脑会话/连接/同步/迁移/市场/蓝图/设计专家）统一改用 Xf 组件。</li>
+<li>新增「我的 → 外观」：跟随系统 / 浅色 / 深色 × 5 色板，本机保存。</li>
+</ul></article>
+<article><h3 class="sales">Xsalers</h3><ul>
+<li>底栏保持「今日 / 客户 / 复盘 / 专家 / 我的」五项，信息架构不变。</li>
+<li>今日、客户（含档案/CRM 概览/编辑）、复盘（含记录详情/任务中心）、专家（含 AI 设计/编辑/市场）、我的统一改用 Xf 组件。</li>
+<li>新增「我的 → 外观」，默认品牌紫罗兰主色。</li>
+</ul></article>
+</div>
+<h3 style="margin-top:24px">共同视觉</h3>
+<p>暖纸画布、白色内容卡、细边框、单一主色；亮/暗主题跟随系统或手动固定；统一 60 个线性图标与 28 个共享组件；底栏保留 Haze 毛玻璃与选中主色胶囊；主要触控区不小于 48dp。</p>
+</section>
+
+<section id="system"><h2>设计系统落地</h2>
+<div class="table-wrap"><table><caption class="muted">来源：<code>docs/design/redesign-concept-android-spec.md</code>；实现：<code>XfDesign.kt / XfComponents.kt / XfIcons.kt / XfAppearance.kt</code></caption>
+<thead><tr><th scope="col">项目</th><th scope="col">落地内容</th></tr></thead><tbody>
+<tr><td>令牌</td><td>亮/暗两套语义色：canvas <code>#F6F5F1</code>/<code>#0E0F12</code>、surface <code>#FFFFFF</code>/<code>#181A1F</code>、ink <code>#1B1C1F</code>/<code>#F1F2F4</code>、line <code>#E5E2DA</code>/<code>#282A31</code>；XfType / XfDimens / XfShapes / XfElevation 统一尺寸与字号。</td></tr>
+<tr><td>主色 5 组</td><td>靛蓝 <code>#4F5DF0</code>、青绿 <code>#0E9384</code>、琥珀 <code>#B26B00</code>、玫瑰 <code>#D94F6B</code>、紫罗兰 <code>#7055DE</code>；XFriend 默认靛蓝，XSalers 默认紫罗兰。</td></tr>
+<tr><td>主题模式</td><td>跟随系统 / 浅色 / 深色；SharedPreferences <code>xf_appearance</code> 本机持久化，不进入账号同步；切换立即生效。</td></tr>
+<tr><td>图标</td><td>60 个手工 ImageVector：24 视窗、1.75 stroke、round cap/join；导航 20dp、行内 17dp、强调 24dp。</td></tr>
+<tr><td>组件</td><td>28 个：XfCard / XfButton / XfStatusChip / XfListRow / XfTextField / XfSegmented / XfDialog / XfEmptyState / XfBanner / XfTopBar 等；32 处确认/编辑弹窗统一 XfDialog。</td></tr>
+<tr><td>壳层</td><td>XfTopBar 56dp；底栏内容 80dp + 1dp 顶线 + Haze 毛玻璃 + 选中胶囊 + 系统 insets。</td></tr>
+</tbody></table></div>
+<p class="note"><strong>与概念稿的差异：</strong>桌面侧栏、三栏聊天、上下文/成员栏、创建预览栏不迁移；群聊/会议/决策档案不实现（无业务）；概念 4 套 accent 落地为 5 套（增加 XSalers 品牌紫）；XFriend 默认主色从旧品牌蓝 <code>#5267E8</code> 改为概念靛蓝（启动图标资产保留）。</p>
+</section>
+
+<section id="screens"><h2>界面范围</h2>
+<div class="table-wrap"><table><thead><tr><th scope="col">App / 范围</th><th scope="col">页面</th><th scope="col">说明</th></tr></thead><tbody>
+<tr><td class="brand">Xfriend</td><td>对话、工作台、资源、我的、外观</td><td>4 底栏不变；主要页面与详情迁移 Xf 组件</td></tr>
+<tr><td class="brand">Xfriend 详情/弹窗</td><td>模型配置、平台设备、任务中心、电脑会话、电脑与平台、账号与同步、迁移、市场、蓝图、设计专家、资源</td><td>既有路由全部保留；32 处弹窗统一</td></tr>
+<tr><td class="sales">Xsalers</td><td>今日、客户、复盘、专家、我的、外观</td><td>5 底栏不变；主要页面迁移 Xf 组件</td></tr>
+<tr><td class="sales">Xsalers 详情/弹窗</td><td>客户档案、CRM 概览、记录详情、任务中心、专家设计/编辑、市场、模型配置、云同步、迁移、截图导入、导入导出</td><td>既有流程与确认语义保留</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="verification"><h2>验证记录</h2>
+<h3>构建（最终，已通过）</h3>
+<div class="table-wrap"><table><thead><tr><th scope="col">项目</th><th scope="col">结果</th></tr></thead><tbody>
+<tr><td>命令</td><td><code>gradlew --no-daemon --max-workers=4 -Pkotlin.compiler.execution.strategy=in-process :app:assembleXfriendDebug :app:assembleXsalersDebug --console=plain</code></td></tr>
+<tr><td>日志</td><td><code>build-0.11-final.log</code>（最终，UTF-16，含 QA 修复）；<code>build-0.11-b.log</code>（首轮成功）；<code>build-0.11-a.log</code>（首次失败尝试）</td></tr>
+<tr><td>结果</td><td><strong>BUILD SUCCESSFUL in 9m 46s</strong>；77 actionable tasks（15 executed / 62 up-to-date）；0 个 <code>e:</code> 错误；仅历史 warning</td></tr>
+<tr><td>版本校验</td><td>aapt2：versionCode 11 / versionName 0.11.0；包名 <code>com.singu.xfriend.mobile</code> / <code>com.singu.xsalers.mobile</code>；minSdk 26 / targetSdk 34</td></tr>
+<tr><td>XFriend APK</td><td><code>D:\build_apk\XFriend-Android-0.11.0-debug.apk</code> · 26,451,921 bytes · SHA-256 <code>46693C8F2A57BBC1161F43318533235B470234B67B31F38FF2DD97EC2845457E</code> · mtime 2026-10-18 00:18:19</td></tr>
+<tr><td>XSalers APK</td><td><code>D:\build_apk\XSalers-Android-0.11.0-debug.apk</code> · 26,451,941 bytes · SHA-256 <code>E4C4A9A7C36124F0E55E64B725272476BB2291114CCA230A3F3D2BED323CA0C6</code> · mtime 2026-10-18 00:17:24</td></tr>
+<tr><td>副本</td><td><code>D:\xfriend-suite\.artifacts\0.11-release\</code>（已同步覆盖）</td></tr>
+</tbody></table></div>
+<h3 style="margin-top:20px">模拟器 QA（回归通过）</h3>
+<div class="table-wrap"><table><thead><tr><th scope="col">等级</th><th scope="col">问题</th><th scope="col">状态</th></tr></thead><tbody>
+<tr><td>P0</td><td>XSalers 主壳底部 5-tab 导航栏完全未渲染（<code>WindowInsets.isImeVisible</code> 误报导致底栏被跳过）</td><td>已修复并通过回归：5 tab 全部出现且可切换（report.md §11）</td></tr>
+<tr><td>P1</td><td>XfSegmented 选中项阴影在浅色下呈较重灰色描边</td><td>已修复并通过回归：1dp <code>line</code> 细边框、无灰晕（report.md §11）</td></tr>
+<tr><td>P2</td><td>底栏 64dp 偏低、文字距手势区偏近</td><td>已修复并通过回归：实测 80dp（210px @2.625，report.md §11）</td></tr>
+<tr><td>非问题</td><td>XSalers 客户详情“点不开”为截图脚本误触；QA fixture 顶部提示条为 QA 构建专有</td><td>已复核，不计缺陷</td></tr>
+<tr><td>未覆盖</td><td>XSalers 专家/我的/外观页首轮因 P0 无法进入；复盘/客户档案深色未截</td><td>已在最终回归补截专家/我的/外观；深色页仍未覆盖</td></tr>
+</tbody></table></div>
+<p>完整报告：<a href="qa-0.11/report.md"><code>docs/qa-0.11/report.md</code></a>；最终回归结论见 <strong>§11「最终构建回归（结论：通过）」</strong>。QA fixture 为独立 <code>.qa</code> 包名，仅用于截图验收，不属于交付安装包。<br>
+回归使用修复后 QA fixture：<code>build-0.11-qa-final.log</code>（BUILD SUCCESSFUL in 10m 17s）→ <code>.artifacts\0.11-qa\Xfriend-0.11-qa.apk</code>（26,468,093 bytes / SHA-256 <code>C6EAB964…FBB44</code>）、<code>Xsalers-0.11-qa.apk</code>（26,468,205 bytes / SHA-256 <code>0B53FF5F…41DBF8</code>）。回归结果：XSalers 底栏 5 tab 全部可切换（含我的→外观浅/深）、分段控件 1dp 细边框无灰晕、XFriend 底栏实测 80dp（210px@2.625）、logcat 0 FATAL/ANR、无新问题；回归截图 <code>xs-today-reg.png</code>、<code>xs-customers-reg.png</code>、<code>xs-review-reg.png</code>、<code>xs-experts-reg.png</code>、<code>xs-profile-reg.png</code>、<code>xs-appearance-reg-light/dark.png</code>、<code>xf-chat-reg.png</code>、<code>xf-workbench-reg.png</code>。<br>
+单元测试已通过：<code>test-0.11.log</code>，两个 flavor 合计 574 项、0 failures / 0 errors；lint 未执行；真机、字体缩放、TalkBack、对比度、Haze 跨 API 未验证。</p>
+</section>
+
+<section id="shots"><h2>截图</h2>
+<h3>概念稿参考（不是 0.11 真机验收截图）</h3>
+<figure><img src="design/screens/concept-home-light.png" alt="概念稿首页浅色"><figcaption>概念稿 · 首页（浅色）· 桌面 Chromium 渲染</figcaption></figure>
+<figure><img src="design/screens/concept-experts-light.png" alt="概念稿专家列表"><figcaption>概念稿 · 专家列表（浅色）</figcaption></figure>
+<figure><img src="design/screens/concept-profile-light.png" alt="概念稿个人中心"><figcaption>概念稿 · 个人中心（浅色）</figcaption></figure>
+<h3>0.11 模拟器实测 · 最终回归（report.md §11）</h3>
+<figure><img src="qa-0.11/xs-today-reg.png" alt="XSalers 今日回归"><figcaption>XSalers · 今日（回归）· 底栏 5 tab 出现（P0 通过）</figcaption></figure>
+<figure><img src="qa-0.11/xs-experts-reg.png" alt="XSalers 专家回归"><figcaption>XSalers · 专家（回归）· tab 可切换（P0 通过）</figcaption></figure>
+<figure><img src="qa-0.11/xs-profile-reg.png" alt="XSalers 我的回归"><figcaption>XSalers · 我的（回归）· 底栏保留</figcaption></figure>
+<figure><img src="qa-0.11/xs-appearance-reg-dark.png" alt="XSalers 外观回归深色"><figcaption>XSalers · 外观（回归·深色）· 主题切换正常</figcaption></figure>
+<figure><img src="qa-0.11/xf-chat-reg.png" alt="XFriend 对话回归"><figcaption>XFriend · 对话（回归）· 底栏 80dp（P2 通过）</figcaption></figure>
+<figure><img src="qa-0.11/xf-workbench-reg.png" alt="XFriend 工作台回归"><figcaption>XFriend · 工作台（回归）· 分段细边框（P1 通过）</figcaption></figure>
+<h3>0.11 首轮实测（修复前，仅作问题证据）</h3>
+<figure><img src="qa-0.11/xf-appearance-dark.png" alt="XFriend 外观深色"><figcaption>XFriend · 外观（深色）· 主题与 5 色板</figcaption></figure>
+<figure><img src="qa-0.11/xs-today-light.png" alt="XSalers 今日浅色"><figcaption>XSalers · 今日（首轮）· P0 底栏缺失证据（已修复）</figcaption></figure>
+<p class="muted">截图均来自 adb screencap，仅代表模拟器环境（API 35 / 1080×2400 / 420dpi），不是真机验收。</p>
+</section>
+
+<section id="limits"><h2>已知限制</h2>
+<ul>
+<li>0.11 未做真机验收；模拟器 QA 回归通过（P0/P1/P2 均验证），但模拟器为合成数据验收，不能替代真机/真实账号/真实模型验收。</li>
+<li>0.11 单元测试已通过（两个 flavor 合计 574 项，0 failures/errors）；lint 未执行；真机与无障碍未验证，未执行项不声明通过。</li>
+<li>少量 Material 图标 / MaterialTheme typography 仍残留（约 17 处图标），未 100% 统一到 Xf。</li>
+<li>外观偏好只存本机，不参与账号同步；换机/重装恢复默认。</li>
+<li>业务边界沿用 0.10：手机不含完整 Python 运行时；云端智能体执行、XFriend 免密钥试用、并行研究团队、手机会话迁移电脑、邮件发送、群聊/会议均未实现或未验收。</li>
+<li>交付为开发签名 APK，非商店发布包；服务端部署、桌面安装包、生产签名与上架不在本次范围。</li>
+</ul>
+</section>
+<footer>0.11 交付范围：视觉重塑源码实现、最终构建与模拟器 QA 回归通过。真机、真实账号/模型链路与无障碍验收未执行；交付为开发签名 APK。</footer>
+</main></body></html>

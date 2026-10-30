@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>星助理 · 单入口手机版产品原型 | XFriend</title>
+<meta name="description" content="XFriend 星助理单入口手机版调试版的产品原型：真实对话、语音识别、消息级回复、子代理任务与审批、模型配置。设计示意，不代表已实现。">
+<style>
+/* ============================================================
+   0. Tokens — mirrored from XfDesign.kt (0.11 office system)
+   ============================================================ */
+:root{
+  --canvas:#F6F5F1; --canvas2:#EFEDE7;
+  --surface:#FFFFFF; --surface2:#F7F6F2; --surface3:#EEECE6;
+  --line:#E5E2DA; --line-strong:#D6D2C7;
+  --ink:#1B1C1F; --ink-2:#57585F; --ink-3:#8C8D94; --ink-4:#B6B7BD;
+  --accent:#4F5DF0; --accent-solid:#4351E8; --accent-ink:#3B47CC;
+  --accent-soft:#ECEEFE; --accent-line:#D9DEFB;
+  --green:#1F9D6B; --green-soft:#E6F5EE;
+  --amber:#B26B00; --amber-soft:#FBF0DA;
+  --red:#D5443B; --red-soft:#FBEAE8;
+  --blue:#3B82F6; --blue-soft:#E9F1FE;
+  --teal:#0E9384; --violet:#7055DE;
+  --shadow-1:0 1px 2px rgba(27,28,31,.05),0 1px 3px rgba(27,28,31,.04);
+  --shadow-2:0 10px 30px -12px rgba(27,28,31,.18),0 2px 8px rgba(27,28,31,.06);
+  --shadow-phone:0 32px 64px -32px rgba(27,28,31,.36),0 8px 24px -12px rgba(27,28,31,.18);
+  --r-card:14px; --r-hero:18px; --r-ctl:10px;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --mono:"SFMono-Regular",ui-monospace,"JetBrains Mono","Cascadia Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--canvas);color:var(--ink);
+  font:15px/1.72 var(--font);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+img{max-width:100%}
+a{color:var(--accent-ink);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:2px}
+button{font:inherit;color:inherit;cursor:pointer}
+code,kbd{font-family:var(--mono);font-size:.86em}
+::selection{background:var(--accent-soft)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ============================================================
+   1. Page frame
+   ============================================================ */
+.masthead{
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#FBFAF7 0%,rgba(246,245,241,0) 100%);
+}
+.masthead__in{max-width:1240px;margin:0 auto;padding:22px 28px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brandmark{
+  width:38px;height:38px;border-radius:11px;background:var(--accent-soft);
+  border:1px solid var(--accent-line);display:grid;place-items:center;flex:none;
+}
+.brandmark svg{width:21px;height:21px;color:var(--accent-ink)}
+.masthead__title{display:flex;flex-direction:column;gap:1px;min-width:0}
+.masthead__title b{font-size:16px;letter-spacing:.1px}
+.masthead__title span{font-size:12.5px;color:var(--ink-3)}
+.masthead__meta{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.metachip{
+  font-size:11.5px;letter-spacing:.02em;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 10px;
+  font-variant-numeric:tabular-nums;
+}
+.metachip--accent{color:var(--accent-ink);background:var(--accent-soft);border-color:var(--accent-line)}
+
+.layout{max-width:1240px;margin:0 auto;padding:0 28px 96px;display:grid;grid-template-columns:196px minmax(0,1fr);gap:52px;align-items:start}
+@media (max-width:1080px){ .layout{grid-template-columns:1fr;gap:0} .toc{display:none} }
+
+/* 类选择器上的 display 会盖掉 UA 的 [hidden]，这里必须强制生效 */
+[hidden]{display:none!important}
+
+.toc{position:sticky;top:24px;padding:34px 0 0;font-size:13px}
+.toc__label{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-4);font-weight:600;margin-bottom:12px}
+.toc a{display:flex;gap:9px;padding:7px 8px;border-radius:7px;color:var(--ink-2);line-height:1.45}
+.toc a b{font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink-4);font-size:11.5px;padding-top:2px}
+.toc a:hover{background:var(--surface2);text-decoration:none;color:var(--ink)}
+.toc a.active{background:var(--surface);color:var(--accent-ink);box-shadow:var(--shadow-1)}
+.toc a.active b{color:var(--accent)}
+
+main.doc{min-width:0;padding-top:34px}
+
+/* ============================================================
+   2. Sections & shared type
+   ============================================================ */
+.hero{padding:26px 0 34px;border-bottom:1px solid var(--line)}
+.hero__eyebrow{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);font-weight:600;margin-bottom:14px}
+.hero h1{font-size:clamp(30px,4vw,42px);line-height:1.18;letter-spacing:-.02em;margin:0 0 14px;font-weight:700}
+.hero p{max-width:66ch;color:var(--ink-2);font-size:16px;margin:0 0 10px}
+.hero__facts{display:flex;gap:26px;flex-wrap:wrap;margin-top:22px}
+.fact{min-width:120px}
+.fact b{display:block;font-size:19px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.fact span{font-size:12px;color:var(--ink-3)}
+.hero__note{margin-top:20px;font-size:12.5px;color:var(--ink-3);border-left:2px solid var(--amber);padding:2px 0 2px 12px;max-width:70ch}
+
+section.sec{padding:46px 0 10px;border-bottom:1px solid var(--line);scroll-margin-top:20px}
+section.sec:last-of-type{border-bottom:0}
+.sec__head{display:flex;gap:14px;align-items:baseline;margin-bottom:8px}
+.sec__num{font-family:var(--mono);font-size:12px;color:var(--accent-ink);letter-spacing:.02em;padding-top:3px;flex:none}
+.sec h2{font-size:23px;line-height:1.3;letter-spacing:-.015em;margin:0;font-weight:650}
+.sec__lede{max-width:72ch;color:var(--ink-2);font-size:14.5px;margin:6px 0 26px 40px}
+@media (max-width:640px){ .sec__lede{margin-left:0} }
+
+h3.sub{font-size:15px;font-weight:650;letter-spacing:-.005em;margin:34px 0 12px;display:flex;align-items:center;gap:8px}
+h3.sub .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex:none}
+p.small,small.small{font-size:12.5px;color:var(--ink-3)}
+.mono{font-family:var(--mono)}
+
+/* ============================================================
+   3. Cards / grids / chips / buttons
+   ============================================================ */
+.grid{display:grid;gap:14px}
+.grid--2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid--4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){.grid--3,.grid--4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.grid--2,.grid--3,.grid--4{grid-template-columns:1fr}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:18px;box-shadow:var(--shadow-1)}
+.card--flat{box-shadow:none;background:var(--surface2);border-color:transparent}
+.card__k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);font-weight:600;margin-bottom:8px}
+.card h4{margin:0 0 6px;font-size:14.5px;font-weight:650;letter-spacing:-.005em}
+.card p{margin:0;font-size:13px;line-height:1.65;color:var(--ink-2)}
+.card ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+.card li{margin:3px 0}
+
+.principle{display:flex;gap:12px;align-items:flex-start}
+.principle__ico{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.principle__ico svg{width:16px;height:16px}
+
+.chipset{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.chip svg{width:12px;height:12px;opacity:.75}
+.chip--accent{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent-ink)}
+.chip--run{background:var(--blue-soft);border-color:#CFE0FD;color:#245FBF}
+.chip--wait{background:var(--amber-soft);border-color:#F0DDB8;color:#8A5300}
+.chip--done{background:var(--green-soft);border-color:#C7EBD8;color:#11704B}
+.chip--fail{background:var(--red-soft);border-color:#F3CDC9;color:#A52E27}
+.chip--idle{background:var(--surface2);border-color:var(--line);color:var(--ink-3)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 14px;border-radius:var(--r-ctl);border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:550;color:var(--ink);transition:background .15s,border-color .15s,transform .12s}
+.btn:hover{background:var(--surface2);text-decoration:none}
+.btn:active{transform:translateY(.5px)}
+.btn svg{width:15px;height:15px}
+.btn--primary{background:var(--accent-solid);border-color:var(--accent-solid);color:#fff}
+.btn--primary:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
+.btn--ghost{background:transparent;border-color:transparent;color:var(--ink-2)}
+.btn--ghost:hover{background:var(--surface2);color:var(--ink)}
+.btn--danger{background:var(--red-soft);border-color:#F0CDC9;color:#A52E27}
+.btn--danger:hover{background:#F7DEDA}
+.btn--sm{min-height:28px;padding:0 10px;font-size:12px;border-radius:8px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+.linkbtn{background:none;border:0;padding:0;color:var(--accent-ink);font-size:12.5px;font-weight:550}
+.linkbtn:hover{text-decoration:underline;text-underline-offset:2px}
+
+/* ============================================================
+   4. Phone frame
+   ============================================================ */
+.phonestage{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;align-items:start}
+@media (min-width:1180px){.phonestage--3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.figure{margin:0;min-width:0}
+.phonewrap{display:flex;justify-content:center}
+.phone{
+  --p-bg:#F6F5F1; --p-surface:#FFFFFF; --p-surface2:#F7F6F2; --p-surface3:#EEECE6;
+  --p-line:#E5E2DA; --p-ink:#1B1C1F; --p-ink2:#57585F; --p-ink3:#8C8D94;
+  --p-accent:#4351E8; --p-accent-ink:#3B47CC; --p-accent-soft:#ECEEFE; --p-accent-line:#D9DEFB;
+  --p-green:#1F9D6B; --p-amber:#B26B00; --p-amber-soft:#FBF0DA; --p-red:#D5443B; --p-red-soft:#FBEAE8;
+  --p-blue:#245FBF; --p-blue-soft:#E9F1FE;
+  position:relative;width:364px;height:788px;border-radius:42px;
+  background:var(--p-bg);border:1px solid var(--p-line);
+  box-shadow:var(--shadow-phone);
+  overflow:hidden;display:flex;flex-direction:column;
+  color:var(--p-ink);
+  font-size:13.5px;line-height:1.6;
+  isolation:isolate;
+  transition:background .25s,color .25s,border-color .25s;
+}
+.phone.dark{
+  --p-bg:#0E0F12; --p-surface:#181A1F; --p-surface2:#1E2026; --p-surface3:#24272E;
+  --p-line:#2C3039; --p-ink:#F1F2F4; --p-ink2:#B9BCC4; --p-ink3:#8A8D95;
+  --p-accent:#8B95FF; --p-accent-ink:#A6AEFF; --p-accent-soft:#20233A; --p-accent-line:#333A5E;
+  --p-green:#4CC38A; --p-amber:#E0A43C; --p-amber-soft:#2E2517; --p-red:#F0776E; --p-red-soft:#33201F;
+  --p-blue:#8FB4F7; --p-blue-soft:#1B2536;
+  box-shadow:0 32px 64px -32px rgba(0,0,0,.7),0 8px 24px -12px rgba(0,0,0,.5);
+  border-color:#2C3039;
+}
+.phone::before{ /* dynamic island */
+  content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);
+  width:104px;height:26px;border-radius:999px;background:#111;z-index:20;
+}
+.phone.dark::before{background:#000;box-shadow:inset 0 0 0 1px #262A33}
+.statusbar{display:flex;align-items:center;justify-content:space-between;padding:13px 22px 2px;font-size:11px;font-weight:600;color:var(--p-ink);letter-spacing:.02em;flex:none}
+.statusbar__right{display:flex;align-items:center;gap:5px}
+.statusbar svg{width:13px;height:13px}
+.phone__appbar{
+  display:flex;align-items:center;gap:9px;padding:10px 12px 9px 14px;flex:none;
+  border-bottom:1px solid var(--p-line);background:var(--p-bg);
+  position:relative;z-index:10;
+}
+.phone__appbar .brand{width:30px;height:30px;border-radius:9px;background:var(--p-accent-soft);border:1px solid var(--p-accent-line);display:grid;place-items:center;flex:none}
+.phone__appbar .brand svg{width:17px;height:17px;color:var(--p-accent-ink)}
+.phone__appbar .titles{min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.phone__appbar .titles b{font-size:14.5px;font-weight:650;letter-spacing:.01em}
+.phone__appbar .titles span{font-size:10.5px;color:var(--p-ink3);display:flex;align-items:center;gap:4px}
+.phone__appbar .spacer{margin-left:auto}
+.ibtn{width:34px;height:34px;border-radius:9px;border:0;background:transparent;display:grid;place-items:center;color:var(--p-ink2);flex:none}
+.ibtn:hover{background:var(--p-surface2);color:var(--p-ink)}
+.ibtn svg{width:17px;height:17px}
+.ibtn--send{background:var(--p-accent);color:#fff;border-radius:50%}
+.ibtn--send:hover{background:var(--p-accent-ink);color:#fff}
+.ibtn--send[disabled]{background:var(--p-surface3);color:var(--p-ink3)}
+
+.taskstrip{
+  display:flex;align-items:center;gap:9px;padding:8px 14px;flex:none;
+  background:var(--p-surface2);border-bottom:1px solid var(--p-line);
+  font-size:11.5px;color:var(--p-ink2);cursor:pointer;
+}
+.taskstrip:hover{background:var(--p-surface3)}
+.taskstrip .spin{width:13px;height:13px;border-radius:50%;border:1.6px solid var(--p-accent-line);border-top-color:var(--p-accent);animation:spin 1.1s linear infinite;flex:none}
+.taskstrip b{font-weight:600;color:var(--p-ink)}
+.taskstrip .go{margin-left:auto;color:var(--p-accent-ink);font-weight:600;font-size:11px;white-space:nowrap}
+.taskstrip--wait .spin{animation:none;border-color:transparent;background:var(--p-amber);border-radius:50%;transform:scale(.72)}
+
+/* 多任务托盘：进行中的 2–3 条，不是页签 */
+.tray{display:flex;align-items:center;gap:6px;padding:6px 10px;flex:none;border-bottom:1px solid var(--p-line);background:var(--p-bg);overflow-x:auto;scrollbar-width:none}
+.tray::-webkit-scrollbar{display:none}
+.tray__item{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--p-line);background:var(--p-surface);border-radius:999px;padding:3px 8px;font-size:10px;color:var(--p-ink2);white-space:nowrap;flex:none}
+.tray__item b{font-weight:600;color:var(--p-ink);font-size:10px}
+.tray__item .d{width:6px;height:6px;border-radius:50%;background:var(--p-blue);flex:none}
+.tray__item--rec .d{background:var(--p-red);animation:pulse 1.2s infinite}
+.tray__item--wait .d{background:var(--p-amber)}
+.tray__item--on{border-color:var(--p-accent-line);background:var(--p-accent-soft);color:var(--p-accent-ink)}
+.tray__item--on b{color:var(--p-accent-ink)}
+.tray__all{margin-left:auto;font-size:10px;color:var(--p-accent-ink);font-weight:600;white-space:nowrap;flex:none;padding-left:4px}
+.chip--rec{background:var(--p-red-soft);border-color:#F3CDC9;color:#A52E27}
+
+/* 发送目标选择条 */
+.sendto{display:flex;align-items:center;gap:6px;padding:2px 2px 7px;font-size:10.5px;color:var(--p-ink2)}
+.sendto b{color:var(--p-ink);font-weight:600}
+.sendto .tgt{border:1px solid var(--p-accent-line);background:var(--p-accent-soft);color:var(--p-accent-ink);border-radius:999px;padding:1px 7px;font-weight:600}
+.sendto .chev{margin-left:auto;color:var(--p-ink3);font-size:12px}
+
+/* 架构流程条 */
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:16px 0 6px}
+.flow__box{flex:1 1 150px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 12px;font-size:12px;line-height:1.55;color:var(--ink-2)}
+.flow__box b{display:block;font-size:12.5px;color:var(--ink);margin-bottom:2px}
+.flow__box em{font-style:normal;color:var(--ink-3);font-size:11px;display:block;margin-top:3px}
+.flow__arrow{align-self:center;color:var(--ink-4);font-size:13px}
+@media (max-width:700px){.flow__arrow{display:none}}
+.ibtn--rec{position:relative;background:var(--p-red-soft);border-color:#F3CDC9;color:#A52E27}
+.ibtn--rec::after{content:"";position:absolute;top:6px;right:6px;width:5px;height:5px;border-radius:50%;background:var(--p-red);border:1px solid #fff}
+
+.phone__body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:14px 14px 8px;scrollbar-width:thin;scrollbar-color:var(--p-line) transparent}
+.phone__body::-webkit-scrollbar{width:4px}
+.phone__body::-webkit-scrollbar-thumb{background:var(--p-line);border-radius:4px}
+.phone__body.no-scroll{overflow:hidden}
+.homebar{width:118px;height:4px;border-radius:99px;background:var(--p-ink);opacity:.22;margin:6px auto 7px;flex:none}
+
+/* ============================================================
+   5. Messages inside phone
+   ============================================================ */
+.msg{display:flex;gap:8px;margin:0 0 16px;position:relative}
+.msg--user{justify-content:flex-end}
+.msg__avatar{width:26px;height:26px;border-radius:8px;background:var(--p-accent-soft);border:1px solid var(--p-accent-line);display:grid;place-items:center;flex:none;margin-top:2px}
+.msg__avatar svg{width:14px;height:14px;color:var(--p-accent-ink)}
+.msg__col{min-width:0;max-width:100%}
+.msg__name{font-size:10.5px;color:var(--p-ink3);margin:0 0 3px;display:flex;align-items:center;gap:5px}
+.msg__name b{font-weight:600;color:var(--p-ink2)}
+.msg__name .badge{font-size:9px;border:1px solid var(--p-line);border-radius:4px;padding:0 3px;color:var(--p-ink3)}
+.msg__text{font-size:13.5px;line-height:1.68;color:var(--p-ink);word-break:break-word}
+.msg__text p{margin:0 0 7px}
+.msg__text p:last-child{margin-bottom:0}
+.msg__text ul{margin:4px 0 6px;padding-left:17px}
+.msg__text li{margin:2px 0}
+.msg__text b{font-weight:650}
+.msg__text .ref{color:var(--p-accent-ink);font-weight:600}
+.msg--user .bubble{
+  background:var(--p-accent-soft);border:1px solid var(--p-accent-line);
+  border-radius:15px 15px 4px 15px;padding:9px 12px;font-size:13.5px;line-height:1.62;
+  max-width:262px;word-break:break-word;
+}
+.msg--user .bubble .quote{margin-bottom:7px}
+.msg--user .meta{display:flex;justify-content:flex-end;gap:8px;font-size:10px;color:var(--p-ink3);margin-top:4px}
+.msg--assistant .meta{margin-top:5px;display:flex;align-items:center;gap:10px;font-size:10px;color:var(--p-ink3);min-height:16px}
+.msg--assistant .meta button{background:none;border:0;padding:0;color:var(--p-ink3);font-size:10px;display:inline-flex;align-items:center;gap:3px}
+.msg--assistant .meta button:hover{color:var(--p-accent-ink)}
+.msg__more{opacity:0;transition:opacity .15s}
+.msg:hover .msg__more,.msg:focus-within .msg__more{opacity:1}
+.quote{
+  border-left:2px solid var(--p-accent-line);background:var(--p-surface2);
+  border-radius:6px;padding:6px 8px;font-size:11px;line-height:1.5;color:var(--p-ink2);
+  max-width:100%;
+}
+.quote .q-top{display:flex;align-items:center;gap:5px;color:var(--p-accent-ink);font-size:10px;font-weight:600;margin-bottom:1px}
+.quote .q-top svg{width:10px;height:10px}
+.quote .q-text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.quote--stale{border-left-color:var(--p-amber);opacity:.95}
+.quote--stale .q-top{color:var(--p-amber)}
+.quote--gone{border-left-color:var(--p-line);color:var(--p-ink3)}
+.typing::after{content:"";display:inline-block;width:2px;height:13px;background:var(--p-accent);margin-left:2px;vertical-align:-2px;animation:caret 1s steps(2) infinite}
+.stream-note{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:10.5px;color:var(--p-ink3)}
+.stream-note .dots{display:inline-flex;gap:2px}
+.stream-note .dots i{width:3px;height:3px;border-radius:50%;background:var(--p-ink3);animation:bob 1.2s infinite}
+.stream-note .dots i:nth-child(2){animation-delay:.15s}
+.stream-note .dots i:nth-child(3){animation-delay:.3s}
+.stream-stop{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--p-line);background:var(--p-surface);border-radius:999px;padding:3px 9px;font-size:10.5px;color:var(--p-ink2);margin-top:8px}
+.stream-stop:hover{background:var(--p-surface2);color:var(--p-ink)}
+.stream-stop svg{width:9px;height:9px}
+
+/* day divider */
+.day{display:flex;align-items:center;gap:8px;margin:2px 0 14px;font-size:10px;color:var(--p-ink3)}
+.day::before,.day::after{content:"";height:1px;background:var(--p-line);flex:1}
+
+/* ============================================================
+   6. Cards inside phone: task / approval / suggestion / hero
+   ============================================================ */
+.tcard{
+  border:1px solid var(--p-line);background:var(--p-surface);border-radius:12px;
+  margin:2px 0 12px;box-shadow:0 1px 2px rgba(27,28,31,.04);overflow:hidden;
+}
+.tcard__head{display:flex;align-items:center;gap:8px;padding:9px 10px}
+.tcard__ico{width:26px;height:26px;border-radius:8px;background:var(--p-accent-soft);color:var(--p-accent-ink);display:grid;place-items:center;flex:none}
+.tcard__ico svg{width:14px;height:14px}
+.tcard__title{min-width:0;flex:1}
+.tcard__title b{display:block;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcard__title span{font-size:10px;color:var(--p-ink3);display:flex;align-items:center;gap:4px;margin-top:1px}
+.tcard__body{padding:0 10px 9px;font-size:11px;color:var(--p-ink2)}
+.tcard__rows{display:flex;flex-direction:column;gap:5px;margin-top:2px}
+.trow{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--p-ink2)}
+.trow > span:nth-child(2){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .ctx,.trow .state{flex:none;white-space:nowrap}
+.trow .ctx{font-family:var(--mono);font-size:9.5px;color:var(--p-ink3);background:var(--p-surface2);border:1px solid var(--p-line);border-radius:4px;padding:0 4px}
+.trow .state{margin-left:auto;font-size:9.5px;color:var(--p-ink3);display:flex;align-items:center;gap:3px}
+.trow .state i{width:5px;height:5px;border-radius:50%;background:var(--p-ink3);display:inline-block}
+.trow .state--run i{background:var(--p-blue)}
+.trow .state--done i{background:var(--p-green)}
+.trow .state--wait i{background:var(--p-amber)}
+.tcard__bar{margin-top:8px;display:flex;align-items:center;gap:6px}
+.tbar{flex:1;height:4px;border-radius:99px;background:var(--p-surface3);overflow:hidden}
+.tbar i{display:block;height:100%;border-radius:99px;background:var(--p-accent);width:31%}
+.tcard__bar span{font-size:9.5px;color:var(--p-ink3);font-variant-numeric:tabular-nums}
+.tcard__foot{display:flex;align-items:center;gap:6px;padding:7px 10px;border-top:1px solid var(--p-line);background:var(--p-surface2)}
+.tcard__foot .more{margin-left:auto;font-size:10px;color:var(--p-ink3)}
+.tcard__foot .btn{min-height:24px;padding:0 8px;font-size:10.5px;border-radius:6px}
+
+.approval{border:1px solid #EFD9AE;background:#FFFBF2;border-radius:12px;padding:10px;margin:0 0 12px}
+.phone.dark .approval{background:#221B10;border-color:#493A1E}
+.approval__top{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:#8A5300;margin-bottom:6px}
+.phone.dark .approval__top{color:#E0A43C}
+.approval__top svg{width:12px;height:12px}
+.approval__top .ttl{margin-left:auto;font-weight:500;color:#A87A2E;font-size:9.5px}
+.approval h5{margin:0 0 3px;font-size:12px;font-weight:650;color:var(--p-ink)}
+.approval p{margin:0 0 7px;font-size:10.5px;line-height:1.55;color:var(--p-ink2)}
+.approval dl{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin:0 0 8px;font-size:10px}
+.approval dt{color:var(--p-ink3)}
+.approval dd{margin:0;color:var(--p-ink2);font-family:var(--mono);font-size:9.5px;word-break:break-all}
+.approval__note{font-size:9.5px;color:#A87A2E;margin:0 0 8px}
+.phone.dark .approval__note{color:#C9A05A}
+.phone.dark .chip--run{background:#16233A;border-color:#2A3D5C;color:#8FB6FF}
+.phone.dark .chip--done{background:#12291F;border-color:#20452F;color:#6FD3A2}
+.phone.dark .chip--wait{background:#2A2110;border-color:#4A3A18;color:#E0B15C}
+.phone.dark .chip--fail{background:#2A1614;border-color:#4B2A28;color:#F0918A}
+.phone.dark .chip--accent{background:rgba(139,149,255,.14);border-color:#2E3560;color:#A9B2FF}
+.phone.dark .chip--idle{background:var(--p-surface2);border-color:var(--p-line);color:var(--p-ink3)}
+.approval__btns{display:flex;gap:6px}
+.approval__btns .btn{flex:1;min-height:30px;font-size:11px;border-radius:7px}
+.approval__btns .btn--primary{background:var(--p-ink);border-color:var(--p-ink);color:var(--p-bg)}
+
+.hero-empty{padding:18px 6px 10px;text-align:center}
+.starmark{width:52px;height:52px;border-radius:15px;background:var(--p-accent-soft);border:1px solid var(--p-accent-line);display:grid;place-items:center;margin:6px auto 14px}
+.starmark svg{width:27px;height:27px;color:var(--p-accent-ink)}
+.hero-empty h2{font-size:19px;line-height:1.35;letter-spacing:-.01em;margin:0 0 6px;font-weight:650}
+.hero-empty p{font-size:12px;color:var(--p-ink2);margin:0 auto 4px;max-width:250px}
+.conn{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--p-ink3);margin-top:8px}
+.conn i{width:5px;height:5px;border-radius:50%;background:var(--p-green);display:inline-block}
+.conn i.warn{background:var(--p-amber)}
+.conn i.off{background:var(--p-red)}
+.suggests{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:16px 2px 12px}
+.suggest{
+  text-align:left;border:1px solid var(--p-line);background:var(--p-surface);border-radius:10px;
+  padding:9px 10px;font-size:11.5px;line-height:1.45;color:var(--p-ink);display:flex;flex-direction:column;gap:4px;
+  min-height:58px;
+}
+.suggest:hover{border-color:var(--p-accent-line);background:var(--p-accent-soft)}
+.suggest b{font-weight:600;font-size:11.5px}
+.suggest span{font-size:9.5px;color:var(--p-ink3)}
+.recent{margin-top:6px}
+.recent__head{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--p-ink3);margin:0 2px 6px}
+.recent__item{width:100%;text-align:left;border:1px solid var(--p-line);background:var(--p-surface);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.recent__item:hover{background:var(--p-surface2)}
+.recent__item .r-ico{width:22px;height:22px;border-radius:7px;background:var(--p-surface2);display:grid;place-items:center;color:var(--p-ink2);flex:none}
+.recent__item .r-ico svg{width:12px;height:12px}
+.recent__item .r-main{min-width:0;flex:1}
+.recent__item b{display:block;font-size:11px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent__item span{font-size:9.5px;color:var(--p-ink3)}
+.recent__item .r-go{color:var(--p-ink3);font-size:10px}
+
+/* ============================================================
+   7. Composer
+   ============================================================ */
+.composer{flex:none;border-top:1px solid var(--p-line);background:var(--p-bg);padding:7px 10px 4px;position:relative;z-index:9}
+.replystrip{display:flex;align-items:center;gap:7px;background:var(--p-surface2);border:1px solid var(--p-line);border-radius:8px;padding:5px 7px;margin-bottom:6px;font-size:10.5px;color:var(--p-ink2)}
+.replystrip svg{width:11px;height:11px;color:var(--p-accent-ink);flex:none}
+.replystrip .rt{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.replystrip .rt b{color:var(--p-accent-ink);font-weight:600}
+.replystrip button{background:none;border:0;padding:2px;color:var(--p-ink3);display:grid;place-items:center}
+.replystrip button:hover{color:var(--p-ink)}
+.replystrip button svg{color:inherit}
+.composer__box{border:1px solid var(--p-line);background:var(--p-surface);border-radius:14px;padding:7px 7px 6px;transition:border-color .15s,box-shadow .15s}
+.composer__box:focus-within{border-color:var(--p-accent-line);box-shadow:0 0 0 3px var(--p-accent-soft)}
+.composer__box textarea{
+  width:100%;border:0;background:transparent;resize:none;outline:0;
+  font:13px/1.55 var(--font);color:var(--p-ink);max-height:88px;min-height:22px;padding:2px 4px;
+}
+.composer__box textarea::placeholder{color:var(--p-ink3)}
+.composer__bar{display:flex;align-items:center;gap:2px;margin-top:3px}
+.composer__bar .ibtn{width:28px;height:28px;border-radius:8px}
+.composer__bar .ibtn svg{width:15px;height:15px}
+.modechip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--p-line);background:transparent;border-radius:999px;padding:3px 8px;font-size:10px;color:var(--p-ink2);margin-right:3px}
+.modechip:hover{background:var(--p-surface2)}
+.modechip b{font-weight:600;color:var(--p-ink)}
+.modechip svg{width:9px;height:9px;opacity:.7}
+.composer__hint{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 2px;font-size:9.5px;color:var(--p-ink3)}
+.composer__hint .dest{display:inline-flex;align-items:center;gap:3px}
+.composer__hint .dest svg{width:9px;height:9px}
+.ibtn--send{margin-left:auto;width:28px;height:28px}
+.ibtn--send svg{width:14px;height:14px}
+
+/* ============================================================
+   8. Sheets / overlay / toast / recording (inside phone)
+   ============================================================ */
+.sheetwrap{position:absolute;inset:0;z-index:30;display:none;align-items:flex-end;background:rgba(20,20,24,.32);backdrop-filter:blur(2px)}
+.sheetwrap.open{display:flex;animation:fade .16s ease}
+.sheet{
+  width:100%;max-height:82%;overflow:auto;background:var(--p-surface);
+  border-radius:20px 20px 0 0;border-top:1px solid var(--p-line);
+  padding:14px 14px 18px;animation:up .2s cubic-bezier(.2,.7,.3,1);
+}
+.sheet__grab{width:36px;height:4px;border-radius:99px;background:var(--p-line);margin:0 auto 10px}
+.sheet__head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sheet__head h4{margin:0;font-size:14px;font-weight:650}
+.sheet__head .ibtn{margin-left:auto;width:28px;height:28px}
+.sheet__body{font-size:12px;color:var(--p-ink2);line-height:1.6}
+.menurow{width:100%;display:flex;align-items:center;gap:9px;border:0;border-bottom:1px solid var(--p-line);background:transparent;padding:10px 2px;font-size:12px;color:var(--p-ink);text-align:left}
+.menurow:last-child{border-bottom:0}
+.menurow:hover{background:var(--p-surface2)}
+.menurow .mi{width:24px;height:24px;border-radius:7px;background:var(--p-surface2);display:grid;place-items:center;color:var(--p-ink2);flex:none}
+.menurow .mi svg{width:13px;height:13px}
+.menurow .mt{flex:1;min-width:0}
+.menurow .mt b{display:block;font-weight:550}
+.menurow .mt span{display:block;font-size:10px;color:var(--p-ink3)}
+.menurow .chev{color:var(--p-ink3);font-size:11px}
+.menurow.danger{color:var(--p-red)}
+
+.toast{
+  position:absolute;left:50%;bottom:96px;transform:translate(-50%,8px);
+  background:rgba(27,28,31,.92);color:#fff;font-size:11.5px;padding:7px 12px;border-radius:9px;
+  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:40;max-width:86%;text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.recbar{display:flex;align-items:center;gap:8px;border:1px solid var(--p-line);background:var(--p-surface);border-radius:12px;padding:8px 10px;margin-bottom:6px}
+.recbar .dot{width:7px;height:7px;border-radius:50%;background:var(--p-red);animation:pulse 1.2s infinite;flex:none}
+.wave{display:flex;align-items:center;gap:2px;height:18px;flex:1}
+.wave i{width:2px;border-radius:2px;background:var(--p-accent);height:5px;animation:wave 1s ease-in-out infinite}
+.wave i:nth-child(3n){animation-delay:.12s}
+.wave i:nth-child(3n+1){animation-delay:.24s}
+.wave i:nth-child(3n+2){animation-delay:.36s}
+.recbar .time{font-size:10.5px;color:var(--p-ink2);font-variant-numeric:tabular-nums}
+.recbar .x{background:none;border:0;color:var(--p-ink3);font-size:10.5px;padding:2px}
+.asr{font-size:9.5px;color:var(--p-ink3);margin-top:4px;display:flex;align-items:center;gap:4px}
+.asr svg{width:9px;height:9px}
+.asr b{color:var(--p-ink2);font-weight:550}
+.asr .low{border-bottom:1px dashed var(--p-amber);color:var(--p-ink)}
+
+/* ============================================================
+   9. Annotations under figures
+   ============================================================ */
+figcaption{margin-top:14px}
+figcaption .cap{display:flex;align-items:baseline;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px}
+figcaption .cap em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--accent-ink);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:5px;padding:1px 5px}
+figcaption .cap-sub{font-size:11.5px;color:var(--ink-3)}
+.notes{margin:10px 0 0;padding-left:0;list-style:none;font-size:12px;color:var(--ink-2);line-height:1.6}
+.notes li{position:relative;padding-left:14px;margin:5px 0}
+.notes li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--line-strong)}
+.notes li b{color:var(--ink);font-weight:600}
+
+/* ============================================================
+   10. Doc components: IA diagram, swatches, tables, controls
+   ============================================================ */
+.ia{display:grid;grid-template-columns:1fr 40px 1fr;gap:0;align-items:stretch}
+@media (max-width:820px){.ia{grid-template-columns:1fr;gap:14px}}
+.ia__col{border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);padding:16px;box-shadow:var(--shadow-1)}
+.ia__col h4{margin:0 0 4px;font-size:13px;font-weight:650}
+.ia__col .tag{font-size:10px;color:var(--ink-3);margin-bottom:10px;display:block}
+.ia__arrow{display:grid;place-items:center;color:var(--ink-4)}
+.ia__arrow svg{width:20px;height:20px}
+.ianode{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12px;margin:6px 0;background:var(--surface2)}
+.ianode svg{width:13px;height:13px;color:var(--ink-3);flex:none}
+.ianode--accent{background:var(--accent-soft);border-color:var(--accent-line)}
+.ianode--accent svg{color:var(--accent-ink)}
+.ianode--muted{opacity:.6}
+.ianode small{margin-left:auto;font-size:10px;color:var(--ink-3)}
+.ia--old .ianode--muted{text-decoration:line-through;text-decoration-color:var(--line-strong)}
+
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.sw{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.sw i{display:block;height:44px}
+.sw div{padding:6px 8px;font-size:10px;line-height:1.45}
+.sw div b{display:block;font-weight:600;font-size:11px}
+.sw div span{color:var(--ink-3);font-family:var(--mono);font-size:9.5px}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);box-shadow:var(--shadow-1)}
+table.spec{width:100%;border-collapse:collapse;font-size:12.5px;min-width:600px}
+table.spec th{text-align:left;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface2);white-space:nowrap}
+table.spec td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.55}
+table.spec tr:last-child td{border-bottom:0}
+table.spec td b{font-weight:600}
+table.spec code{font-size:10.5px;background:var(--surface2);border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink-2)}
+table.spec .dim{color:var(--ink-3)}
+table.spec .nowrap{white-space:nowrap}
+
+.controls{position:sticky;top:24px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);padding:16px;box-shadow:var(--shadow-1)}
+.controls h4{margin:0 0 10px;font-size:12px;font-weight:650;display:flex;align-items:center;gap:6px}
+.controls h4 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+.ctl-group{margin-bottom:14px}
+.ctl-group>span{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);font-weight:600;margin-bottom:6px}
+.ctl-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ctl{justify-content:flex-start;font-size:11.5px;min-height:32px;padding:0 9px;font-weight:500;border-radius:8px}
+.ctl svg{width:13px;height:13px;flex:none;opacity:.8}
+.ctl .kbd{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--ink-4)}
+.ctl--accent{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent-ink)}
+.ctl-note{font-size:10.5px;color:var(--ink-3);line-height:1.55;margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line)}
+.live-layout{display:grid;grid-template-columns:minmax(0,1fr) 286px;gap:34px;align-items:start}
+@media (max-width:960px){.live-layout{grid-template-columns:1fr}.controls{position:static;order:2}}
+.logbox{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px;font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--ink-2);max-height:150px;overflow:auto}
+.logbox b{color:var(--accent-ink);font-weight:600}
+.logbox .t{color:var(--ink-4)}
+
+.callout{display:flex;gap:11px;border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#31398F;margin:16px 0}
+.callout svg{width:15px;height:15px;flex:none;margin-top:2px}
+.callout--warn{border-color:#EFD9AE;background:var(--amber-soft);color:#7A4A00}
+.callout--warn svg{color:#8A5300}
+.callout b{font-weight:650}
+
+.tagline{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--ink-3);margin:10px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
+
+footer.docfoot{padding:38px 0 20px;border-top:1px solid var(--line);margin-top:46px;font-size:12px;color:var(--ink-3)}
+footer.docfoot b{color:var(--ink-2)}
+.srclist{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin:12px 0 0;padding:0;list-style:none}
+@media (max-width:700px){.srclist{grid-template-columns:1fr}}
+.srclist li{display:flex;gap:7px;font-size:12px;line-height:1.6}
+.srclist svg{width:13px;height:13px;color:var(--ink-4);flex:none;margin-top:3px}
+
+/* ============================================================
+   11. Motion & a11y
+   ============================================================ */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{transform:translateY(14px);opacity:.6}to{transform:none;opacity:1}}
+@keyframes caret{0%,50%{opacity:1}51%,100%{opacity:0}}
+@keyframes bob{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-2px);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}
+@keyframes wave{0%,100%{height:5px}50%{height:15px}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  html{scroll-behavior:auto}
+}
+@media print{
+  body{background:#fff}
+  .toc,.controls,.masthead__meta{display:none}
+  .layout{display:block;padding:0}
+  section.sec{break-inside:avoid}
+  .phone{box-shadow:none;border-color:#ccc}
+  .sheetwrap{display:none!important}
+}
+@media (max-width:520px){
+  .masthead__in{padding:16px}
+  .layout{padding:0 16px 60px}
+  .phone{width:100%;max-width:364px;height:720px}
+}
+</style>
+</head>
+
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.4l2.25 6.35L20.6 11l-6.35 2.25L12 19.6l-2.25-6.35L3.4 11l6.35-2.25z"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.3"/><path d="M12 7.4V12l3.1 1.9"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5h16M4 12h16M4 16.5h16"/><circle cx="9" cy="7.5" r="2.1"/><circle cx="15" cy="12" r="2.1"/><circle cx="9" cy="16.5" r="2.1"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="10.5" rx="3"/><path d="M5.6 11.4a6.4 6.4 0 0 0 12.8 0M12 17.8V21M9 21h6"/></symbol>
+<symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.5V5M6 11l6-6 6 6"/></symbol>
+<symbol id="i-attach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 11.6l-7.4 7.4a4.2 4.2 0 0 1-6-6l8-8a2.8 2.8 0 0 1 4 4l-7.9 7.9a1.5 1.5 0 0 1-2.1-2.1L16 7.1"/></symbol>
+<symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5L4 9l5.5-5.5"/><path d="M4 9h8.5A7.5 7.5 0 0 1 20 16.5V20"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.6l5 5 10-11"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.2L21 19.4H3z"/><path d="M12 9.8v4.1M12 16.7v.4"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3.2 1.9"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5l6.5 6.5-6.5 6.5"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 9.5L12 16l6.5-6.5"/></symbol>
+<symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+<symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4"/><rect x="10.2" y="10.2" width="3.6" height="3.6" rx="1"/><path d="M9.2 3.2v2M14.8 3.2v2M9.2 18.8v2M14.8 18.8v2M3.2 9.2h2M3.2 14.8h2M18.8 9.2h2M18.8 14.8h2"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.4" width="14" height="9.6" rx="2.2"/><path d="M8.5 10.4V8a3.5 3.5 0 0 1 7 0v2.4"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.4"/><path d="M3.6 12h16.8M12 3.6c2.4 2.3 3.7 5.1 3.7 8.4s-1.3 6.1-3.7 8.4c-2.4-2.3-3.7-5.1-3.7-8.4S9.6 5.9 12 3.6Z"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6.6" y="2.6" width="10.8" height="18.8" rx="2.6"/><path d="M10.4 18.2h3.2"/><path d="M10.2 5.6h3.6"/></symbol>
+<symbol id="i-laptop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.6" y="5.4" width="14.8" height="10.2" rx="1.8"/><path d="M2.5 18.6h19"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 7.4h6l2 2h9V18a2 2 0 0 1-2 2H5.6a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 3.6h6.8l4.6 4.6V20.4H6.6z"/><path d="M13.4 3.6v4.6h4.6M9.4 12.2h6M9.4 15.6h6"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.4"/><path d="M15.8 15.8l4.2 4.2"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.8 12A7.8 7.8 0 1 1 17.4 6"/><path d="M19.8 4v5h-5"/></symbol>
+<symbol id="i-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 9.2a12.6 12.6 0 0 1 16.8 0M6.6 12.6a8.2 8.2 0 0 1 10.8 0M9.6 16a4 4 0 0 1 4.8 0"/><circle cx="12" cy="19.2" r="1.1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.6" y="14" width="3.2" height="5.4" rx="1" fill="currentColor" stroke="none"/><rect x="8.9" y="10.2" width="3.2" height="9.2" rx="1" fill="currentColor" stroke="none"/><rect x="14.2" y="6.4" width="3.2" height="13" rx="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-battery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="8" width="16.4" height="8" rx="2.2"/><path d="M21.2 10.8v2.4"/><rect x="4.6" y="9.8" width="11" height="4.4" rx="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.4" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0"/><path d="M15.4 5.6a3.2 3.2 0 0 1 0 5.6M17.2 14.6a5.6 5.6 0 0 1 3.4 5.4"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5.5" width="3.4" height="13" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.6" y="5.5" width="3.4" height="13" rx="1.2" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="5.8" r="2.2"/><circle cx="7" cy="18.2" r="2.2"/><circle cx="17" cy="12" r="2.2"/><path d="M7 8v8M9.2 5.8H13a4 4 0 0 1 4 4V10"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4l7 2.5V12c0 4.2-2.9 7.4-7 8.6-4.1-1.2-7-4.4-7-8.6V5.9z"/><path d="M9 12l2.2 2.2L15.4 9.8"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5h4L19 9a2.1 2.1 0 0 0-3-3L5.5 16.5z"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.4" cy="15.6" r="3.6"/><path d="M11 13l8-8M16.4 7.6l2 2"/></symbol>
+<symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4l1.6 4.6 4.6 1.6-4.6 1.6L12 15.8l-1.6-4.6L5.8 9.6l4.6-1.6z"/><path d="M18.4 15.2l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.4 10.6L12 15.2l4.6-4.6M4.5 19.5h15"/></symbol>
+</defs></svg>
+
+<header class="masthead">
+  <div class="masthead__in">
+    <div class="brandmark"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+    <div class="masthead__title">
+      <b>星助理 · 单入口手机版</b>
+      <span>XFRIEND 开发文档 01–04 的产品原型</span>
+    </div>
+    <div class="masthead__meta">
+      <span class="metachip metachip--accent">设计示意 · 非已实现功能</span>
+      <span class="metachip">v1.0</span>
+      <span class="metachip">2026-10-27</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <div class="toc__label">Contents</div>
+    <a href="#s1"><b>01</b> 目标与原则</a>
+    <a href="#s2"><b>02</b> 信息架构与设计语言</a>
+    <a href="#s3"><b>03</b> 核心页面</a>
+    <a href="#s4"><b>04</b> 可交互原型</a>
+    <a href="#s5"><b>05</b> 并发任务：一个入口两条线</a>
+    <a href="#s6"><b>06</b> 状态、错误与恢复</a>
+    <a href="#s7"><b>07</b> 验收项映射</a>
+    <a href="#s8"><b>08</b> 落地对应与依据</a>
+  </nav>
+
+  <main class="doc">
+
+    <div class="hero">
+      <div class="hero__eyebrow">Product prototype · single entry</div>
+      <h1>打开就是星助理。<br>专业分工留在系统内部。</h1>
+      <p>这个原型只回答一件事：把现在的「对话／工作台／资源／我的」四入口，收敛成一个能真实聊天、能按住语音说话、能对着某条消息回复、并在后台派出子代理的星助理，界面应该长什么样、按下去会发生什么。</p>
+      <p>所有界面都可点、可滚、可切换状态；<b>没有一条 mock 回答会被描述成已完成能力</b>。真实中转站、ASR、电脑节点仍按文档 03 的 P0–P4 门禁逐段验证。</p>
+      <div class="hero__facts">
+        <div class="fact"><b>1</b><span>主入口（启动即会话）</span></div>
+        <div class="fact"><b>0</b><span>常驻专家／团队／会议页签</span></div>
+        <div class="fact"><b>0</b><span>底部三栏导航</span></div>
+        <div class="fact"><b>20</b><span>条验收项在原型中有落点</span></div>
+      </div>
+      <div class="hero__note">评审提示：页面底部第 04 节是「活的」手机，右侧控制台可以点出发送、流式、停止、录音转写、消息回复、任务展开、审批、断网与设置；第 05 节回答「录音转写和改 PPT 同时跑」时界面怎么放；第 07 节标明每个验收编号对应的交互，并明确标注「示意 / 未测试」。</div>
+    </div>
+
+    <!-- ================= 01 ================= -->
+    <section class="sec" id="s1">
+      <div class="sec__head"><span class="sec__num">01</span><h2>目标与设计原则</h2></div>
+      <p class="sec__lede">统一入口不等于删掉专家、团队、会议这些后台能力，也不等于把权限交给模型。原型的取舍全部围绕四个不变量：一个入口、任务在后台、信息说清楚、完成可核验。</p>
+
+      <div class="grid grid--2">
+        <div class="card">
+          <div class="principle">
+            <div class="principle__ico"><svg class="i"><use href="#i-star"/></svg></div>
+            <div>
+              <h4>一个入口，二级展开</h4>
+              <p>启动直接落在主会话。历史、设置、记忆、任务都是二级抽屉或页面，不再有专家／团队／会议常驻页签，也不把三个页签换成「会话／记忆／任务」底栏。</p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="principle">
+            <div class="principle__ico"><svg class="i"><use href="#i-branch"/></svg></div>
+            <div>
+              <h4>总 Agent 只负责接、路由、汇报</h4>
+              <p>消息先进入持久收件队列并立即返回受理或排队，长任务交给子 Agent。首任务运行时仍可接收第二个无关需求；子代理有独立 context_id 与检查点，主会话只出现任务卡片。</p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="principle">
+            <div class="principle__ico"><svg class="i"><use href="#i-shield"/></svg></div>
+            <div>
+              <h4>说清楚：目标、位置、目的地、范围</h4>
+              <p>消息回复始终带目标与版本；任务卡显示执行节点；切模型/服务商时提示数据将发往哪个域名；审批卡列出操作、收件人、正文摘要、有效期——任一字段变化即失效重审。</p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="principle">
+            <div class="principle__ico"><svg class="i"><use href="#i-check"/></svg></div>
+            <div>
+              <h4>完成要有证据，不靠措辞</h4>
+              <p>状态与 revision 由服务端持久化，客户端断线不等于后台停止。恢复时先取快照再按 last_event_id 续订；「模型说完成了」不构成 completed，必须有结果引用或完成依据。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <svg class="i"><use href="#i-alert"/></svg>
+        <div><b>刻意不做：</b>常驻全自动电脑接管、完整语音通话/后台唤醒、自动安装执行器或插件、把所有邮件与笔记平台一次接通、为统一入口重造一套并行数据库。旧专家配置、团队权限、会议记录保持可读，由功能开关控制入口显隐。</div>
+      </div>
+
+      <h3 class="sub"><span class="dot"></span>首版必须闭合的四条链路</h3>
+      <div class="grid grid--4">
+        <div class="card card--flat"><div class="card__k">P1</div><h4>真实对话</h4><p>默认中转站真实请求，流式、停止、错误分类、历史恢复；断网与错误鉴权有正确反馈。</p></div>
+        <div class="card card--flat"><div class="card__k">P2</div><h4>调试配置</h4><p>独立调试包、多配置、安全存储、手填 model_id，真实探测后给出可操作建议。</p></div>
+        <div class="card card--flat"><div class="card__k">P3</div><h4>语音与回复</h4><p>中文录音→转写→可编辑→发送；消息级引用、定位、版本与撤权占位。</p></div>
+        <div class="card card--flat"><div class="card__k">P4</div><h4>子代理与恢复</h4><p>持久收件、独立上下文、预算/并发/深度、父取消传播、重启后可恢复。</p></div>
+      </div>
+    </section>
+
+    <!-- ================= 02 ================= -->
+    <section class="sec" id="s2">
+      <div class="sec__head"><span class="sec__num">02</span><h2>信息架构与设计语言</h2></div>
+      <p class="sec__lede">左侧是 0.14 的实际结构：四个底部入口，专家与团队并列，模型配置藏在「我的」，任务中心是独立页面。右侧是原型建议：唯一主会话 + 四个二级去处。设计语言直接沿用现有 Compose 令牌，避免另造一套视觉。</p>
+
+      <div class="ia">
+        <div class="ia__col ia--old">
+          <h4>现在 · v0.14 实际导航</h4>
+          <span class="tag">AssistantRoot：四页签 + 十一个二级路由</span>
+          <div class="ianode ianode--muted"><svg class="i"><use href="#i-users"/></svg>对话（专家／团队切换）<small>页签</small></div>
+          <div class="ianode ianode--muted"><svg class="i"><use href="#i-cpu"/></svg>工作台<small>页签</small></div>
+          <div class="ianode ianode--muted"><svg class="i"><use href="#i-folder"/></svg>资源<small>页签</small></div>
+          <div class="ianode ianode--muted"><svg class="i"><use href="#i-settings"/></svg>我的<small>页签</small></div>
+          <div class="ianode"><svg class="i"><use href="#i-doc"/></svg>模型配置 / 电脑连接 / 任务中心 / 同步迁移<small>二级</small></div>
+          <p class="small" style="margin:12px 0 0">专家、团队、会议、技能市场都是第一层可见内容，用户要先选「找谁」，才能说「做什么」。</p>
+        </div>
+        <div class="ia__arrow"><svg class="i"><use href="#i-arrow-left" transform="rotate(180 12 12)"/></svg></div>
+        <div class="ia__col">
+          <h4>原型 · 星助理单入口</h4>
+          <span class="tag">启动即主会话；其余全部为二级</span>
+          <div class="ianode ianode--accent"><svg class="i"><use href="#i-star"/></svg><b>星助理主会话</b><small>唯一入口</small></div>
+          <div class="ianode"><svg class="i"><use href="#i-history"/></svg>历史抽屉（按今天／昨天分组）</div>
+          <div class="ianode"><svg class="i"><use href="#i-settings"/></svg>设置：模型与语音 · 记忆与工作区 · 任务与诊断</div>
+          <div class="ianode"><svg class="i"><use href="#i-branch"/></svg>任务卡片 → 任务详情 → 子代理上下文</div>
+          <div class="ianode"><svg class="i"><use href="#i-shield"/></svg>审批卡（绑定摘要与有效期）</div>
+          <div class="ianode"><svg class="i"><use href="#i-reply"/></svg>引用定位（原消息／版本／不可用占位）</div>
+          <p class="small" style="margin:12px 0 0">专家与团队不消失：作为子 Agent 可调用的后台能力存在，不再要求用户先选专家。</p>
+        </div>
+      </div>
+
+      <h3 class="sub"><span class="dot"></span>设计令牌：沿用 XfDesign.kt，不另起炉灶</h3>
+      <div class="swatches">
+        <div class="sw"><i style="background:#F6F5F1"></i><div><b>canvas</b><span>#F6F5F1</span></div></div>
+        <div class="sw"><i style="background:#FFFFFF;border-bottom:1px solid #E5E2DA"></i><div><b>surface</b><span>#FFFFFF</span></div></div>
+        <div class="sw"><i style="background:#E5E2DA"></i><div><b>line</b><span>#E5E2DA</span></div></div>
+        <div class="sw"><i style="background:#1B1C1F"></i><div><b>ink</b><span>#1B1C1F</span></div></div>
+        <div class="sw"><i style="background:#57585F"></i><div><b>ink-2</b><span>#57585F</span></div></div>
+        <div class="sw"><i style="background:#4351E8"></i><div><b>accent-solid</b><span>#4351E8</span></div></div>
+        <div class="sw"><i style="background:#1F9D6B"></i><div><b>green · 完成</b><span>#1F9D6B</span></div></div>
+        <div class="sw"><i style="background:#B26B00"></i><div><b>amber · 等待</b><span>#B26B00</span></div></div>
+        <div class="sw"><i style="background:#D5443B"></i><div><b>red · 失败</b><span>#D5443B</span></div></div>
+        <div class="sw"><i style="background:#245FBF"></i><div><b>blue · 运行</b><span>#245FBF</span></div></div>
+      </div>
+
+      <div class="grid grid--3" style="margin-top:14px">
+        <div class="card">
+          <div class="card__k">Typography</div>
+          <h4>字号层级</h4>
+          <ul>
+            <li>标题 19–24 · 语义加粗</li>
+            <li>正文 13.5–15 / 行高 1.6–1.7</li>
+            <li>说明 11–12 · 元信息 10–11</li>
+            <li>数字一律 tabular-nums</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card__k">Touch &amp; layout</div>
+          <h4>手感约束</h4>
+          <ul>
+            <li>主控件 ≥ 44–48dp；消息区长按可达</li>
+            <li>卡片圆角 12–14，主输入 14</li>
+            <li>页面边距 16，卡片内边距 12–16</li>
+            <li>键盘弹起：底栏让位，输入框上移</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card__k">Motion</div>
+          <h4>动效规则</h4>
+          <ul>
+            <li>转场 180–220ms 位移 + 淡入</li>
+            <li>流式用光标，不用假百分比</li>
+            <li>任务进度按真实步数分段</li>
+            <li>尊重「减少动态效果」</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 03 ================= -->
+    <section class="sec" id="s3">
+      <div class="sec__head"><span class="sec__num">03</span><h2>核心页面</h2></div>
+      <p class="sec__lede">五个关键画面，覆盖首启空状态、真实对话与任务卡、语音转写、任务详情与审批、模型配置。每个画面下的注释标出它对应的文档条款与验收编号；所有内容均为示意文案。</p>
+
+      <div class="phonestage phonestage--3">
+
+        <!-- P1 首启 -->
+        <figure class="figure">
+          <div class="phonewrap">
+            <div class="phone" aria-label="首启空状态原型">
+              <div class="statusbar"><span>9:41</span><span class="statusbar__right"><svg class="i"><use href="#i-signal"/></svg><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-battery"/></svg></span></div>
+              <header class="phone__appbar">
+                <div class="brand"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                <div class="titles"><b>星助理</b><span>个人空间 · 调试版</span></div>
+                <span class="spacer"></span>
+                <button class="ibtn" aria-label="历史"><svg class="i"><use href="#i-history"/></svg></button>
+                <button class="ibtn" aria-label="设置"><svg class="i"><use href="#i-settings"/></svg></button>
+              </header>
+              <div class="phone__body">
+                <div class="hero-empty">
+                  <div class="starmark"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                  <h2>把想法交给我</h2>
+                  <p>先说要做的事。我会确认目标、选好执行位置，再把结果带回来。</p>
+                  <div class="conn"><i></i>默认中转站 · 已连接 <span style="color:var(--p-ink3)">·</span> <span style="color:var(--p-accent-ink)">数据目的地</span></div>
+                </div>
+                <div class="suggests">
+                  <button class="suggest"><b>整理今天的工作</b><span>汇总待办与重点</span></button>
+                  <button class="suggest"><b>写一份周报</b><span>从本周记录起草</span></button>
+                  <button class="suggest"><b>读文件找约定</b><span>在电脑上定位接口</span></button>
+                  <button class="suggest"><b>安排明天日程</b><span>结合已有安排</span></button>
+                </div>
+                <div class="recent">
+                  <div class="recent__head"><span>继续上次</span><span>全部任务 ›</span></div>
+                  <button class="recent__item">
+                    <span class="r-ico"><svg class="i"><use href="#i-branch"/></svg></span>
+                    <span class="r-main"><b>整理九月会议纪要</b><span>运行中 · 2 个子任务</span></span>
+                    <span class="r-go">›</span>
+                  </button>
+                  <button class="recent__item">
+                    <span class="r-ico"><svg class="i"><use href="#i-shield"/></svg></span>
+                    <span class="r-main"><b>周报草稿发送</b><span>等待确认 · 审批 1</span></span>
+                    <span class="r-go">›</span>
+                  </button>
+                </div>
+              </div>
+              <div class="composer">
+                <div class="composer__box">
+                  <textarea rows="1" placeholder="说说想完成什么…" aria-label="输入框示意"></textarea>
+                  <div class="composer__bar">
+                    <span class="modechip">问答 <svg class="i"><use href="#i-chev-d"/></svg></span>
+                    <button class="ibtn" aria-label="附件"><svg class="i"><use href="#i-attach"/></svg></button>
+                    <button class="ibtn" aria-label="语音输入"><svg class="i"><use href="#i-mic"/></svg></button>
+                    <button class="ibtn ibtn--send" disabled aria-label="发送"><svg class="i"><use href="#i-arrow-up"/></svg></button>
+                  </div>
+                </div>
+                <div class="composer__hint"><span class="dest"><svg class="i"><use href="#i-globe"/></svg>中转站 · relay.example.com</span><span>按住说话</span></div>
+              </div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+          <figcaption>
+            <div class="cap"><em>P1</em>启动即主会话<span class="cap-sub">· A01 · 文档 02 §1</span></div>
+            <ul class="notes">
+              <li><b>没有功能大厅：</b>启动直接落在对话，专家、团队、会议不再出现在第一层。</li>
+              <li><b>两个二级入口：</b>历史与设置固定在标题栏右侧；记忆、任务在设置与任务卡内。</li>
+              <li><b>状态可见：</b>连接状态旁直接标出数据目的地域名，切换前还会二次确认。</li>
+              <li><b>空状态不给假回复：</b>只给建议问法；无网络时保留草稿并提示，不伪造助理消息。</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <!-- P2 对话流式 + 引用 + 任务卡 -->
+        <figure class="figure">
+          <div class="phonewrap">
+            <div class="phone" aria-label="对话、流式与引用原型">
+              <div class="statusbar"><span>9:41</span><span class="statusbar__right"><svg class="i"><use href="#i-signal"/></svg><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-battery"/></svg></span></div>
+              <header class="phone__appbar">
+                <div class="brand"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                <div class="titles"><b>星助理</b><span>默认中转站 · 映射待实测</span></div>
+                <span class="spacer"></span>
+                <button class="ibtn" aria-label="历史"><svg class="i"><use href="#i-history"/></svg></button>
+                <button class="ibtn" aria-label="设置"><svg class="i"><use href="#i-settings"/></svg></button>
+              </header>
+              <div class="taskstrip" role="button" tabindex="0">
+                <span class="spin"></span><b>字段补齐方案</b><span>· 2/3 子任务</span><span class="go">详情 ›</span>
+              </div>
+              <div class="phone__body">
+                <div class="day">今天</div>
+
+                <div class="msg msg--assistant">
+                  <div class="msg__avatar"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                  <div class="msg__col">
+                    <div class="msg__name"><b>星助理</b>· 09:41</div>
+                    <div class="msg__text"><p>手机端契约目前只接收纯文本。要加引用和附件，得先在 v2 合同里加字段，再谈 UI。</p></div>
+                    <div class="meta"><span class="msg__more"><button><svg class="i"><use href="#i-reply"/></svg>回复</button> <button aria-label="更多"><svg class="i"><use href="#i-more"/></svg></button></span></div>
+                  </div>
+                </div>
+
+                <div class="msg msg--user">
+                  <div class="msg__col">
+                    <div class="bubble">
+                      <div class="quote"><div class="q-top"><svg class="i"><use href="#i-reply"/></svg>回复 星助理 · 09:41</div><div class="q-text">手机端契约目前只接收纯文本。要加引用和附件…</div></div>
+                      那按这份约定，把手机端字段补一下，先出方案。
+                    </div>
+                    <div class="meta"><span>09:42 · 已送达</span><span>client_msg 7f2a</span></div>
+                  </div>
+                </div>
+
+                <div class="msg msg--assistant">
+                  <div class="msg__avatar"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                  <div class="msg__col">
+                    <div class="msg__name"><b>星助理</b>· 09:42 <span class="badge">接单</span></div>
+                    <div class="tcard">
+                      <div class="tcard__head">
+                        <span class="tcard__ico"><svg class="i"><use href="#i-branch"/></svg></span>
+                        <span class="tcard__title"><b>手机端字段补齐方案</b><span><svg class="i" style="width:9px;height:9px"><use href="#i-phone"/></svg> 此手机 · rev 7</span></span>
+                        <span class="chip chip--run" style="font-size:9.5px">运行中</span>
+                      </div>
+                      <div class="tcard__body">
+                        <div class="tcard__rows">
+                          <div class="trow"><span class="ctx">ctx_8f2a</span><span>对齐 reply_to_message_id</span><span class="state state--done"><i></i>完成</span></div>
+                          <div class="trow"><span class="ctx">ctx_3c71</span><span>草拟 reply_target_version</span><span class="state state--run"><i></i>进行中</span></div>
+                        </div>
+                        <div class="tcard__bar"><span class="tbar"><i></i></span><span>12.4k / 40k tok</span></div>
+                      </div>
+                      <div class="tcard__foot"><button class="btn btn--sm">展开</button><button class="btn btn--sm">查看子上下文</button><span class="more">取消只停后续步骤</span></div>
+                    </div>
+                    <div class="msg__text typing">先拆成两件事：一是把 <b>reply_to_message_id</b> 与目标版本写进提交契约，二是给流式事件补引用元数据。子代理已分别开工，方案出来你会先看到卡片，不会看到两份聊天记录。</div>
+                    <div class="stream-note"><span class="dots"><i></i><i></i><i></i></span>正在生成 · 默认中转站</div>
+                    <button class="stream-stop"><svg class="i"><use href="#i-stop"/></svg>停止生成</button>
+                    <div class="meta"><span>09:42</span><button><svg class="i"><use href="#i-reply"/></svg>回复</button><button>复制</button></div>
+                  </div>
+                </div>
+              </div>
+              <div class="composer">
+                <div class="replystrip"><svg class="i"><use href="#i-reply"/></svg><span class="rt">回复 <b>星助理</b>：字段补齐方案 · 12.4k/40k tok</span><button aria-label="取消引用"><svg class="i"><use href="#i-x"/></svg></button></div>
+                <div class="composer__box">
+                  <textarea rows="1" aria-label="输入示意">顺便确认：reply_to_message_id 由客户端生成还是服务端校验？</textarea>
+                  <div class="composer__bar">
+                    <span class="modechip">问答 <svg class="i"><use href="#i-chev-d"/></svg></span>
+                    <button class="ibtn" aria-label="附件"><svg class="i"><use href="#i-attach"/></svg></button>
+                    <button class="ibtn" aria-label="语音输入"><svg class="i"><use href="#i-mic"/></svg></button>
+                    <button class="ibtn ibtn--send" aria-label="发送"><svg class="i"><use href="#i-arrow-up"/></svg></button>
+                  </div>
+                </div>
+                <div class="composer__hint"><span class="dest"><svg class="i"><use href="#i-globe"/></svg>将发送历史 6 条 · 不含附件</span><span>问答模式不写文件</span></div>
+              </div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+          <figcaption>
+            <div class="cap"><em>P2</em>对话、引用与任务卡<span class="cap-sub">· A02 / A07 / A19 · 文档 02 §2 §8</span></div>
+            <ul class="notes">
+              <li><b>引用是关系不是拼字：</b>输入区出现可取消的引用条；消息里保留可点开的引用块与目标版本。</li>
+              <li><b>任务卡替代等待：</b>子任务各自有 context_id 与预算，主界面只展示卡片；展开才进详情。</li>
+              <li><b>流式可停止：</b>正文流式追加，终态由服务端落库后对齐；停止只结束本次生成，不等于取消任务。</li>
+              <li><b>重复提交只产生一条：</b>client_message_id 与 idempotency_key 由客户端生成，重试回同一结果。</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <!-- P3 语音 -->
+        <figure class="figure">
+          <div class="phonewrap">
+            <div class="phone" aria-label="语音转写原型">
+              <div class="statusbar"><span>9:41</span><span class="statusbar__right"><svg class="i"><use href="#i-signal"/></svg><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-battery"/></svg></span></div>
+              <header class="phone__appbar">
+                <div class="brand"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                <div class="titles"><b>星助理</b><span>语音识别 · 云端 ASR</span></div>
+                <span class="spacer"></span>
+                <button class="ibtn" aria-label="历史"><svg class="i"><use href="#i-history"/></svg></button>
+                <button class="ibtn" aria-label="设置"><svg class="i"><use href="#i-settings"/></svg></button>
+              </header>
+              <div class="phone__body">
+                <div class="day">今天</div>
+                <div class="msg msg--assistant">
+                  <div class="msg__avatar"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                  <div class="msg__col">
+                    <div class="msg__name"><b>星助理</b>· 09:20</div>
+                    <div class="msg__text"><p>上周例会我记录到“审批超时后自动降级”的结论，但还没整理成待办。要现在做吗？</p></div>
+                  </div>
+                </div>
+                <div class="msg msg--user">
+                  <div class="msg__col"><div class="bubble">要，帮我列三条能直接分派的。</div><div class="meta"><span>09:21</span></div></div>
+                </div>
+
+                <div class="tcard" style="margin-top:4px">
+                  <div class="tcard__head">
+                    <span class="tcard__ico"><svg class="i"><use href="#i-mic"/></svg></span>
+                    <span class="tcard__title"><b>语音已转写 · 可编辑</b><span>录音 7 秒 · 识别 1.8 秒</span></span>
+                    <span class="chip chip--done" style="font-size:9.5px">待发送</span>
+                  </div>
+                  <div class="tcard__body">
+                    <div style="border:1px solid var(--p-line);border-radius:8px;padding:8px;background:var(--p-surface2);font-size:12px;line-height:1.6">
+                      帮我查一下上周例会记录里关于<span class="asr-low" style="border-bottom:1px dashed var(--p-amber)">审批超时</span>的结论，整理成三条待办，分别给产品、后端和测试。
+                    </div>
+                    <div class="asr" style="margin-top:6px"><svg class="i"><use href="#i-globe"/></svg>识别目的地：<b>ASR 中转 · cn-east</b> · 原始音频不落盘</div>
+                    <div class="tcard__rows" style="margin-top:6px">
+                      <div class="trow"><span class="ctx">audio_tmp_4f1</span><span>本次录音为临时数据，发送或取消后清理</span></div>
+                    </div>
+                  </div>
+                  <div class="tcard__foot"><button class="btn btn--sm">重新录制</button><button class="btn btn--sm">编辑</button><span class="more">低置信度已标出</span></div>
+                </div>
+
+                <div class="msg msg--assistant" style="margin-top:2px">
+                  <div class="msg__avatar"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                  <div class="msg__col">
+                    <div class="msg__name"><b>星助理</b>· 09:21</div>
+                    <div class="msg__text"><p>收到。转写先留作草稿，你确认后我再发。</p></div>
+                  </div>
+                </div>
+              </div>
+              <div class="composer">
+                <div class="recbar">
+                  <span class="dot"></span>
+                  <span class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                  <span class="time">00:07</span>
+                  <button class="x" aria-label="取消录音">取消</button>
+                </div>
+                <div class="composer__box">
+                  <div class="composer__bar" style="margin-top:0">
+                    <button class="btn btn--sm">重新录制</button>
+                    <button class="btn btn--sm" style="margin-left:6px">编辑文字</button>
+                    <button class="ibtn ibtn--send" aria-label="发送转写结果"><svg class="i"><use href="#i-arrow-up"/></svg></button>
+                  </div>
+                </div>
+                <div class="composer__hint"><span class="dest"><svg class="i"><use href="#i-mic"/></svg>按住说话 · 上滑取消</span><span>转写可编辑</span></div>
+              </div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+          <figcaption>
+            <div class="cap"><em>P3</em>语音输入与可编辑转写<span class="cap-sub">· A06 · 文档 02 §13</span></div>
+            <ul class="notes">
+              <li><b>点击→停止→转写→编辑→发送：</b>不做持续监听、后台唤醒或全双工通话。</li>
+              <li><b>三个必须清晰的分支：</b>无语音、录音权限被拒、上传失败都要有明确提示，且不自动发送。</li>
+              <li><b>ASR 独立配置：</b>执行位置、服务地址、语言/模型、凭据引用、最大时长、音频保留策略与聊天模型分开。</li>
+              <li><b>回复目标不丢：</b>录音前选中的引用，在转写与发送后仍指向同一条消息。</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <!-- P4 任务与审批 -->
+        <figure class="figure">
+          <div class="phonewrap">
+            <div class="phone" aria-label="任务详情与审批原型">
+              <div class="statusbar"><span>9:41</span><span class="statusbar__right"><svg class="i"><use href="#i-signal"/></svg><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-battery"/></svg></span></div>
+              <header class="phone__appbar">
+                <button class="ibtn" aria-label="返回"><svg class="i"><use href="#i-arrow-left"/></svg></button>
+                <div class="titles" style="margin-left:2px"><b>任务详情</b><span>#t_2f8c · rev 7</span></div>
+                <span class="spacer"></span>
+                <button class="ibtn" aria-label="更多"><svg class="i"><use href="#i-more"/></svg></button>
+              </header>
+              <div class="phone__body">
+                <div class="card" style="border:1px solid var(--p-line);background:var(--p-surface);border-radius:12px;padding:11px;margin-bottom:12px">
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+                    <b style="font-size:12.5px">手机端字段补齐方案</b>
+                    <span class="chip chip--run" style="font-size:9.5px;margin-left:auto">执行中</span>
+                  </div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <span class="chip" style="font-size:9.5px"><svg class="i" style="width:9px;height:9px"><use href="#i-phone"/></svg>此手机</span>
+                    <span class="chip" style="font-size:9.5px"><svg class="i" style="width:9px;height:9px"><use href="#i-globe"/></svg>中转站</span>
+                    <span class="chip" style="font-size:9.5px"><svg class="i" style="width:9px;height:9px"><use href="#i-clock"/></svg>预算 12.4k/40k</span>
+                  </div>
+                </div>
+
+                <div class="card" style="border:1px solid var(--p-line);background:var(--p-surface);border-radius:12px;padding:11px;margin:0 0 12px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><b style="font-size:11.5px">步骤</b><span class="small" style="font-size:9.5px;color:var(--p-ink3)">按 revision 有序落库</span></div>
+                  <div class="trow" style="margin-bottom:5px"><i style="width:5px;height:5px;border-radius:50%;background:var(--p-green);display:inline-block"></i>对齐提交字段<span class="state state--done"><i></i>已完成</span></div>
+                  <div class="trow" style="margin-bottom:5px"><i style="width:5px;height:5px;border-radius:50%;background:var(--p-green);display:inline-block"></i>补流式事件元数据<span class="state state--done"><i></i>已完成</span></div>
+                  <div class="trow"><i style="width:5px;height:5px;border-radius:50%;background:var(--p-blue);display:inline-block"></i>汇总差异与回退说明<span class="state state--run"><i></i>进行中</span></div>
+                </div>
+
+                <div class="card" style="border:1px solid var(--p-line);background:var(--p-surface);border-radius:12px;padding:11px;margin:0 0 12px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><b style="font-size:11.5px">子代理 · 2</b><span class="small" style="font-size:9.5px;color:var(--p-ink3)">并行上限 3 · 深度 2</span></div>
+                  <div class="trow" style="margin-bottom:6px"><span class="ctx">ctx_8f2a</span><span>字段对齐 · 输入 3 条引用</span><span class="state state--done"><i></i>完成</span></div>
+                  <div class="trow" style="margin-bottom:6px"><span class="ctx">ctx_3c71</span><span>版本校验 · 等待后端返回</span><span class="state state--wait"><i></i>等待</span></div>
+                  <div class="tbar" style="margin-top:2px"><i style="width:62%"></i></div>
+                  <div class="small" style="font-size:9.5px;color:var(--p-ink3);margin-top:5px">父取消会向下传播；恢复前重查权限、预算与审批。</div>
+                </div>
+
+                <div class="approval">
+                  <div class="approval__top"><svg class="i"><use href="#i-shield"/></svg>待你确认<span class="ttl">审批 09:58 前有效</span></div>
+                  <h5>发送任务汇总邮件</h5>
+                  <p>把已完成的字段差异发给后端负责人，正文将引用当前任务结果。</p>
+                  <dl>
+                    <dt>收件人</dt><dd>backend-lead@example.com</dd>
+                    <dt>正文摘要</dt><dd>2 处字段变更 + 1 处待确认</dd>
+                    <dt>操作摘要</dt><dd>8f3a…d2c1</dd>
+                  </dl>
+                  <p class="approval__note">修改收件人、正文或参数后，本次批准自动失效，需要重新确认。</p>
+                  <div class="approval__btns"><button class="btn btn--sm">拒绝</button><button class="btn btn--sm btn--primary">批准并发送</button></div>
+                </div>
+              </div>
+              <div class="composer" style="padding:8px 10px 6px">
+                <div style="display:flex;gap:7px"><button class="btn btn--sm btn--danger" style="flex:1">取消任务</button><button class="btn btn--sm" style="flex:1">查看子上下文</button></div>
+              </div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+          <figcaption>
+            <div class="cap"><em>P4</em>任务详情、子代理与审批<span class="cap-sub">· A10 / A11 / A12 / A17 · 文档 02 §10</span></div>
+            <ul class="notes">
+              <li><b>主界面只有卡片：</b>详情里才出现步骤、子代理、预算、检查点；不另开「专家」列表。</li>
+              <li><b>两个子任务两个 context：</b>ctx_8f2a 与 ctx_3c71 各存消息与 checkpoint，不串话、不共享父会话全文。</li>
+              <li><b>审批绑定摘要：</b>批准只对当前 action_digest 与范围有效；改字段即重审，避免旧批准被复用。</li>
+              <li><b>取消不是撤销：</b>取消经 cancelling 到 cancelled，已完成的外部副作用需单独补偿。</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <!-- P5 设置与模型 -->
+        <figure class="figure">
+          <div class="phonewrap">
+            <div class="phone" aria-label="设置与模型配置原型">
+              <div class="statusbar"><span>9:41</span><span class="statusbar__right"><svg class="i"><use href="#i-signal"/></svg><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-battery"/></svg></span></div>
+              <header class="phone__appbar">
+                <button class="ibtn" aria-label="返回"><svg class="i"><use href="#i-arrow-left"/></svg></button>
+                <div class="titles" style="margin-left:2px"><b>模型与语音</b><span>开发者配置 · 调试包独立</span></div>
+                <span class="spacer"></span>
+                <button class="ibtn" aria-label="添加配置"><svg class="i"><use href="#i-plus"/></svg></button>
+              </header>
+              <div class="phone__body">
+                <div class="card" style="border:1px solid var(--p-line);border-radius:12px;padding:10px;margin-bottom:9px;background:var(--p-surface)">
+                  <div style="display:flex;align-items:center;gap:6px"><b style="font-size:11.5px">默认中转站</b><span class="chip chip--accent" style="font-size:9px;padding:2px 6px;margin-left:auto">使用中</span></div>
+                  <div class="small" style="font-size:9.5px;color:var(--p-ink3);margin:2px 0 5px">relay · 星助理默认模型 · 账户鉴权</div>
+                  <div class="chipset" style="margin-top:0"><span class="chip" style="font-size:9.5px"><svg class="i" style="width:9px;height:9px"><use href="#i-check"/></svg>流式</span><span class="chip" style="font-size:9.5px"><svg class="i" style="width:9px;height:9px"><use href="#i-check"/></svg>工具</span><span class="chip" style="font-size:9.5px">09:20 探测 · 1.2s</span></div>
+                </div>
+                <div class="card" style="border:1px solid var(--p-line);border-radius:12px;padding:10px;margin-bottom:9px;background:var(--p-surface)">
+                  <div style="display:flex;align-items:center;gap:6px"><b style="font-size:11.5px">个人服务 B</b><span class="chip chip--fail" style="font-size:9px;padding:2px 6px;margin-left:auto">auth_failed</span></div>
+                  <div class="small" style="font-size:9.5px;color:var(--p-ink3);margin:2px 0 5px">openai_chat_completions · example-model-v1（手填）</div>
+                  <div class="chipset" style="margin-top:0"><span class="chip" style="font-size:9.5px">api.personal.example</span><span class="chip" style="font-size:9.5px">cred_ref_2</span></div>
+                  <p style="font-size:9.5px;color:#A52E27;margin:6px 0 0;line-height:1.5">401 鉴权失败。检查凭据引用是否存在；Key 不写入导出与日志。</p>
+                </div>
+                <div class="card" style="border:1px dashed var(--p-line);border-radius:12px;padding:9px;margin-bottom:12px;background:transparent;text-align:center;font-size:10.5px;color:var(--p-ink2)">＋ 添加服务配置（协议、地址、模型、超时）</div>
+
+                <div class="card" style="border:1px solid var(--p-line);border-radius:12px;padding:10px;margin-bottom:9px;background:var(--p-surface)">
+                  <div style="display:flex;align-items:center;gap:6px"><b style="font-size:11.5px">语音识别</b><span class="chip chip--wait" style="font-size:9px;padding:2px 6px;margin-left:auto">待验证</span></div>
+                  <div class="small" style="font-size:9.5px;color:var(--p-ink3);margin-top:2px;line-height:1.55">云端 ASR · 中文 · cn-east<br>最大 60s · 原始音频不长期保留</div>
+                </div>
+                <div class="menurow" style="font-size:11.5px"><span class="mi"><svg class="i"><use href="#i-folder"/></svg></span><span class="mt"><b>记忆与工作区</b><span>查看、纠正、删除与暂停记录</span></span><span class="chev">›</span></div>
+                <div class="menurow" style="font-size:11.5px"><span class="mi"><svg class="i"><use href="#i-doc"/></svg></span><span class="mt"><b>任务与诊断</b><span>脱敏日志与导出预览</span></span><span class="chev">›</span></div>
+                <div class="menurow" style="font-size:11.5px"><span class="mi"><svg class="i"><use href="#i-shield"/></svg></span><span class="mt"><b>调试版隔离</b><span>com.singu.xfriend.debug · 数据目录独立</span></span><span class="chev">›</span></div>
+              </div>
+              <div class="composer" style="padding:8px 10px 6px"><button class="btn btn--sm btn--primary" style="width:100%">测试连接并记录能力</button></div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+          <figcaption>
+            <div class="cap"><em>P5</em>模型与语音配置<span class="cap-sub">· A03 / A04 / A14 / A16 · 文档 02 §4–§5</span></div>
+            <ul class="notes">
+              <li><b>协议与地址分开：</b>relay 与 openai_chat_completions 是不同适配器，改 URL 不等于自动兼容。</li>
+              <li><b>模型可手填：</b>列表接口是可选能力；无列表时仍允许填 model_id，并标记已验证能力。</li>
+              <li><b>错误可区分：</b>auth_failed、network_unreachable、model_not_found、quota_exceeded 等各自给建议，不混称网络错误。</li>
+              <li><b>凭据引用：</b>界面只出现 credential_ref 占位；导出、日志与安装包静态配置不含明文 Key。</li>
+            </ul>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ================= 04 ================= -->
+    <style>
+      .phone--live{width:372px;height:790px}
+      .live-note{font-size:11.5px;color:var(--ink-3);margin:12px 0 0;line-height:1.6}
+      .lvbanner{display:flex;align-items:flex-start;gap:6px;border-radius:9px;padding:6px 8px;font-size:10.5px;line-height:1.5;margin:0 0 10px;border:1px solid transparent}
+      .lvbanner svg{width:12px;height:12px;margin-top:1px;flex:none}
+      .lvbanner--warn{background:var(--p-amber-soft);border-color:#EBD3A6;color:#7A4A00}
+      .phone.dark .lvbanner--warn{border-color:#4B3A1C}
+      .lvbanner--fail{background:var(--p-red-soft);border-color:#F0CDC9;color:#A52E27}
+      .phone.dark .lvbanner--fail{border-color:#4B2A28}
+      .lvbanner b{font-weight:650}
+      :where(svg.i){width:14px;height:14px;flex:none}
+      #liveBanners{position:sticky;top:-14px;z-index:7;background:var(--p-bg);margin:0 -14px;padding:0 14px 2px}
+      #liveBanners:empty{display:none}
+      .vdraft{border:1px solid var(--p-line);background:var(--p-surface2);border-radius:9px;padding:7px 8px;font-size:11.5px;line-height:1.55;color:var(--p-ink);margin-bottom:6px}
+      .vbtns{display:flex;gap:6px}
+      .vbtns .btn{flex:1;min-height:30px;font-size:11px;border-radius:7px}
+      .transcript-note{font-size:9.5px;color:var(--p-ink3);display:flex;align-items:center;gap:4px;margin-top:5px}
+      .transcript-note svg{width:9px;height:9px}
+      .kbd{font-family:var(--mono);font-size:9.5px;color:var(--ink-4);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 3px;background:var(--surface)}
+      table.spec td .st{white-space:nowrap}
+      .st-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:1px}
+      .risklist{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+      .risklist li{display:flex;gap:9px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 12px;font-size:12.5px;line-height:1.55}
+      .risklist li b{flex:none;font-size:10px;letter-spacing:.04em;border-radius:5px;padding:1px 5px;height:18px;margin-top:1px}
+      .risklist .r-blocked{background:var(--red-soft);color:#A52E27;border:1px solid #F0CDC9}
+      .risklist .r-open{background:var(--amber-soft);color:#8A5300;border:1px solid #EBD3A6}
+      .risklist .r-todo{background:var(--accent-soft);color:var(--accent-ink);border:1px solid var(--accent-line)}
+      .risklist li span{color:var(--ink-2)}
+    </style>
+
+    <section class="sec" id="s4">
+      <div class="sec__head"><span class="sec__num">04</span><h2>可交互原型</h2></div>
+      <p class="sec__lede">下面这台手机是活的：建议问法会触发流式回复，麦克风会走「录音→转写→可编辑」，⋯ 菜单可以回复或定位，任务卡能展开与取消，审批可以批准或拒绝，断网会保留草稿。所有回复都是本地演示文本，不代表模型输出或已接通服务。</p>
+
+      <div class="live-layout">
+        <div>
+          <div class="phonewrap" style="justify-content:flex-start">
+            <div class="phone phone--live" id="livePhone" aria-label="可交互的星助理原型">
+              <div class="statusbar"><span>9:41</span><span class="statusbar__right"><svg class="i"><use href="#i-signal"/></svg><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-battery"/></svg></span></div>
+              <header class="phone__appbar">
+                <div class="brand"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                <div class="titles"><b>星助理</b><span id="liveSub">默认中转站 · 已连接</span></div>
+                <span class="spacer"></span>
+                <button class="ibtn" id="liveHistoryBtn" aria-label="历史"><svg class="i"><use href="#i-history"/></svg></button>
+                <button class="ibtn" id="liveSettingsBtn" aria-label="设置"><svg class="i"><use href="#i-settings"/></svg></button>
+              </header>
+              <div class="taskstrip" id="liveTaskStrip" hidden>
+                <span class="spin" id="liveTaskSpin"></span><b id="liveTaskTitle">任务</b><span id="liveTaskSub">· 运行中</span><span class="go" id="liveTaskGo">详情 ›</span>
+              </div>
+              <div class="phone__body" id="liveBody">
+                <div id="liveBanners"></div>
+                <div id="liveHero">
+                  <div class="hero-empty">
+                    <div class="starmark"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                    <h2>把想法交给我</h2>
+                    <p>先说要做的事。我会确认目标、选好执行位置，再把结果带回来。</p>
+                    <div class="conn" id="liveConn"><i></i>默认中转站 · 已连接 <span style="color:var(--p-ink3)">·</span> <span style="color:var(--p-accent-ink)">数据目的地</span></div>
+                  </div>
+                  <div class="suggests">
+                    <button class="suggest" data-prompt="帮我整理今天的工作，列出最重要的三件事"><b>整理今天的工作</b><span>汇总待办与重点</span></button>
+                    <button class="suggest" data-prompt="把上周例会的结论整理成三条待办，分别给产品、后端和测试"><b>整理会议待办</b><span>拆成可执行任务</span></button>
+                    <button class="suggest" data-prompt="读一下项目里的接口文档，找出手机端还没实现的字段"><b>读文件找约定</b><span>先给方案再动手</span></button>
+                    <button class="suggest" data-prompt="帮我把这份整理结果发邮件给后端负责人"><b>发送邮件</b><span>外发前先审批</span></button>
+                  </div>
+                  <div class="recent">
+                    <div class="recent__head"><span>继续上次</span><span>全部任务 ›</span></div>
+                    <button class="recent__item" data-prompt="继续上次的字段补齐方案，把差异汇总完"><span class="r-ico"><svg class="i"><use href="#i-branch"/></svg></span><span class="r-main"><b>整理九月会议纪要</b><span>运行中 · 2 个子任务</span></span><span class="r-go">›</span></button>
+                    <button class="recent__item" data-prompt="周报草稿现在可以发了吗"><span class="r-ico"><svg class="i"><use href="#i-shield"/></svg></span><span class="r-main"><b>周报草稿发送</b><span>等待确认 · 审批 1</span></span><span class="r-go">›</span></button>
+                  </div>
+                </div>
+                <div id="liveMessages" aria-live="polite"></div>
+              </div>
+              <div class="composer" id="liveComposer">
+                <div class="replystrip" id="liveReplyStrip" hidden>
+                  <svg class="i"><use href="#i-reply"/></svg>
+                  <span class="rt" id="liveReplyText">回复</span>
+                  <button id="liveReplyCancel" aria-label="取消引用"><svg class="i"><use href="#i-x"/></svg></button>
+                </div>
+                <div class="recbar" id="liveRecbar" hidden>
+                  <span class="dot"></span>
+                  <span class="wave" id="liveWave"></span>
+                  <span class="time" id="liveRecTime">00:00</span>
+                  <button class="x" id="liveRecCancel">取消</button>
+                </div>
+                <div class="composer__box">
+                  <textarea id="liveInput" rows="1" placeholder="说说想完成什么…" aria-label="输入消息"></textarea>
+                  <div class="composer__bar">
+                    <button class="modechip" id="liveMode">问答 <svg class="i"><use href="#i-chev-d"/></svg></button>
+                    <button class="ibtn" id="liveAttach" aria-label="附件"><svg class="i"><use href="#i-attach"/></svg></button>
+                    <button class="ibtn" id="liveMic" aria-label="语音输入"><svg class="i"><use href="#i-mic"/></svg></button>
+                    <button class="ibtn ibtn--send" id="liveSend" aria-label="发送"><svg class="i"><use href="#i-arrow-up"/></svg></button>
+                  </div>
+                </div>
+                <div class="composer__hint"><span class="dest" id="liveDest"><svg class="i"><use href="#i-globe"/></svg>relay.example.com</span><span id="liveHint">回车发送 · Shift+回车换行</span></div>
+              </div>
+              <div class="sheetwrap" id="liveSheetWrap" role="dialog" aria-modal="true" aria-label="浮层">
+                <div class="sheet" id="liveSheet"></div>
+              </div>
+              <div class="toast" id="liveToast" role="status"></div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+          <p class="live-note">在手机里也可以直接操作：点建议问法、点麦克风、点消息右上⋯菜单、点任务卡展开。演示回答均为本地生成。</p>
+        </div>
+
+        <aside class="controls" aria-label="原型控制台">
+          <h4><span class="live-dot"></span>状态控制台</h4>
+
+          <div class="ctl-group">
+            <span>对话</span>
+            <div class="ctl-grid">
+              <button class="btn ctl ctl--accent" data-act="send"><svg class="i"><use href="#i-sparkles"/></svg>发一个问题</button>
+              <button class="btn ctl" data-act="stream"><svg class="i"><use href="#i-arrow-up"/></svg>长回答</button>
+              <button class="btn ctl" data-act="stop"><svg class="i"><use href="#i-stop"/></svg>停止生成</button>
+              <button class="btn ctl" data-act="clear"><svg class="i"><use href="#i-refresh"/></svg>清空会话</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <span>语音</span>
+            <div class="ctl-grid">
+              <button class="btn ctl" data-act="record"><svg class="i"><use href="#i-mic"/></svg>开始录音</button>
+              <button class="btn ctl" data-act="transcribe"><svg class="i"><use href="#i-mic"/></svg>停止并转写</button>
+              <button class="btn ctl" data-act="reccancel"><svg class="i"><use href="#i-x"/></svg>取消录音</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <span>消息级回复</span>
+            <div class="ctl-grid">
+              <button class="btn ctl" data-act="reply"><svg class="i"><use href="#i-reply"/></svg>回复上一条</button>
+              <button class="btn ctl" data-act="stale"><svg class="i"><use href="#i-alert"/></svg>引用失效</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <span>任务与审批</span>
+            <div class="ctl-grid">
+              <button class="btn ctl" data-act="task"><svg class="i"><use href="#i-branch"/></svg>派生子任务</button>
+              <button class="btn ctl" data-act="cancelTask"><svg class="i"><use href="#i-pause"/></svg>父任务取消</button>
+              <button class="btn ctl" data-act="approval"><svg class="i"><use href="#i-shield"/></svg>请求审批</button>
+              <button class="btn ctl" data-act="probe"><svg class="i"><use href="#i-key"/></svg>测试连接</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <span>异常</span>
+            <div class="ctl-grid">
+              <button class="btn ctl" data-act="offline"><svg class="i"><use href="#i-wifi"/></svg>断网</button>
+              <button class="btn ctl" data-act="online"><svg class="i"><use href="#i-wifi"/></svg>恢复网络</button>
+              <button class="btn ctl" data-act="auth"><svg class="i"><use href="#i-alert"/></svg>鉴权失败</button>
+              <button class="btn ctl" data-act="dark"><svg class="i"><use href="#i-star"/></svg>深色外观</button>
+            </div>
+          </div>
+
+          <button class="btn ctl" data-act="reset" style="width:100%"><svg class="i"><use href="#i-refresh"/></svg>重置演示</button>
+
+          <div class="logbox" id="liveLog"><span class="t">09:41</span> <b>ready</b> 原型已加载，无真实请求</div>
+<p class="ctl-note">演示状态全部在本地：不发请求、不录音、不写存储。真实链路需按 P0–P4 在目标设备与中转站上验证。</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ================= 05 ================= -->
+    <section class="sec" id="s5">
+      <div class="sec__head"><span class="sec__num">05</span><h2>并发任务：一个入口，两条正在跑的线</h2></div>
+      <p class="sec__lede">“一边录音转写，一边改 PPT”——这是最容易把界面做崩的场景：两个输入流、两种进度、一份文件还要写回。做法不是在会话里并列两段聊天，而是把三件事拆开：<b>输入通道</b>（录音条、文本框）只负责采集；<b>会话时间线</b>只留发起、关键节点、需要你、结果；<b>任务</b>各自拥有 context、预算、租约与检查点。界面上只多两样东西：顶部任务托盘，和二级的任务面板。</p>
+
+      <div class="grid grid--3">
+        <div class="card"><div class="card__k">一条会话</div><h4>不分裂聊天窗口</h4><p>第二条任务不新开会话。发起它的气泡与结果卡片留在原位置，后台进度只更新卡片，不刷屏、不打断对话。</p></div>
+        <div class="card"><div class="card__k">输入与任务分开</div><h4>录音是通道，转写才是任务</h4><p>麦克风同一时刻只发一个录音租约。转写结果先落「待确认草稿」，用户发送或说「整理成纪要」才变成任务输入。</p></div>
+        <div class="card"><div class="card__k">冲突要显式</div><h4>同一份文件只有一个写者</h4><p>PPT 写回前要审批；第二个任务想改同一文件时排队并显示等待位置，不静默覆盖、不各写一版。</p></div>
+      </div>
+
+      <h3 class="sub"><span class="dot"></span>架构：输入、路由、任务、事件分开</h3>
+      <div class="flow">
+        <div class="flow__box"><b>输入</b>文字 / 语音 / 附件<em>client_message_id + 显式 target_task_id（可选）</em></div>
+        <span class="flow__arrow">→</span>
+        <div class="flow__box"><b>持久收件队列</b>先落库，再回执<em>排队不是失败，可以继续发</em></div>
+        <span class="flow__arrow">→</span>
+        <div class="flow__box"><b>总 Agent 路由</b>new / update / cancel / clarify<em>不确定就先问，不猜归属</em></div>
+        <span class="flow__arrow">→</span>
+        <div class="flow__box"><b>任务注册表</b>task_id · context_id · 租约 · 预算<em>子代理独立上下文</em></div>
+        <span class="flow__arrow">→</span>
+        <div class="flow__box"><b>事件 + 快照</b>每任务独立 seq<em>托盘由快照渲染，不靠内存</em></div>
+      </div>
+
+      <div class="phonestage" style="margin-top:22px">
+        <!-- P6 双任务并行 -->
+        <figure class="figure">
+          <div class="phonewrap">
+            <div class="phone" aria-label="双任务并行原型">
+              <div class="statusbar"><span>9:41</span><span class="statusbar__right"><svg class="i"><use href="#i-signal"/></svg><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-battery"/></svg></span></div>
+              <header class="phone__appbar">
+                <div class="brand"><svg class="i i--fill"><use href="#i-star"/></svg></div>
+                <div class="titles"><b>星助理</b><span>默认中转站 · 2 个任务进行中</span></div>
+                <span class="spacer"></span>
+                <button class="ibtn" aria-label="历史"><svg class="i"><use href="#i-history"/></svg></button>
+                <button class="ibtn" aria-label="设置"><svg class="i"><use href="#i-settings"/></svg></button>
+              </header>
+              <div class="tray" aria-label="运行中的任务">
+                <span class="tray__item tray__item--rec"><span class="d"></span><b>录音转写</b><span>03:12</span></span>
+                <span class="tray__item"><span class="d"></span><b>改 PPT</b><span>2/3 步</span></span>
+                <span class="tray__item tray__item--wait"><span class="d"></span><b>待确认</b><span>1</span></span>
+                <span class="tray__all">任务面板 ›</span>
+              </div>
+              <div class="phone__body" style="padding-bottom:0">
+                <div class="msg msg--user">
+                  <div class="msg__col">
+                    <div class="bubble">帮我把这段录音转成纪要；另外把 Q3 复盘 PPT 第 4 页的数据换成最新的。</div>
+                    <div class="meta"><span>09:41 · 已送达</span><span>client_msg 3d8e</span></div>
+                  </div>
+                </div>
+
+                <div class="msg msg--assistant">
+                  <div class="msg__avatar"><svg class="i"><use href="#i-star"/></svg></div>
+                  <div class="msg__col">
+                    <div class="msg__name"><b>星助理</b>· 09:41 <span class="badge">拆成 2 个任务</span></div>
+                    <div class="tcard">
+                      <div class="tcard__head">
+                        <span class="tcard__ico"><svg class="i"><use href="#i-mic"/></svg></span>
+                        <span class="tcard__title"><b>录音转写 · 09:41</b><span>本机麦克风 → ASR 中转 cn-east</span></span>
+                        <span class="chip chip--rec" style="font-size:9.5px">录音 03:12</span>
+                      </div>
+                      <div class="tcard__body">
+                        <div class="tcard__rows">
+                          <div class="trow"><span class="ctx">ctx_rec_41</span><span>录音租约 · 上限 08:00</span><span class="state state--run"><i></i>进行中</span></div>
+                          <div class="trow"><span class="ctx">ctx_asr_88</span><span>分段转写 3/8 · 草稿不自动发</span><span class="state state--run"><i></i>进行中</span></div>
+                        </div>
+                      </div>
+                      <div class="tcard__foot"><button class="btn btn--sm">停止</button><button class="btn btn--sm">看草稿</button><span class="more">麦克风独占 · 1.8k/12k tok</span></div>
+                    </div>
+
+                    <div class="tcard" style="margin-top:8px">
+                      <div class="tcard__head">
+                        <span class="tcard__ico"><svg class="i"><use href="#i-cpu"/></svg></span>
+                        <span class="tcard__title"><b>改 PPT · Q3 复盘第 4 页</b><span>电脑 D-01 · 文件 rev 12</span></span>
+                        <span class="chip chip--wait" style="font-size:9.5px">待审批写回</span>
+                      </div>
+                      <div class="tcard__body">
+                        <div class="tcard__rows">
+                          <div class="trow"><span class="ctx">ctx_pp_07</span><span>读取第 4 页与数据源</span><span class="state state--done"><i></i>完成</span></div>
+                          <div class="trow"><span class="ctx">ctx_pp_22</span><span>写回 outlook.pptx（需你批准）</span><span class="state state--wait"><i></i>等待</span></div>
+                        </div>
+                        <div class="tcard__bar"><span class="tbar"><i style="width:64%"></i></span><span>6.4k / 20k tok</span></div>
+                      </div>
+                      <div class="tcard__foot"><button class="btn btn--sm">查看差异</button><button class="btn btn--sm btn--primary">审批写回</button><span class="more">审批绑定摘要 4b7e…9c02</span></div>
+                    </div>
+
+                    <div class="msg__text" style="margin-top:2px">录音先给草稿；PPT 写回前再确认。</div>
+                  </div>
+                </div>
+              </div>
+              <div class="composer">
+                <div class="sendto"><svg class="i"><use href="#i-arrow-up"/></svg>发送到 <span class="tgt">主会话</span><span>· 点任务卡可只发给该任务</span><span class="chev">›</span></div>
+                <div class="composer__box">
+                  <textarea rows="1" aria-label="输入示意">把录音里的行动项也加进 PPT 的结尾页</textarea>
+                  <div class="composer__bar">
+                    <span class="modechip">问答 <svg class="i"><use href="#i-chev-d"/></svg></span>
+                    <button class="ibtn" aria-label="附件"><svg class="i"><use href="#i-attach"/></svg></button>
+                    <button class="ibtn ibtn--rec" aria-label="录音进行中"><svg class="i"><use href="#i-mic"/></svg></button>
+                    <button class="ibtn ibtn--send" aria-label="发送"><svg class="i"><use href="#i-arrow-up"/></svg></button>
+                  </div>
+                </div>
+                <div class="composer__hint"><span class="dest"><svg class="i"><use href="#i-mic"/></svg>录音进行中 · 仍可输入</span><span>并发 2 / 3</span></div>
+              </div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+          <figcaption>
+            <div class="cap"><em>P6</em>两条任务并行的主会话<span class="cap-sub">· A19 / A20 · 文档 02 §10–11</span></div>
+            <ul class="notes">
+              <li><b>托盘不是页签：</b>只在有进行中任务时出现，横排 2–3 个状态胶囊；它不是底部导航，也不新增入口。</li>
+              <li><b>录音是输入通道：</b>录音条、计时在输入区；转写任务卡负责进度与草稿，二者不互相顶掉。</li>
+              <li><b>每条任务都写清位置与成本：</b>麦克风在本机、写文件在电脑 D-01、各自 token 预算，用户一眼知道数据去哪。</li>
+              <li><b>写回是审批点：</b>PPT 停在写文件前，批准绑定收件文件与摘要；改内容后旧批准自动失效。</li>
+              <li><b>两条线互不影响：</b>录音转完先给草稿，确认后才整理成纪要；PPT 写回同样只在批准后发生。</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <!-- P7 任务面板 -->
+        <figure class="figure">
+          <div class="phonewrap">
+            <div class="phone" aria-label="任务面板原型">
+              <div class="statusbar"><span>9:41</span><span class="statusbar__right"><svg class="i"><use href="#i-signal"/></svg><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-battery"/></svg></span></div>
+              <header class="phone__appbar">
+                <button class="ibtn" aria-label="返回"><svg class="i"><use href="#i-arrow-left"/></svg></button>
+                <div class="titles"><b>任务</b><span>1 进行中 · 1 待确认 · 1 等待设备</span></div>
+                <span class="spacer"></span>
+                <button class="ibtn" aria-label="更多"><svg class="i"><use href="#i-more"/></svg></button>
+              </header>
+              <div class="phone__body">
+                <div class="recent">
+                  <div class="recent__head"><span>需要你 · 1</span><span>按紧急度，不按时间</span></div>
+                  <button class="recent__item">
+                    <span class="r-ico" style="color:var(--p-amber)"><svg class="i"><use href="#i-shield"/></svg></span>
+                    <span class="r-main"><b>改 PPT · 写回第 4 页</b><span>t_pp22 · 电脑 D-01 · 09:58 前有效</span></span>
+                    <span class="chip chip--wait" style="font-size:9px">待审批</span>
+                  </button>
+
+                  <div class="recent__head" style="margin-top:14px"><span>进行中 · 1</span><span>离开不停止</span></div>
+                  <button class="recent__item">
+                    <span class="r-ico" style="color:#A52E27"><svg class="i"><use href="#i-mic"/></svg></span>
+                    <span class="r-main"><b>录音转写 · 周会</b><span>t_rec41 · 此手机 · 03:12 / 08:00</span></span>
+                    <span class="chip chip--rec" style="font-size:9px">录音中</span>
+                  </button>
+
+                  <div class="recent__head" style="margin-top:14px"><span>等待外部 · 1</span><span>不假装在跑</span></div>
+                  <button class="recent__item">
+                    <span class="r-ico" style="color:var(--p-ink3)"><svg class="i"><use href="#i-laptop"/></svg></span>
+                    <span class="r-main"><b>竞品资料邮件 · 草稿</b><span>t_mail_12 · 电脑 D-01 离线 · 恢复后重确认</span></span>
+                    <span class="chip chip--idle" style="font-size:9px">等待设备</span>
+                  </button>
+
+                  <div class="recent__head" style="margin-top:14px"><span>已完成 · 3</span><span>结果可追溯</span></div>
+                  <button class="recent__item">
+                    <span class="r-ico"><svg class="i"><use href="#i-check"/></svg></span>
+                    <span class="r-main"><b>会议纪要草稿 · 上周五</b><span>ctx_asr_77 · 草稿已确认 · 2 条来源</span></span>
+                    <span class="chip chip--done" style="font-size:9px">完成</span>
+                  </button>
+                  <button class="recent__item" style="margin-top:6px">
+                    <span class="r-ico"><svg class="i"><use href="#i-search"/></svg></span>
+                    <span class="r-main"><b>竞品定价检索 · 昨天</b><span>t_res_08 · 电脑 D-01 · 6 页引用</span></span>
+                    <span class="chip chip--done" style="font-size:9px">完成</span>
+                  </button>
+                  <button class="recent__item" style="margin-top:6px">
+                    <span class="r-ico"><svg class="i"><use href="#i-doc"/></svg></span>
+                    <span class="r-main"><b>周报草稿 · 上周四</b><span>t_doc_31 · 此手机 · 等你编辑</span></span>
+                    <span class="chip" style="font-size:9px">草稿</span>
+                  </button>
+
+                  <div class="sendto" style="border:1px solid var(--p-line);border-radius:10px;background:var(--p-surface);padding:9px 10px;margin-top:16px">
+                    <span>并发 2 / 3 · 深度 1 / 2</span><span class="chev">今日 38.2k / 120k tok</span>
+                  </div>
+                  <p style="font-size:10px;color:var(--p-ink3);line-height:1.6;margin:8px 2px 0">同一份文件同一时刻只有一个写者；电脑离线时任务进 waiting_device，不会假装在跑。</p>
+                </div>
+              </div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+          <figcaption>
+            <div class="cap"><em>P7</em>任务面板：并发、租约与预算<span class="cap-sub">· A10 / A12 / A19 / A20</span></div>
+            <ul class="notes">
+              <li><b>四个分组固定：</b>需要你 / 进行中 / 已完成 / 等待外部。紧急度优先，避免把「等审批」埋进列表。</li>
+              <li><b>点进去才是完整上下文：</b>子代理的 transcript、checkpoint、证据引用都在详情里，主会话不复制。</li>
+              <li><b>成本可见：</b>每个任务显示 token 预算，合计不超过父任务与账号上限；超限排队，不静默继续计费。</li>
+            </ul>
+          </figcaption>
+        </figure>
+      </div>
+
+      <h3 class="sub"><span class="dot"></span>一句话怎么落到正确的任务上</h3>
+      <div class="tablewrap"><table class="spec">
+        <thead><tr><th>用户这句话</th><th>路由判定</th><th>落到哪</th><th>界面反馈</th></tr></thead>
+        <tbody>
+          <tr><td>「把录音里的行动项加进结尾页」</td><td>update_task（带 input_refs）</td><td>改 PPT 任务</td><td>输入区显示「发送到 改 PPT」；卡片追加一步</td></tr>
+          <tr><td>「这段先别转成纪要」</td><td>cancel_task</td><td>录音转写任务</td><td>卡片转「正在停止」；已产出的草稿保留并说明</td></tr>
+          <tr><td>「顺便查一下竞品定价」</td><td>new_task</td><td>同会话新建任务</td><td>追加一张新卡片，托盘 +1，不打断上一条</td></tr>
+          <tr><td>「那页先别改」但没说是哪页</td><td>clarification</td><td>暂不落任务</td><td>回一句追问，不猜、不默认最新任务</td></tr>
+          <tr><td>电脑离线时点「批准写回」</td><td>保留审批，任务进 waiting_device</td><td>原任务</td><td>卡片提示「电脑离线；恢复后需重新确认」</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3 class="sub"><span class="dot"></span>资源冲突与恢复</h3>
+      <div class="tablewrap"><table class="spec">
+        <thead><tr><th>资源</th><th>独占/并发规则</th><th>冲突时界面</th></tr></thead>
+        <tbody>
+          <tr><td>本机麦克风</td><td>同一时刻一个录音租约；取消立即释放</td><td>第二个录音请求显示「麦克风被录音 #41 占用」，可排队或结束它</td></tr>
+          <tr><td>同一份 PPT 文件</td><td>同一时刻一个写者；写入校验 base_version</td><td>返回文件锁/版本冲突，给「对比后合并」而不是静默覆盖</td></tr>
+          <tr><td>配对电脑节点</td><td>节点在线 lease 才执行；撤销配对后新调用拒绝</td><td>离线进 waiting_device；恢复后重查权限与审批</td></tr>
+          <tr><td>网络与进程</td><td>后台不随客户端断开停止；重启从 checkpoint 恢复</td><td>重连先取任务快照，再按每任务 last_event_id 续订</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="grid grid--2" style="margin-top:18px">
+        <div class="card"><div class="card__k">为什么不是两个会话</div><h4>上下文不串，也不复制</h4><p>总 Agent 只做接收、澄清、路由与汇报；两个任务各自独立 context。跨任务只交换 <code>resource_id</code>（例如转写草稿 draft_0912），不复制整段对话，也不让模型互相看见对方的过程。</p></div>
+        <div class="card"><div class="card__k">为什么不是后台自动乱跑</div><h4>预算、深度、取消都可控</h4><p>每任务独立预算 + 父任务总预算；并发 3、递归深度 2；父取消向下传播到子代理。取消不等于撤销已写回的文件，界面会列出已完成与未执行的步骤。</p></div>
+      </div>
+
+      <div class="callout"><svg class="i" style="color:var(--accent-ink);flex:none"><use href="#i-branch"/></svg><div><b>这不是第二个入口。</b>托盘是主会话里的状态条，任务面板是二级页面；底部仍然没有页签，录音条也只占输入区。用户始终只面对一个星助理，专业分工留在系统内部。</div></div>
+    </section>
+
+    <!-- ================= 06 ================= -->
+    <section class="sec" id="s6">
+      <div class="sec__head"><span class="sec__num">06</span><h2>状态、错误与恢复</h2></div>
+      <p class="sec__lede">界面最容易被做假的地方就是状态。这里把错误分类和任务状态定死：每一个都能落到具体文案、可操作下一步与恢复策略；不存在笼统的「网络错误」，也不存在只靠模型措辞的「已完成」。</p>
+
+      <h3 class="sub"><span class="dot"></span>错误分类（对应 A04）</h3>
+      <div class="tablewrap">
+        <table class="spec">
+          <thead><tr><th>错误码</th><th>界面表现</th><th>用户下一步</th><th>不得出现</th></tr></thead>
+          <tbody>
+            <tr><td><code>network_unreachable</code></td><td>顶部条：当前网络不可达，草稿已保留。发送按钮置灰，不弹假回复。</td><td>检查网络或稍后重试；恢复后先查原请求状态再决定是否重发。</td><td>自动重试写操作；把草稿清空。</td></tr>
+            <tr><td><code>auth_failed</code></td><td>配置页对应 profile 标红；详情给 401 与凭据引用名。</td><td>去修改凭据引用；不要把 Key 贴进聊天或日志。</td><td>把整段响应体、请求头打进日志。</td></tr>
+            <tr><td><code>model_not_found</code></td><td>「模型不存在」，保留已填 model_id 供修改。</td><td>手填正确 ID 或从可选列表选择。</td><td>静默改用另一个模型继续执行。</td></tr>
+            <tr><td><code>quota_exceeded</code></td><td>「额度不足」，附当前 profile 与剩余额度（若服务返回）。</td><td>更换模型/服务或充值。</td><td>继续重试直到被动限流。</td></tr>
+            <tr><td><code>rate_limited</code></td><td>「请求过快」，显示建议等待时间；队列位次可见。</td><td>等待或降低并发；任务进入排队而非失败。</td><td>把限流写成鉴权失败。</td></tr>
+            <tr><td><code>unsupported_capability</code></td><td>能力标签置灰（如流式、工具），并说明该协议不支持。</td><td>切换适配器或关闭对应能力。</td><td>假装流式（一次性回显后再拆字）。</td></tr>
+            <tr><td><code>provider_error</code></td><td>「服务商错误」，展示 request_id 前缀与耗时。</td><td>保留诊断信息稍后重试；必要时切换服务商。</td><td>只显示「出错了」。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub"><span class="dot"></span>任务状态机（对应 A11 / A12 / A13）</h3>
+      <div class="tablewrap">
+        <table class="spec">
+          <thead><tr><th>状态</th><th>主界面</th><th>允许操作</th><th>持久化与恢复</th></tr></thead>
+          <tbody>
+            <tr><td><span class="st"><i class="st-dot" style="background:#B26B00"></i><code>queued</code> 排队</span></td><td>任务条：排队中 · 第 2 位</td><td>取消、查看详情</td><td>收件队列持久化，服务重启不丢单</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#245FBF"></i><code>running</code> 执行中</span></td><td>卡片显示步数与预算</td><td>停止生成、查看子代理、取消</td><td>每步写事件与 result_ref；断线后台继续</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#B26B00"></i><code>awaiting_approval</code> 待确认</span></td><td>审批卡置顶，任务条转黄</td><td>批准/拒绝（绑定摘要）</td><td>重启后审批仍有效或按 expires_at 失效</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#B26B00"></i><code>waiting_user</code> 等待你</span></td><td>卡片提示需要补充信息</td><td>回答、取消</td><td>问题与已收集上下文写入 checkpoint</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#57585F"></i><code>waiting_device</code> 等待电脑</span></td><td>「已连接电脑离线」+ 最后在线时间</td><td>重连、改为云端方案（需授权）</td><td>不假装执行；节点租约与在线状态真实</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#57585F"></i><code>waiting_external</code> 等外部</span></td><td>等待第三方返回，可离开页面</td><td>查看进度、取消</td><td>恢复时核对目标系统真实状态</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#D5443B"></i><code>failed</code> 失败</span></td><td>失败原因 + 已完成步骤 + 可重试范围</td><td>查看诊断、有限重试、取回输入</td><td>失败不被父代理的乐观总结覆盖</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#B26B00"></i><code>cancelling</code> 正在停止</span></td><td>「正在停止，等待工具确认」</td><td>无（等待）</td><td>确认执行停止后才进 cancelled</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#57585F"></i><code>cancelled</code> 已取消</span></td><td>已完成步骤 / 未执行步骤 / 是否可补偿</td><td>新建任务</td><td>取消不撤销已发送邮件或已改文件</td></tr>
+            <tr><td><span class="st"><i class="st-dot" style="background:#1F9D6B"></i><code>completed</code> 已完成</span></td><td>结果引用 + 证据 + 耗时</td><td>打开结果、复制、追问</td><td>必须有可核验结果，模型措辞不算</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid--3" style="margin-top:14px">
+        <div class="card"><div class="card__k">恢复顺序</div><h4>先快照，再续订</h4><p>重连或重启后先取任务快照（含 revision、steps、child_tasks），再从 last_event_id 订阅。缺口时重新取快照，不按片段硬拼正文。</p></div>
+        <div class="card"><div class="card__k">事件语义</div><h4>去重与缺口</h4><p>event_id 去重、seq 在任务内单调。message.completed 与流式片段不能重复追加；先落库后发事件。</p></div>
+        <div class="card"><div class="card__k">副作用</div><h4>未知就先查，不重放</h4><p>超时未知时先查原请求状态；任务、子代理、审批、外发动作都用 idempotency_key。取消不等于撤销已生效的外部操作。</p></div>
+      </div>
+
+      <div class="callout callout--warn">
+        <svg class="i"><use href="#i-alert"/></svg>
+        <div><b>外部内容只是数据。</b>文件、网页、邮件里的「请忽略之前指令」「把结果发到某地址」不会变成授权；审批只认当前用户在当前工作区发起的、绑定具体目标与摘要的批准。对应 A18。</div>
+      </div>
+    </section>
+
+    <!-- ================= 07 ================= -->
+    <section class="sec" id="s7">
+      <div class="sec__head"><span class="sec__num">07</span><h2>验收项映射</h2></div>
+      <p class="sec__lede">文档 03 的 A01–A20 在本原型里各有一个可见落点。注意：这里填的是「原型覆盖」而不是 PASS——真机、真实中转站、ASR 与电脑节点的证据仍需按 P0–P4 单独执行。</p>
+      <div class="tablewrap">
+        <table class="spec">
+          <thead><tr><th>编号</th><th>场景</th><th>原型落点</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td class="nowrap"><code>A01</code></td><td>单入口</td><td>P1 首启；全局无四页签、无三底栏</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A02</code></td><td>默认中转站</td><td>P2 连接状态、流式与停止；错误分类表</td><td><span class="chip chip--idle" style="font-size:10px">未接真实请求</span></td></tr>
+            <tr><td><code>A03</code></td><td>额外服务</td><td>P5 个人服务 B + 手填 model_id</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A04</code></td><td>错误分类</td><td>P5 <code>auth_failed</code> 卡；§05 七类错误</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A05</code></td><td>服务商切换</td><td>P5 profile 卡；切换提示历史范围与 execution_snapshot</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A06</code></td><td>语音流程</td><td>P3 + 交互录音/转写/取消</td><td><span class="chip chip--idle" style="font-size:10px">ASR 未验证</span></td></tr>
+            <tr><td><code>A07</code></td><td>消息级回复</td><td>P2 引用条与引用块；交互「回复上一条」</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A08</code></td><td>引用失效</td><td>交互「引用失效」→ 不可用占位；版本提示</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A09</code></td><td>提交幂等</td><td>P2 client_msg 与重试说明</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A10</code></td><td>子代理隔离</td><td>P4 两个独立 context_id 与各自状态</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A11</code></td><td>子代理恢复</td><td>P4 checkpoint 行；§05 恢复规则</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A12</code></td><td>预算和取消</td><td>P4 预算条、并发上限、父取消传播说明</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A13</code></td><td>弱网恢复</td><td>交互断网态 + §05 三张恢复卡</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A14</code></td><td>调试隔离</td><td>P5「调试版隔离」行与独立调试包说明</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A15</code></td><td>权限安全</td><td>审批卡范围；§05 交集与越权规则</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A16</code></td><td>敏感数据</td><td>P5 credential_ref、脱敏日志入口</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A17</code></td><td>审批完整性</td><td>P4 摘要字段与「改动即失效」提示</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A18</code></td><td>外部内容注入</td><td>§05 「外部内容只是数据」说明</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A19</code></td><td>持续接收需求</td><td>任务运行时仍可继续发送；任务条不阻塞输入</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+            <tr><td><code>A20</code></td><td>多任务正确路由</td><td>引用消息 → 定位对应任务；迟到结果只回任务卡</td><td><span class="chip chip--idle" style="font-size:10px">原型示意</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small" style="margin-top:10px">P5/P6 的额外覆盖（资源版本冲突、删除传播、撤权后检索与缓存清理；电脑离线等待、配对撤销、引擎安装边界）不在本轮原型范围内，需在后续原型或实现中单独表达。</p>
+    </section>
+
+    <!-- ================= 08 ================= -->
+    <section class="sec" id="s8">
+      <div class="sec__head"><span class="sec__num">08</span><h2>落地对应与已知风险</h2></div>
+      <p class="sec__lede">原型直接映射到现有 Kotlin/Compose 工程，不引入新框架、不改包名、不动旧数据。下表的「文件」均为仓库中已存在或需新增的真实模块，改动建议只描述方向，不代表已经实现。</p>
+
+      <div class="tablewrap">
+        <table class="spec">
+          <thead><tr><th>文件 / 模块</th><th>原型对应</th><th>建议改动</th><th>兼容要求</th></tr></thead>
+          <tbody>
+            <tr><td><code>AssistantScreen.kt</code></td><td>单入口与二级路由</td><td>去掉四页签 XfTopBar／ProductBottomBar，改为单会话 + drawer；旧路由保留在功能开关后面</td><td>旧入口可回退；不删除旧设置页</td></tr>
+            <tr><td><code>FriendChatScreen.kt</code></td><td>P1–P4 主会话</td><td>引用条、任务卡、停止生成、错误分类、语音确认区</td><td>现有流式与任务逻辑不重写，只改呈现与状态来源</td></tr>
+            <tr><td><code>XfDesign.kt</code>／<code>XfComponents.kt</code></td><td>全部视觉</td><td>沿用令牌；新增 TaskCard / ApprovalCard / QuoteBlock 组件</td><td>不改主题令牌含义，Xsalers 复用需回归</td></tr>
+            <tr><td><code>FriendModelClient.kt</code>／配置存储</td><td>P5 模型配置</td><td>多 profile、手填 model、真实探测、execution_snapshot</td><td>凭据只存 credential_ref；切换只影响新请求</td></tr>
+            <tr><td><code>AgentRuntime.kt</code>／<code>FriendRun*</code></td><td>P4 子代理</td><td>持久收件队列、独立 context_id、checkpoint、预算/并发/深度</td><td>父取消传播；恢复前重查权限</td></tr>
+            <tr><td><code>FriendRemote*</code></td><td>电脑节点</td><td>能力注册、离线等待、审批透传、配对撤销</td><td>不伪造在线状态</td></tr>
+            <tr><td>ASR 适配器（需新增）</td><td>P3 语音</td><td>独立配置与适配器，不与聊天模型混用</td><td>未接通时标 BLOCKED，不用模拟转写验收</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub"><span class="dot"></span>当前阻塞与待确认（对应文档 01 §15）</h3>
+      <ul class="risklist">
+        <li><b class="r-blocked">BLOCKED</b><span><b>中转站协议与模型映射未实测：</b>域名、鉴权方式、deepseek-flash 是否同名可用、额度与流式能力都需在目标账号上验证；本文档任何模型名都只是界面示意。</span></li>
+        <li><b class="r-blocked">BLOCKED</b><span><b>ASR 服务未确定：</b>本地或云端、中文能力、中国大陆网络、费用与音频保留策略均未决；没有服务时 P3 只能完成引用部分。</span></li>
+        <li><b class="r-blocked">BLOCKED</b><span><b>设备与发布渠道未定：</b>Android 或 iOS、调试与正式签名、测试设备、安装渠道；原型不区分平台细节。</span></li>
+        <li><b class="r-open">OPEN</b><span><b>现有 v2 合同只收文本：</b>引用、附件、模式、模型覆盖需通过能力协商新增字段；旧服务继续兼容，未支持控件不显示为可用。</span></li>
+        <li><b class="r-open">OPEN</b><span><b>仓库不是 git 仓库：</b>无法用 git status/diff 记录 dirty 文件。P0 需先建立可恢复补丁与文件清单，再做改动。</span></li>
+        <li><b class="r-todo">NEXT</b><span><b>本轮交付边界：</b>只交付本原型与设计说明，不改业务源码、不重打 APK、不部署服务器。实现顺序按 P0 → P1 → P2 → P3 → P4。</span></li>
+      </ul>
+
+      <div class="callout">
+        <svg class="i"><use href="#i-shield"/></svg>
+        <div><b>如何继续：</b>确认这版原型的信息架构与关键交互后，进入 P0（现状核查与保护工作区）与 P1（单入口 + 默认中转站真实聊天闭环）。P1 的通过条件是目标设备上一轮真实问答、断网与错误鉴权反馈正确，而不是本页面的按钮都能点。</div>
+      </div>
+    </section>
+
+    <footer class="docfoot">
+      <b>依据与版本</b>：产品原型 v1.0 · 2026-10-27 · 依据 XFriend 开发文档 01–04、现有 0.14 仓库与 <code>XfDesign.kt</code> 令牌；不含真实请求、录音与凭据。
+      <ul class="srclist">
+        <li><svg class="i"><use href="#i-doc"/></svg><a href="XFRIEND-MOBILE-SIMPLIFIED-DESIGN-2026-10-17.html">上一版手机端简化设计（2026-10-17，三页签，已过时）</a></li>
+        <li><svg class="i"><use href="#i-doc"/></svg><a href="design/redesign-concept-android-spec.md">Android 重构概念规格（0.11 设计语言）</a></li>
+        <li><svg class="i"><use href="#i-doc"/></svg><a href="MOBILE-0.14.md">0.14 交付说明（本机 Agent 与专家群）</a></li>
+        <li><svg class="i"><use href="#i-doc"/></svg><a href="../README.md">仓库 README 与构建说明</a></li>
+        <li><svg class="i"><use href="#i-doc"/></svg><a href="../app/src/main/java/com/singu/xfriend/AssistantScreen.kt">AssistantScreen.kt（现有四页签导航）</a></li>
+        <li><svg class="i"><use href="#i-doc"/></svg><a href="../app/src/main/java/com/singu/xfriend/FriendChatScreen.kt">FriendChatScreen.kt（现有会话与任务页）</a></li>
+        <li><svg class="i"><use href="#i-doc"/></svg><a href="../app/src/main/java/com/singu/xfriend/XfDesign.kt">XfDesign.kt（颜色、字号、间距令牌）</a></li>
+        <li><svg class="i"><use href="#i-doc"/></svg><a href="https://api-docs.deepseek.com/api/responses">DeepSeek 接口文档（模型能力以实测为准）</a></li>
+      </ul>
+      <p style="margin:14px 0 0">评审口径：本文件是可交互产品原型，不是可安装应用；任何「已连接」「已完成」字样都是界面状态示意，不代表真实服务已验证。</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const phone = $("#livePhone");
+  const body = $("#liveBody");
+  const messages = $("#liveMessages");
+  const hero = $("#liveHero");
+  const input = $("#liveInput");
+  const sheetWrap = $("#liveSheetWrap");
+  const sheet = $("#liveSheet");
+  const toastEl = $("#liveToast");
+  const logEl = $("#liveLog");
+  const replyStrip = $("#liveReplyStrip");
+  const replyText = $("#liveReplyText");
+  const recbar = $("#liveRecbar");
+  const recTime = $("#liveRecTime");
+  const subLine = $("#liveSub");
+  const conn = $("#liveConn");
+  const dest = $("#liveDest");
+  const hint = $("#liveHint");
+  const taskStrip = $("#liveTaskStrip");
+  const banners = $("#liveBanners");
+
+  const S = {
+    msgs: [], seq: 0, stream: null, streamingMsg: null,
+    reply: null, task: null, approval: null,
+    offline: false, recording: false, recTimer: null, recSecs: 0,
+    probeFail: false, sheet: null
+  };
+
+  const clock = () => {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+  const md = (s, partial) => {
+    let t = String(s);
+    if (partial) {
+      const marks = t.match(/\*\*/g);
+      if (marks && marks.length % 2 === 1) {
+        const i = t.lastIndexOf("**");
+        t = t.slice(0, i) + t.slice(i + 2);
+      }
+    }
+    return esc(t)
+      .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .split(/\n{2,}/).map((p) => "<p>" + p.replace(/\n/g, "<br>") + "</p>").join("");
+  };
+
+  function log(msg, kind) {
+    const t = clock();
+    const line = document.createElement("div");
+    line.innerHTML = '<span class="t">' + t + "</span> <b>" + esc(kind || "evt") + "</b> " + esc(msg);
+    logEl.prepend(line);
+    while (logEl.children.length > 12) logEl.lastElementChild.remove();
+  }
+  let toastTimer = null;
+  function toast(msg) {
+    const comp = document.getElementById("liveComposer");
+    if (comp) toastEl.style.bottom = (comp.offsetHeight + 24) + "px";
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+    log(msg, "toast");
+  }
+
+  /* ---------- rendering ---------- */
+  function quoteHtml(q) {
+    if (!q) return "";
+    if (q.gone) return '<div class="quote quote--gone"><div class="q-top">原消息不可用</div><div class="q-text">目标已被删除或权限已撤销，预览不再展示。</div></div>';
+    if (q.stale) return '<div class="quote quote--stale"><div class="q-top"><svg class="i"><use href="#i-reply"/></svg>引用版本 · 已编辑</div><div class="q-text">' + esc(q.text) + "</div></div>";
+    return '<div class="quote"><div class="q-top"><svg class="i"><use href="#i-reply"/></svg>回复 ' + esc(q.author) + (q.time ? " · " + esc(q.time) : "") + '</div><div class="q-text">' + esc(q.text) + "</div></div>";
+  }
+
+  function taskHtml(t) {
+    const subs = t.subs.map((s) => {
+      const cls = s.state === "done" ? "state--done" : s.state === "run" ? "state--run" : s.state === "wait" ? "state--wait" : "";
+      const label = {done:"完成", run:"进行中", wait:"等待", stopped:"已停止"}[s.state] || s.state;
+      return '<div class="trow"><span class="ctx">' + esc(s.ctx) + "</span><span>" + esc(s.label) + '</span><span class="state ' + cls + '"><i></i>' + label + "</span></div>";
+    }).join("");
+    const pct = Math.min(100, Math.round(t.used / t.max * 100));
+    const chip = t.status === "cancelled"
+      ? '<span class="chip chip--idle" style="font-size:9.5px">已取消</span>'
+      : t.status === "cancelling"
+        ? '<span class="chip chip--wait" style="font-size:9.5px">正在停止</span>'
+        : '<span class="chip chip--run" style="font-size:9.5px">运行中</span>';
+    const foot = t.status === "cancelled"
+      ? '<span class="more">已完成 2 项，未执行 1 项；外发副作用不自动撤销</span>'
+      : '<button class="btn btn--sm" data-toggle-task="' + t.id + '">' + (t.expanded ? "收起" : "展开") + '</button><button class="btn btn--sm" data-cancel-task="' + t.id + '">取消</button><span class="more">取消向下传播</span>';
+    const extra = t.expanded ? '<div class="trow" style="margin-top:6px"><span class="ctx">cp_07</span><span>检查点 · 恢复前重查权限与预算</span></div>' : "";
+    return '<div class="tcard" data-task="' + t.id + '">' +
+      '<div class="tcard__head"><span class="tcard__ico"><svg class="i"><use href="#i-branch"/></svg></span>' +
+      '<span class="tcard__title"><b>' + esc(t.title) + '</b><span><svg class="i" style="width:9px;height:9px"><use href="#i-phone"/></svg> ' + esc(t.where) + " · rev " + t.rev + "</span></span>" + chip + "</div>" +
+      '<div class="tcard__body"><div class="tcard__rows">' + subs + "</div>" + extra +
+      '<div class="tcard__bar"><span class="tbar"><i style="width:' + pct + '%"></i></span><span>' + (t.used / 1000).toFixed(1) + "k / " + (t.max / 1000) + "k tok</span></div></div>" +
+      '<div class="tcard__foot">' + foot + "</div></div>";
+  }
+
+  function approvalHtml(a) {
+    const chip = a.status === "pending"
+      ? ""
+      : '<span class="chip ' + (a.status === "approved" ? "chip--done" : "chip--idle") + '" style="font-size:9px;padding:2px 6px">' + (a.status === "approved" ? "已批准" : "已拒绝") + "</span>";
+    const btns = a.status === "pending"
+      ? '<div class="approval__btns"><button class="btn btn--sm" data-approval="reject">拒绝</button><button class="btn btn--sm btn--primary" data-approval="approve">批准并发送</button></div>'
+      : '<p class="approval__note" style="margin:0">' + (a.status === "approved" ? "已批准：仅对摘要 " + a.digest + " 与当前收件人有效。执行结果将回传到任务卡。" : "已拒绝：未执行外发动作；可修改后重新发起审批。") + "</p>";
+    return '<div class="approval"><div class="approval__top"><svg class="i"><use href="#i-shield"/></svg>待你确认 ' + chip + '<span class="ttl">' + a.expires + ' 前有效</span></div>' +
+      '<h5>' + esc(a.title) + "</h5><p>" + esc(a.desc) + "</p><dl>" +
+      "<dt>收件人</dt><dd>" + esc(a.to) + "</dd><dt>正文摘要</dt><dd>" + esc(a.summary) + "</dd><dt>操作摘要</dt><dd>" + esc(a.digest) + "</dd></dl>" +
+      '<p class="approval__note">修改收件人、正文或参数后，本次批准自动失效。</p>' + btns + "</div>";
+  }
+
+  function msgHtml(m) {
+    if (m.role === "user") {
+      return '<div class="msg msg--user" data-msg="' + m.id + '"><div class="msg__col"><div class="bubble">' + quoteHtml(m.quote) + esc(m.text).replace(/\n/g, "<br>") + "</div>" +
+        '<div class="meta"><span>' + m.time + " · 已送达</span><span>client_msg " + m.id + "</span></div></div></div>";
+    }
+    const typing = m.streaming ? " typing" : "";
+    const stream = m.streaming ? '<div class="stream-note"><span class="dots"><i></i><i></i><i></i></span>正在生成 · 默认中转站</div>' +
+      '<button class="stream-stop" data-stop="1"><svg class="i"><use href="#i-stop"/></svg>停止生成</button>' : "";
+    const stopped = m.stopped ? '<div class="stream-note"><svg class="i" style="width:10px;height:10px"><use href="#i-pause"/></svg>已停止生成，已保留内容</div>' : "";
+    return '<div class="msg msg--assistant" data-msg="' + m.id + '"><div class="msg__avatar"><svg class="i i--fill"><use href="#i-star"/></svg></div>' +
+      '<div class="msg__col"><div class="msg__name"><b>星助理</b>· ' + m.time + (m.ack ? ' <span class="badge">接单</span>' : "") + "</div>" +
+      (m.task ? taskHtml(m.task) : "") + (m.approval ? approvalHtml(m.approval) : "") +
+      '<div class="msg__text' + typing + '">' + md(m.text, m.streaming) + "</div>" + stream + stopped +
+      '<div class="meta"><span>' + m.time + '</span><span class="msg__more"><button data-reply="' + m.id + '"><svg class="i" style="width:10px;height:10px"><use href="#i-reply"/></svg>回复</button> <button data-more="' + m.id + '"><svg class="i" style="width:11px;height:11px"><use href="#i-more"/></svg></button></span></div></div></div>';
+  }
+
+  function render() {
+    messages.innerHTML = S.msgs.map(msgHtml).join("");
+    hero.style.display = S.msgs.length ? "none" : "block";
+    // task strip
+    if (S.task) {
+      taskStrip.hidden = false;
+      $("#liveTaskTitle").textContent = S.task.title;
+      $("#liveTaskSub").textContent = S.task.status === "cancelled" ? "· 已取消" : S.task.status === "cancelling" ? "· 正在停止" : "· " + S.task.subs.filter(x => x.state === "done").length + "/" + S.task.subs.length + " 子任务";
+      taskStrip.classList.toggle("taskstrip--wait", S.task.status !== "running");
+      $("#liveTaskSpin").style.display = S.task.status === "running" ? "" : "none";
+    } else {
+      taskStrip.hidden = true;
+    }
+    // composer state
+    if (S.reply) {
+      replyStrip.hidden = false;
+      replyText.innerHTML = S.reply.gone ? '引用 <b>不可用</b>：原消息已删除或撤权' : '回复 <b>' + esc(S.reply.author) + '</b>：' + esc(S.reply.text.replace(/\*\*|`/g, ""));
+    } else replyStrip.hidden = true;
+    $("#liveSend").disabled = S.offline || S.streamingMsg !== null;
+    hint.textContent = S.offline ? "离线 · 草稿保留" : S.streamingMsg ? "生成中 · 可停止" : "回车发送 · Shift+回车换行";
+    subLine.textContent = S.offline ? "离线 · 草稿已保留" : "默认中转站 · 已连接";
+    conn.innerHTML = S.offline
+      ? '<i class="off"></i>离线，无法发送 <span style="color:var(--p-ink3)">·</span> <span style="color:var(--p-accent-ink)">查看草稿</span>'
+      : '<i></i>默认中转站 · 已连接 <span style="color:var(--p-ink3)">·</span> <span style="color:var(--p-accent-ink)">数据目的地</span>';
+    // banners
+    let b = "";
+    if (S.offline) b += '<div class="lvbanner lvbanner--warn"><svg class="i"><use href="#i-wifi"/></svg><div><b>网络不可达。</b>草稿已保留；恢复后先查询原请求状态，再决定是否重发。</div></div>';
+    if (S.authError) b += '<div class="lvbanner lvbanner--fail"><svg class="i"><use href="#i-alert"/></svg><div><b>auth_failed · 401。</b>凭据引用 cred_ref_2 无效，去「设置 → 模型与语音」修改；Key 不会出现在日志里。</div></div>';
+    banners.innerHTML = b;
+    if (S.msgs.length) body.scrollTop = body.scrollHeight;
+  }
+
+  /* ---------- streaming ---------- */
+  function streamInto(m, full, done) {
+    let i = 0;
+    m.streaming = true;
+    render();
+    S.stream = setInterval(() => {
+      i += 3;
+      m.text = full.slice(0, i);
+      const el = document.querySelector('[data-msg="' + m.id + '"] .msg__text');
+      if (el) el.innerHTML = md(m.text, true);
+      body.scrollTop = body.scrollHeight;
+      if (i >= full.length) {
+        clearInterval(S.stream); S.stream = null;
+        m.streaming = false; S.streamingMsg = null;
+        if (done) done();
+        render();
+      }
+    }, 26);
+  }
+
+  const REPLIES = {
+    work: "我先把今天拆成三类：**必须今天完成**、**可以并行**、**需要你决定**。\n\n- 把会议结论转成三条待办，交给产品、后端、测试\n- 把字段差异汇总成半页说明，附上默认中转站的错误日志\n- 周报只写结论与风险，不再复制过程\n\n要我把这三件事派成子任务并行跑吗？",
+    task: "这件事适合拆开做，我先派两个子代理：一个对齐字段，一个校验版本。它们各有独立的上下文与检查点，主会话只会出现任务卡片。\n\n任务运行中你仍然可以继续问我别的事，不需要等它结束。",
+    mail: "这一步会对外发送邮件，属于需要确认的动作。我先把审批卡放到会话里：收件人、正文摘要、有效期都会写清楚；你改了任何一个字段，原来的批准就失效。",
+    read: "我会先只读文件、给出方案，不会直接改。若文件在你已连接的电脑上，我需要那台电脑在线；离线时任务会显示「等待电脑」，而不是假装在跑。",
+    default: "收到。我先确认两件事：目标是「先给方案」还是「直接执行」？执行位置用当前手机，还是已连接的电脑？\n\n确认后我会在后台推进，过程只以任务卡片呈现。"
+  };
+  function pickReply(text) {
+    if (/邮件|发送/.test(text)) return "mail";
+    if (/待办|会议|任务|子代理|拆|并行/.test(text)) return "task";
+    if (/整理|今天|周报|工作/.test(text)) return "work";
+    if (/文件|文档|接口|读/.test(text)) return "read";
+    return "default";
+  }
+
+  function send(text) {
+    text = (text || "").trim();
+    if (!text) { toast(S.offline ? "当前离线，草稿已保留" : "先写点什么"); return; }
+    if (S.offline) { toast("网络不可达：草稿已保留，未发送"); return; }
+    if (S.streamingMsg) { toast("正在生成，先停止或等待完成"); return; }
+    const id = "7f" + (++S.seq).toString(16).padStart(2, "0");
+    S.msgs.push({ id, role: "user", text, time: clock(), quote: S.reply });
+    S.reply = null;
+    input.value = "";
+    autoGrow();
+    const key = pickReply(text);
+    const am = { id: "a" + id, role: "assistant", text: "", time: clock(), ack: true, streaming: true };
+    S.msgs.push(am);
+    S.streamingMsg = am;
+    render();
+    log("提交 client_message_id=" + id + " → 收件队列受理", "submit");
+    streamInto(am, REPLIES[key], () => {
+      if (key === "task") spawnTask(am);
+      if (key === "mail") { spawnApproval(am); }
+    });
+  }
+
+  function spawnTask(anchor) {
+    if (S.task && S.task.status !== "cancelled") { toast("已有运行中的任务；取消或等待后再派"); return; }
+    S.task = {
+      id: "t_" + Math.random().toString(16).slice(2, 6),
+      title: "整理会议结论并分派",
+      where: "此手机",
+      rev: 7, used: 12400, max: 40000,
+      status: "running", expanded: false,
+      subs: [
+        { ctx: "ctx_8f2a", label: "对齐字段与引用关系", state: "run" },
+        { ctx: "ctx_3c71", label: "草拟交付说明", state: "wait" }
+      ]
+    };
+    anchor.task = S.task;
+    render();
+    log("subagent.created ctx_8f2a / ctx_3c71（并发上限 3，深度 2）", "task");
+    setTimeout(() => {
+      if (!S.task) return;
+      S.task.subs[0].state = "done";
+      S.task.subs[1].state = "run";
+      S.task.used = 18600;
+      render();
+    }, 3200);
+    setTimeout(() => {
+      if (!S.task) return;
+      S.task.subs[1].state = "done";
+      S.task.status = "running";
+      S.task.used = 24100;
+      render();
+      toast("子任务完成，结果汇总待你查看");
+    }, 7000);
+  }
+
+  function spawnApproval(anchor) {
+    S.approval = {
+      status: "pending", title: "发送任务汇总邮件",
+      desc: "把已完成的字段差异发给后端负责人，正文引用当前任务结果。",
+      to: "backend-lead@example.com", summary: "2 处字段变更 + 1 处待确认",
+      digest: "8f3a…d2c1", expires: "09:58"
+    };
+    anchor.approval = S.approval;
+    render();
+    log("approval.required action_digest=8f3a…d2c1", "gate");
+  }
+
+  /* ---------- composer / voice ---------- */
+  function autoGrow() {
+    input.style.height = "auto";
+    input.style.height = Math.min(88, input.scrollHeight) + "px";
+  }
+  input.addEventListener("input", autoGrow);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input.value); }
+  });
+  $("#liveSend").addEventListener("click", () => send(input.value));
+  $("#liveMic").addEventListener("click", () => S.recording ? stopRecording(true) : startRecording());
+  $("#liveRecCancel").addEventListener("click", () => stopRecording(false));
+  $("#liveReplyCancel").addEventListener("click", () => { S.reply = null; render(); toast("已取消引用"); });
+  $("#liveAttach").addEventListener("click", () => toast("附件需系统选择器；远端未支持时会明确禁用，而不是假装上传"));
+  $("#liveMode").addEventListener("click", () => {
+    openSheet("mode");
+  });
+  $("#liveHistoryBtn").addEventListener("click", () => openSheet("history"));
+  $("#liveSettingsBtn").addEventListener("click", () => openSheet("settings"));
+
+  function startRecording() {
+    if (S.recording) return;
+    S.recording = true; S.recSecs = 0;
+    recbar.hidden = false;
+    $("#liveWave").innerHTML = Array.from({length:18}, () => "<i></i>").join("");
+    recTime.textContent = "00:00";
+    $("#liveHint").textContent = "录音中 · 上滑或点取消会丢弃本次音频";
+    S.recTimer = setInterval(() => {
+      S.recSecs++;
+      recTime.textContent = "00:" + String(S.recSecs).padStart(2, "0");
+      if (S.recSecs >= 60) stopRecording(true);
+    }, 1000);
+    log("录音开始（演示，不采集真实音频）", "asr");
+  }
+  function stopRecording(transcribe) {
+    if (!S.recording) return;
+    clearInterval(S.recTimer);
+    S.recording = false; recbar.hidden = true;
+    if (!transcribe) {
+      log("取消录音，临时音频已清理", "asr");
+      toast("已取消，本次临时音频已清理");
+      render(); return;
+    }
+    toast("转写中…");
+    setTimeout(() => {
+      const t = "帮我查一下上周例会记录里关于审批超时的结论，整理成三条待办，分别给产品、后端和测试";
+      input.value = t; autoGrow();
+      $("#liveHint").textContent = "转写完成 · 可编辑后发送";
+      log("ASR 转写完成（示意文本）", "asr");
+      toast("转写完成，可编辑后发送");
+      input.focus();
+    }, 900);
+  }
+
+  /* ---------- message actions / delegation ---------- */
+  messages.addEventListener("click", (e) => {
+    const stop = e.target.closest("[data-stop]");
+    if (stop) { stopStreaming(); return; }
+    const rep = e.target.closest("[data-reply]");
+    if (rep) {
+      const m = S.msgs.find(x => x.id === rep.dataset.reply);
+      if (m) { S.reply = { author: "星助理", text: m.text.slice(0, 34) + "…", time: m.time }; render(); toast("已引用该消息"); input.focus(); }
+      return;
+    }
+    const more = e.target.closest("[data-more]");
+    if (more) { openSheet("action", more.dataset.more); return; }
+    const tg = e.target.closest("[data-toggle-task]");
+    if (tg && S.task) { S.task.expanded = !S.task.expanded; render(); return; }
+    const ct = e.target.closest("[data-cancel-task]");
+    if (ct) { cancelTask(); return; }
+    const ap = e.target.closest("[data-approval]");
+    if (ap && S.approval) {
+      S.approval.status = ap.dataset.approval === "approve" ? "approved" : "rejected";
+      render();
+      log("approval.decision " + S.approval.status + " digest=" + S.approval.digest, "gate");
+      toast(S.approval.status === "approved" ? "已批准：仅对当前摘要有效" : "已拒绝，未执行外发");
+    }
+  });
+
+  function stopStreaming() {
+    if (!S.streamingMsg) { toast("当前没有正在生成的内容"); return; }
+    clearInterval(S.stream); S.stream = null;
+    S.streamingMsg.streaming = false;
+    S.streamingMsg.stopped = true;
+    S.streamingMsg = null;
+    render();
+    log("用户停止生成，保留已完成片段", "stream");
+    toast("已停止生成");
+  }
+
+  function cancelTask() {
+    if (!S.task) { toast("没有运行中的任务"); return; }
+    if (S.task.status === "cancelled") { toast("任务已取消"); return; }
+    S.task.status = "cancelling";
+    render();
+    log("task.cancel → cancelling，等待工具确认", "task");
+    setTimeout(() => {
+      if (!S.task) return;
+      S.task.status = "cancelled";
+      S.task.subs.forEach(s => { if (s.state === "run") s.state = "stopped"; });
+      render();
+      log("cancelled：2 步完成，1 步未执行；外发副作用不撤销", "task");
+      toast("已取消：已完成 2 步，未执行 1 步");
+    }, 900);
+  }
+
+  /* ---------- sheets ---------- */
+  function openSheet(kind, payload) {
+    S.sheet = kind;
+    let html = "";
+    if (kind === "history") {
+      html = '<div class="sheet__grab"></div><div class="sheet__head"><h4>历史</h4><button class="ibtn" data-close="1"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sheet__body">' +
+        '<div class="day" style="margin-top:0">今天</div>' +
+        histRow("字段补齐方案与引用契约", "运行中 · 2 个子任务", "09:42") +
+        histRow("九月会议纪要整理", "已完成 · 结果 3 条待办", "08:15") +
+        '<div class="day">昨天</div>' +
+        histRow("周报草稿", "等待确认 · 审批 1", "18:02") +
+        histRow("手机端 v2 合同差异", "已完成 · 2 个文件引用", "11:30") +
+        '<p class="small" style="margin-top:10px">历史只影响会话视图；任务状态与引用权限仍以服务端为准。</p></div>';
+    } else if (kind === "settings") {
+      html = '<div class="sheet__grab"></div><div class="sheet__head"><h4>设置</h4><button class="ibtn" data-close="1"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sheet__body">' +
+        sheetRow("key", "模型与语音", "默认中转站 · 1 个额外服务", "models") +
+        sheetRow("folder", "记忆与工作区", "查看、纠正、删除、暂停记录", "") +
+        sheetRow("doc", "任务与诊断", "脱敏日志、导出预览", "") +
+        sheetRow("shield", "调试版隔离", "com.singu.xfriend.debug", "") +
+        '</div>';
+    } else if (kind === "models") {
+      html = '<div class="sheet__grab"></div><div class="sheet__head"><h4>模型与语音</h4><button class="ibtn" data-close="1"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sheet__body">' +
+        '<div class="card" style="padding:10px;margin-bottom:8px"><div style="display:flex;gap:6px;align-items:center"><b style="font-size:12px">默认中转站</b><span class="chip chip--accent" style="font-size:9px;margin-left:auto">使用中</span></div><p class="small" style="margin:3px 0 0">relay · 账户鉴权 · 流式 ✓ 工具 ✓</p></div>' +
+        '<div class="card" style="padding:10px;margin-bottom:8px"><div style="display:flex;gap:6px;align-items:center"><b style="font-size:12px">个人服务 B</b><span class="chip chip--fail" style="font-size:9px;margin-left:auto">auth_failed</span></div><p class="small" style="margin:3px 0 0">openai_chat_completions · example-model-v1（手填）<br>凭据引用 cred_ref_2 · 数据发往 api.personal.example</p></div>' +
+        '<button class="btn" style="width:100%;margin-bottom:8px" data-probe="1"><svg class="i"><use href="#i-key"/></svg>测试连接（真实请求）</button>' +
+        '<p class="small" id="probeOut" style="margin:0 0 8px">切换服务商只影响新请求；已开始任务保留 execution_snapshot。</p>' +
+        '<p class="small" style="margin:0">ASR 配置独立：云端 · 中文 · cn-east · 最大 60s · 音频不长期保留。</p></div>';
+    } else if (kind === "action") {
+      const m = S.msgs.find(x => x.id === payload);
+      html = '<div class="sheet__grab"></div><div class="sheet__head"><h4>消息操作</h4><button class="ibtn" data-close="1"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sheet__body">' +
+        '<button class="menurow" data-act="reply-msg" data-id="' + payload + '"><span class="mi"><svg class="i"><use href="#i-reply"/></svg></span><span class="mt"><b>回复这条消息</b><span>保留 reply_to_message_id 与目标版本</span></span></button>' +
+        '<button class="menurow" data-act="copy-msg" data-id="' + payload + '"><span class="mi"><svg class="i"><use href="#i-doc"/></svg></span><span class="mt"><b>复制文字</b><span>只复制正文，不含执行状态</span></span></button>' +
+        '<button class="menurow" data-act="locate-msg" data-id="' + payload + '"><span class="mi"><svg class="i"><use href="#i-search"/></svg></span><span class="mt"><b>定位原消息</b><span>滚动并高亮；不可用时显示占位</span></span></button>' +
+        '<button class="menurow danger" data-act="stale-msg" data-id="' + payload + '"><span class="mi"><svg class="i"><use href="#i-alert"/></svg></span><span class="mt"><b>模拟原消息被删除</b><span>用于检查引用占位是否泄露旧内容</span></span></button></div>';
+    } else if (kind === "mode") {
+      html = '<div class="sheet__grab"></div><div class="sheet__head"><h4>本轮模式</h4><button class="ibtn" data-close="1"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sheet__body">' +
+        '<button class="menurow" data-mode="问答"><span class="mi"><svg class="i"><use href="#i-sparkles"/></svg></span><span class="mt"><b>问答</b><span>只读已授权资料，不写文件、不装能力</span></span></button>' +
+        '<button class="menurow" data-mode="计划"><span class="mi"><svg class="i"><use href="#i-doc"/></svg></span><span class="mt"><b>计划</b><span>形成步骤与所需资料，确认后才执行</span></span></button>' +
+        '<button class="menurow" data-mode="执行"><span class="mi"><svg class="i"><use href="#i-shield"/></svg></span><span class="mt"><b>执行</b><span>使用当前已授权工具；高风险动作仍需审批</span></span></button></div>';
+    }
+    sheet.innerHTML = html;
+    sheetWrap.classList.add("open");
+  }
+  function histRow(t, s, time) {
+    return '<button class="recent__item" style="width:100%"><span class="r-ico"><svg class="i"><use href="#i-doc"/></svg></span><span class="r-main"><b>' + esc(t) + "</b><span>" + esc(s) + "</span></span><span>" + time + "</span></button>";
+  }
+  function sheetRow(icon, title, sub, go) {
+    return '<button class="menurow"' + (go ? ' data-sheet="' + go + '"' : "") + '><span class="mi"><svg class="i"><use href="#i-' + icon + '"/></svg></span><span class="mt"><b>' + esc(title) + "</b><span>" + esc(sub) + "</span></span><span class=\"chev\">›</span></button>";
+  }
+  function closeSheet() { sheetWrap.classList.remove("open"); S.sheet = null; }
+  sheetWrap.addEventListener("click", (e) => {
+    if (e.target === sheetWrap) closeSheet();
+    if (e.target.closest("[data-close]")) closeSheet();
+    const go = e.target.closest("[data-sheet]");
+    if (go) { openSheet(go.dataset.sheet); return; }
+    const probe = e.target.closest("[data-probe]");
+    if (probe) { runProbe(); return; }
+    const mode = e.target.closest("[data-mode]");
+    if (mode) { $("#liveMode").innerHTML = esc(mode.dataset.mode) + ' <svg class="i"><use href="#i-chev-d"/></svg>'; closeSheet(); toast("本轮模式：" + mode.dataset.mode + "（仅新请求生效）"); return; }
+    const act = e.target.closest("[data-act]");
+    if (act) {
+      const id = act.dataset.id;
+      const m = S.msgs.find(x => x.id === id);
+      if (act.dataset.act === "reply-msg" && m) { S.reply = { author: "星助理", text: m.text.slice(0, 34) + "…", time: m.time }; closeSheet(); render(); input.focus(); }
+      if (act.dataset.act === "copy-msg" && m) { closeSheet(); toast("已复制（演示）"); }
+      if (act.dataset.act === "locate-msg" && m) { closeSheet(); const el = document.querySelector('[data-msg="' + m.id + '"]'); if (el) { el.scrollIntoView({block:"center",behavior:"smooth"}); } toast("已定位原消息"); }
+      if (act.dataset.act === "stale-msg" && m) { S.reply = { gone: true }; closeSheet(); render(); toast("原消息已删除：引用将显示不可用占位"); }
+    }
+  });
+
+  function runProbe() {
+    const out = $("#probeOut");
+    S.probeFail = !S.probeFail;
+    if (S.probeFail) {
+      out.innerHTML = '<b style="color:#A52E27">auth_failed · 401</b> · 1.1s<br>检查凭据引用 cred_ref_2 是否存在；请求 ID req_9f21（不含 Key）。';
+      log("probe auth_failed 401 cred_ref_2", "probe");
+    } else {
+      out.innerHTML = '<b style="color:#11704B">连接成功 · 1.2s</b><br>流式 ✓ 工具 ✓ 上下文 32k（以服务返回为准）；request_id req_9f20。';
+      log("probe ok 1.2s streaming=true tools=true", "probe");
+    }
+    toast("测试完成（演示结果）");
+  }
+
+  /* ---------- control panel ---------- */
+  const ACT = {
+    send: () => { if (!S.msgs.length) send("帮我整理今天的工作，列出最重要的三件事"); else send("再帮我确认一下：如果任务还在跑，我能继续发新需求吗？"); },
+    stream: () => { S.reply = null; render(); send("读一下项目里的接口文档，找出手机端还没实现的字段"); },
+    stop: stopStreaming,
+    clear: () => { clearInterval(S.stream); S.msgs = []; S.task = null; S.approval = null; S.streamingMsg = null; S.reply = null; if (S.authError) S.authError = false; render(); log("清空本地会话视图（演示）", "reset"); },
+    record: startRecording,
+    transcribe: () => { if (!S.recording) startRecording(); setTimeout(() => stopRecording(true), 700); },
+    reccancel: () => stopRecording(false),
+    reply: () => { const m = S.msgs.filter(x => x.role === "assistant").pop(); if (!m) { toast("先发一条消息"); return; } S.reply = { author: "星助理", text: m.text.slice(0, 34) + "…", time: m.time }; render(); toast("已引用最后一条助理消息"); },
+    stale: () => { S.reply = { gone: true }; render(); toast("引用已失效：将显示不可用占位"); },
+    task: () => {
+      const am = S.msgs.filter(x => x.role === "assistant").pop();
+      if (!am) { send("把上周例会的结论整理成三条待办，分别给产品、后端和测试"); return; }
+      spawnTask(am);
+      toast("已派生子任务：2 个独立 context");
+    },
+    cancelTask,
+    approval: () => {
+      let am = S.msgs.filter(x => x.role === "assistant" && !x.approval).pop();
+      if (!am) { send("帮我把这份整理结果发邮件给后端负责人"); return; }
+      spawnApproval(am); toast("审批卡已加入会话");
+    },
+    probe: () => { openSheet("models"); setTimeout(runProbe, 300); },
+    offline: () => { S.offline = true; render(); log("network_unreachable：草稿保留", "net"); toast("已断网：草稿保留，不重放写操作"); },
+    online: () => { S.offline = false; render(); log("网络恢复：先查原请求状态，再续订事件", "net"); toast("网络已恢复，正在续订事件"); },
+    auth: () => { S.authError = true; render(); log("auth_failed 401（演示）", "net"); toast("鉴权失败：去设置修改凭据引用"); },
+    dark: () => { phone.classList.toggle("dark"); toast(phone.classList.contains("dark") ? "深色外观（跟随系统）" : "浅色外观（跟随系统）"); },
+    reset: () => {
+      clearInterval(S.stream); clearInterval(S.recTimer); S.recTimer = null;
+      S.msgs = []; S.seq = 0; S.reply = null; S.task = null; S.approval = null;
+      S.offline = false; S.recording = false; S.authError = false; S.streamingMsg = null;
+      S.recSecs = 0; recbar.hidden = true; input.value = ""; autoGrow();
+      $("#liveMode").innerHTML = '问答 <svg class="i"><use href="#i-chev-d"/></svg>';
+      hint.textContent = "回车发送 · Shift+回车换行";
+      render(); closeSheet(); log("演示已重置", "reset"); toast("已重置");
+    }
+  };
+  $$("[data-act]").forEach((btn) => btn.addEventListener("click", () => {
+    const fn = ACT[btn.dataset.act];
+    if (fn) { try { fn(); } catch (err) { console.error(err); toast("演示动作失败：" + err.message); } }
+  }));
+  $$("[data-prompt]").forEach((btn) => btn.addEventListener("click", () => send(btn.dataset.prompt)));
+  taskStrip.addEventListener("click", () => {
+    if (!S.task) return;
+    S.task.expanded = !S.task.expanded; render();
+    const el = document.querySelector('[data-task="' + S.task.id + '"]');
+    if (el) el.scrollIntoView({block:"center",behavior:"smooth"});
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && S.sheet) closeSheet();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

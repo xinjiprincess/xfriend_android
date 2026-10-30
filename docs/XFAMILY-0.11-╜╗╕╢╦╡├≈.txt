@@ -1,0 +1,85 @@
+XFAMILY Android 0.11.0 交付说明
+日期：2026-10-17
+项目：D:\xfriend-suite
+安装包：D:\build_apk
+版本：versionCode 11 / versionName 0.11.0（XFriend、XSalers 两个独立 APK）
+
+一、本次变更（0.11.0：UI 视觉重塑）
+本次按「Singu Xfriend 前端重塑概念稿 v1」重做两个 App 的视觉与组件层，业务逻辑、运行时、网络协议、账号与同步逻辑未改。
+设计来源：D:\octop\docs\design\redesign-concept.html
+实施规范：D:\xfriend-suite\docs\design\redesign-concept-android-spec.md
+落地说明：D:\xfriend-suite\docs\XFRIEND-REDESIGN-0.11.md
+交接文档：D:\xfriend-suite\docs\XFAMILY-项目设计与开发交接文档-2026-10-17.html / .txt（D:\build_apk 同名副本）
+概念参考截图：D:\xfriend-suite\docs\design\screens\（23 张，桌面参考，不是真机验收截图）
+
+二、重塑后的共同视觉
+1. 令牌层：XfDesign.kt 统一提供亮/暗 XfColors、XfType、XfDimens、XfShapes、XfElevation；页面不再直接写颜色与字号。
+2. 暖纸画布：浅色画布 #F6F5F1、白色表面 #FFFFFF、主文字 #1B1C1F、分隔线 #E5E2DA；深色画布 #0E0F12、表面 #181A1F、主文字 #F1F2F4。
+3. 单一主色、5 组色板：靛蓝 #4F5DF0 / 青绿 #0E9384 / 琥珀 #B26B00 / 玫瑰 #D94F6B / 紫罗兰 #7055DE（XSalers 品牌色）。XFriend 默认靛蓝、XSalers 默认紫罗兰；设置页可切换，立即生效。
+4. 亮/暗主题：跟随系统 / 浅色 / 深色；本机 SharedPreferences（xf_appearance）保存，不进入账号同步。
+5. 图标：XfIcons.kt 手工实现 60 个 24 视窗、1.75 stroke、圆角线帽的线性图标；导航 20dp、行内 17dp、强调 24dp。
+6. 组件：XfComponents.kt 共 28 个共享组件（XfCard / XfButton / XfStatusChip / XfListRow / XfTextField / XfSegmented / XfDialog / XfEmptyState / XfBanner 等），主要页面、详情与 32 处确认/编辑弹窗统一使用。
+7. 壳层：XfTopBar 顶栏（56dp）、ProductBottomBar 底栏（80dp 内容高 + 顶部 1dp 线 + Haze 毛玻璃 + 选中主色胶囊）；系统导航栏 insets 保留。
+8. 外观设置入口：XFriend「我的 → 外观」、XSalers「我的 → 外观」，提供主题模式、5 色板、预览与系统通知设置。
+
+三、XFriend（4 底栏：对话 / 工作台 / 资源 / 我的）
+- 对话：欢迎/最近任务/助手选择、会话消息、工具行、结果卡、附件、发送/停止保持既有能力，视觉统一。
+- 工作台：智能体/专家/团队、搜索与运行条件筛选、编辑/导入、选择后进入对话。
+- 资源：技能/知识/工作区文件、预览后导入、文本预览与保存。
+- 我的：账号与同步、模型、电脑连接、任务诊断、迁移、外观、通知、退出。
+- 既有详情：模型配置、平台设备、任务中心、电脑会话、连接、同步、市场、蓝图、设计专家、外观等均可达。
+- 未改变：本机模型 API 执行、顺序协作团队、检查点恢复、电脑独立会话、云端执行未启用、免密钥试用未接通。
+
+四、XSalers（5 底栏：今日 / 客户 / 复盘 / 专家 / 我的）
+- 今日：今日跟进、待分析沟通、进行中商机；录音、截图、文字导入。
+- 客户：客户/待办/商机/联系计划、客户档案（概览/沟通/待办/商机/资料）、导入与筛选 CSV 导出。
+- 复盘：录音暂停/继续/结束、摘要/原文/行动/附件、任务中心与失败重试。
+- 专家：专家/团队、AI 设计、编辑、市场与运行条件。
+- 我的：云同步、模型、连接、迁移、导入导出、会员/试用、电话保护、外观、退出。
+- 未改变：Room 客户数据、录音/截图/复盘链路、AI 建议先核对后写入、CRM 不自动改成交状态。
+
+五、构建证据（最终）
+构建命令：gradlew --no-daemon --max-workers=4 -Pkotlin.compiler.execution.strategy=in-process :app:assembleXfriendDebug :app:assembleXsalersDebug --console=plain
+最终构建日志：D:\xfriend-suite\build-0.11-final.log（UTF-16；含 QA 首轮 P0/P1/P2 修复）
+结果：BUILD SUCCESSFUL in 9m 46s；77 actionable tasks（15 executed / 62 up-to-date）；0 个编译错误；仅历史 warning（PhoneStateListener/ArrowBack/未用变量等 16 条）。
+历史构建：build-0.11-a.log 首次因编译错误失败；build-0.11-b.log 修复编译后首轮成功；final 为 QA 修复后的最终版。
+版本校验（aapt2 dump badging）：versionCode 11 / versionName 0.11.0；包名 com.singu.xfriend.mobile / com.singu.xsalers.mobile；minSdk 26 / targetSdk 34；应用名 Xfriend / Xsalers。
+APK（副本同时位于 D:\xfriend-suite\.artifacts\0.11-release\）：
+- D:\build_apk\XFriend-Android-0.11.0-debug.apk（26,451,921 bytes；SHA-256 46693C8F2A57BBC1161F43318533235B470234B67B31F38FF2DD97EC2845457E；mtime 2026-10-18 00:18:19）
+- D:\build_apk\XSalers-Android-0.11.0-debug.apk（26,451,941 bytes；SHA-256 E4C4A9A7C36124F0E55E64B725272476BB2291114CCA230A3F3D2BED323CA0C6；mtime 2026-10-18 00:17:24）
+QA fixture：已用修复后代码重建（build-0.11-qa-final.log，BUILD SUCCESSFUL in 10m 17s；.qa 包名 com.singu.xfriend.mobile.qa / com.singu.xsalers.mobile.qa），用于最终回归：
+- .artifacts\0.11-qa\Xfriend-0.11-qa.apk（26,468,093 bytes；SHA-256 C6EAB9646C57C0806203E0308DEF8C0CDF4F6DE60F35A9C28006C45AAAAFBB44）
+- .artifacts\0.11-qa\Xsalers-0.11-qa.apk（26,468,205 bytes；SHA-256 0B53FF5FE77D41E000A01321C9450D575EB65E2B87A25116435FB951AF41DBF8）
+QA fixture 包仅用于模拟器截图验收，不属于交付安装包；交付包是 D:\build_apk 下两个 0.11.0 debug APK（正式包名 com.singu.xfriend.mobile / com.singu.xsalers.mobile）。
+0.11 默认只做 assemble；单元测试已另行执行并通过：test-0.11.log 记录 BUILD SUCCESSFUL in 5m 11s，两个 flavor 合计 574 项、0 failures / 0 errors（JUnit XML 复核）。lint 未运行，未执行项不声明通过。
+
+六、模拟器视觉与运行验收
+环境：Android API 35 模拟器（AVD XfriendSuiteQA，wm size 1080x2400 / 420dpi）。
+证据目录：D:\xfriend-suite\docs\qa-0.11\（prep.md、setup-boot.png、_logs/、_raw/、report.md）
+报告：D:\xfriend-suite\docs\qa-0.11\report.md
+结论：首轮模拟器 QA（报告 docs\qa-0.11\report.md）P0=1（XSalers 底栏缺失）、P1=1（分段控件灰边）、P2=1（底栏高度）；Lead 已在最终构建修复（IME 判断、分段 1dp 边框、底栏 80dp、PlatformScreen 在线容错），visual-qa 用修复后 QA fixture 完成最终回归：**P0/P1/P2 全部通过**（XSalers 5 tab 可切换、分段无灰晕、XFriend 底栏实测 80dp；logcat 0 FATAL/ANR，无新问题），详见 report.md §11。客户详情“点不开”复核为截图脚本误触，非产品问题。模拟器为合成数据验收，不等于真机/真实账号/真实模型验收。
+说明：模拟器截图只代表该环境；真机验收、字体缩放、TalkBack、对比度与 Haze 跨 API 表现未验证。
+
+七、实施边界与未验证项
+1. 手机是 Kotlin 编排 + 模型 API，不含完整电脑版 Python 运行时；云端智能体执行未启用。
+2. XFriend 免密钥试用未接通；XSalers 试用/订阅按现有真实状态展示，订阅支付未接。
+3. 团队为顺序协作，不声称并行研究；群聊/会议/决策档案未实现，不加入口。
+4. 电脑任务为独立远程会话，手机会话不能无缝迁移到电脑；审批只覆盖宿主声明的真实动作。
+5. 截图导入只在有原始证据和标签时预填，不伪造识别结果；邮件发送未实现。
+6. 交付为开发签名 APK，非应用商店发布包；服务端部署、桌面安装包、生产签名与上架不在本次范围。
+7. 0.11 最终正式构建已通过（见五），模拟器 QA 回归通过（见六，report.md §11）；真机验收未执行，模拟器 QA 为合成数据验收，不能替代真机/真实账号/真实模型验收。首轮截图对应修复前构建，最终截图见 docs\qa-0.11\ *-reg.png 与 report.md §11。旧版本交付物保留在交付目录，当前应选择名称中 0.11.0 的文件。
+
+八、构建和使用
+版本：versionCode 11 / versionName 0.11.0。
+构建：pwsh -File scripts\release-0.11.ps1；完整验证：.\build.ps1 -JavaHome 'C:\Program Files\Java\jdk-20'。
+安装：两个 APK 独立安装，使用开发签名；建议覆盖安装同签名旧版，不要先卸载，以免删除已有本机数据。
+外观：安装后进入「我的 → 外观」切换浅色/深色/跟随系统与 5 组主色；偏好只保存在本机。
+
+九、相关文档
+D:\xfriend-suite\README.md
+D:\xfriend-suite\docs\README.md（文档索引）
+D:\xfriend-suite\docs\XFRIEND-REDESIGN-0.11.md
+D:\xfriend-suite\docs\DELIVERY-0.11.html
+D:\xfriend-suite\docs\verification-0.11.json
+D:\xfriend-suite\docs\design\redesign-concept-android-spec.md
+D:\xfriend-suite\docs\design\screens\

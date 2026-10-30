@@ -1,0 +1,11 @@
+[project]
+name = "xfriend-trial-gateway"
+version = "0.7.0"
+requires-python = ">=3.12"
+dependencies = ["aiohttp>=3.12,<4", "cryptography>=44", "pillow>=11,<13"]
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

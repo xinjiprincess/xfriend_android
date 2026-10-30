@@ -1,0 +1,99 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Xfriend 移动销售工作台 · 0.4 交接报告</title>
+<style>:root{--bg:#f5f6f8;--paper:#fff;--ink:#111827;--muted:#647084;--line:#e5e7eb;--rose:#e85d75;--soft:#fdecf0;--warn:#fff4d4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 system-ui,"Microsoft YaHei",sans-serif}main{max-width:1120px;margin:auto;padding:32px 20px 80px}header{padding:40px;border-radius:28px;background:linear-gradient(120deg,#2e2533,#6f334b);color:white}header p{color:#f4d7e1;max-width:750px}.eyebrow{color:#ffb4c6;font-size:13px;letter-spacing:.14em}h1{font-size:clamp(28px,5vw,42px);line-height:1.3;margin:14px 0}h2{font-size:26px;line-height:1.4;margin:0 0 20px}h3{font-size:19px;margin:24px 0 10px}section{margin-top:24px;padding:30px;background:var(--paper);border:1px solid var(--line);border-radius:22px}p{margin:10px 0}nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}nav a,.pill{padding:6px 12px;border-radius:20px;background:var(--soft);color:#9b304c;font-size:13px}a{color:#b73c5a;text-decoration:none}a:hover{text-decoration:underline}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{border:1px solid var(--line);border-radius:16px;padding:18px}.card strong{display:block;color:#ad3655;margin-bottom:6px}.muted,figcaption{color:var(--muted);font-size:14px}.note{padding:18px;border-left:4px solid #e9aa28;background:var(--warn);border-radius:0 12px 12px 0}.ok{color:#147e58}.pending{color:#a66c00}.table{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:560px;font-size:14px}th,td{text-align:left;vertical-align:top;padding:13px 10px;border-bottom:1px solid var(--line)}th{background:#f9fafb;color:#475569}code{background:#f3f4f6;padding:2px 5px;border-radius:5px;font-size:.9em;overflow-wrap:anywhere}pre{white-space:pre-wrap;word-break:break-word;padding:20px;background:#202733;color:#e6edf6;border-radius:14px;line-height:1.6;font-size:13px}pre code{background:none;padding:0;color:inherit}.screens{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.screens img{width:100%;border:1px solid var(--line);border-radius:20px}.screens figure{margin:0}figure.diagram{margin:18px 0}svg{width:100%;height:auto;display:block}li{margin:7px 0}footer{margin-top:30px;color:var(--muted);font-size:13px}button{background:var(--rose);color:white;border:0;padding:10px 18px;border-radius:10px;cursor:pointer}@media(max-width:680px){main{padding:16px 16px 48px}header,section{padding:22px}.grid{grid-template-columns:1fr}.screens{grid-template-columns:repeat(2,minmax(0,1fr))}h2{font-size:23px}.table{margin-inline:-6px}table{font-size:13px}nav a{font-size:12px}}@media print{body{background:white}main{max-width:none;padding:0}header{background:#493042!important}section{break-inside:avoid;page-break-inside:avoid}nav,button{display:none}pre{color:#111;background:#f3f4f6}.screens{grid-template-columns:repeat(3,1fr)}}
+</style></head><body><main>
+<header><div class="eyebrow">SINGU XFRIEND · ANDROID · ENGINEERING HANDOFF</div><h1>一个随身的销售工作台，<br>一套与电脑协作的能力。</h1><p>在合并版 Xfriend Android 上增加客户管理、录音与截图采集、专家及团队分析、电脑版资源导入，并提供五次免密钥试用网关。</p><p class="muted" style="color:#efc4d1">版本 0.4.0 · 2026-10-13 · Android 原生 Kotlin / Jetpack Compose · 本报告交给电脑版及云服务开发人员</p></header>
+<nav><a href="#status">交付状态</a><a href="#product">产品与界面</a><a href="#architecture">技术与数据流</a><a href="#desktop">电脑版配合接口</a><a href="#trial">试用与订阅</a><a href="#verify">验证与限制</a><a href="#handoff">可复制交接指令</a></nav>
+
+<section id="status"><h2>交付状态与使用前提</h2><p><strong>这是已实现并构建的 Android 开发版本，保留原版登录注册、图标和玫瑰色主题。</strong>手机版仍支持连接电脑，电脑的完整运行时、浏览器、远程桌面等能力继续通过电脑连接使用。</p><div class="note">试用网关已部署到 113.219.170.192，系统服务及本机健康检查通过，密钥已由服务器环境文件注入；真实 MiMo 文本、TTS、ASR 和图片接口均返回 200。公网 80/443 多次访问超时，证书机构 HTTP-01 验证也连接超时，尚未签发受信任证书。因此手机五次试用尚未对外开通，不能把本机服务启动理解为已上线。详见 <a href="DEPLOYMENT-0.4.html">部署记录</a>。</div><div class="grid" style="margin-top:20px"><div class="card"><strong>Android 应用</strong>dist/Xfriend-Android-0.4.0-debug.apk<br><span class="muted">开发签名，可覆盖同签名 0.3；发布前需正式签名。</span></div><div class="card"><strong>电脑版连接桥</strong>desktop-bridge/<br><span class="muted">保留 HTTP / WebSocket 转发，增加资源导出适配。</span></div><div class="card"><strong>五次试用服务</strong>trial-gateway/<br><span class="muted">已部署独立服务，密钥留在服务器；交付源码包不包含共享密钥。</span></div></div></section>
+
+<section id="product"><h2>移动端功能与操作逻辑</h2><p>参考截图的采集、客户、分析模式和个人中心流程，使用原有 Xfriend 图标与 <code>#E85D75</code> 玫瑰色主题。底部使用六个入口；桌面侧栏管理能力收进“我的”及专家管理入口。</p><div class="table"><table><thead><tr><th>入口</th><th>已实现行为</th><th>说明</th></tr></thead><tbody>
+<tr><td>首页</td><td>录音、沟通截图、文字笔记导入；搜索标题、原文和报告；沟通记录详情。</td><td>数据关联到当前账号及客户。</td></tr>
+<tr><td>采集</td><td>麦克风录音、计时、动态波形、客户关联、专家/团队选择、模式选择、可选择停止后自动转写分析。</td><td>自动分析需要明确勾选发送授权；未勾选时先保存在本机。当前无实时字幕。</td></tr>
+<tr><td>客户</td><td>新建、编辑、删除；姓名/电话/公司搜索；跟进中/已成交/已流失筛选；电话去重；通讯录勾选导入；拨号；客户短信导入。</td><td>删除客户保留沟通记录；系统短信权限受限制时使用文本导入。</td></tr>
+<tr><td>专家</td><td>选择单专家或团队；内置销售专家；原版专家/团队/技能/知识管理入口；电脑版导入。</td><td>本机团队按成员顺序分析并汇总；电脑完整团队运行时可通过连接电脑使用。</td></tr>
+<tr><td>模式</td><td>综合分析、决策推演、谈判复盘、风险预警、商机挖掘；初次拜访、报价跟进、续约维护。</td><td>不同模式使用不同报告板块，分析结论需区分事实与待确认信息。</td></tr>
+<tr><td>我的</td><td>模型配置、试用额度、电脑连接与资源导入、原版技能知识和平台入口、订阅入口、电话状态保护。</td><td>订阅入口当前为说明页，无支付、扣费或虚构会员权益。</td></tr></tbody></table></div>
+<h3>六位销售专家组成客情分析团队</h3><div class="grid"><div class="card"><strong>客户需求分析师</strong>需求、痛点、目标、约束与原文证据。</div><div class="card"><strong>客情与决策链顾问</strong>信任信号、角色关系、决策链与待验证问题。</div><div class="card"><strong>谈判与异议教练</strong>关键回合、异议处理、尊重客户的话术。</div><div class="card"><strong>商机与跟进规划师</strong>阶段、预算/时间/决策人、下一步行动。</div><div class="card"><strong>销售风险审阅员</strong>承诺、付款、竞争和流失信号。</div><div class="card"><strong>客情分析负责人</strong>汇总观点与分歧，形成可执行报告。</div></div><p class="muted">专家不会依据电话号码或音色推断客户的敏感属性，也不生成没有依据的成交概率。默认提示词要求引用沟通原文。</p>
+<h3>界面验收截图</h3><p class="muted">下图来自独立 .qa 测试包和隔离示例账号，不代表真实客户或线上分析结果。正式交付 APK 不包含测试 Activity。</p><div class="screens"><figure><img src="sales-home-0.4.png" alt="Xfriend 销售工作台首页"><figcaption>首页与采集入口</figcaption></figure><figure><img src="sales-customers-0.4.png" alt="Xfriend 客户列表测试"><figcaption>客户管理</figcaption></figure><figure><img src="sales-recording-saved-0.4.png" alt="Xfriend 保存录音后的首页"><figcaption>麦克风录音保存</figcaption></figure></div></section>
+
+<section id="architecture"><h2>技术架构与数据流</h2><figure class="diagram"><svg viewBox="0 0 920 360" role="img" aria-label="Android 本地数据及模型、试用、电脑三条执行路径"><defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#9b304c"/></marker></defs><g font-family="system-ui,sans-serif" font-size="16" text-anchor="middle"><rect x="20" y="110" width="220" height="140" rx="18" fill="#fdecf0" stroke="#e85d75"/><text x="130" y="155" fill="#9b304c">Android / Compose</text><text x="130" y="188">客户 · 采集 · 专家/团队</text><text x="130" y="220" font-size="13" fill="#647084">账号隔离 · 本地加密状态</text><rect x="380" y="12" width="220" height="85" rx="16" fill="#f5f6f8" stroke="#cbd5e1"/><text x="490" y="48">用户自己的模型</text><text x="490" y="77" font-size="13">HTTPS · 用户自己的 Key</text><rect x="380" y="137" width="220" height="85" rx="16" fill="#fdecf0" stroke="#e85d75"/><text x="490" y="173">五次试用网关</text><text x="490" y="202" font-size="13">签名租约 · SQLite 额度</text><rect x="380" y="263" width="220" height="85" rx="16" fill="#f5f6f8" stroke="#cbd5e1"/><text x="490" y="299">已配对的电脑版</text><text x="490" y="328" font-size="13">资源导入 · HTTP / WS</text><rect x="710" y="137" width="190" height="85" rx="16" fill="#f5f6f8" stroke="#cbd5e1"/><text x="805" y="173">小米 MiMo</text><text x="805" y="202" font-size="13">文本 · 视觉 · ASR · TTS</text></g><g stroke="#9b304c" fill="none" stroke-width="2" marker-end="url(#arrow)"><path d="M240 145L380 55"/><path d="M240 180L380 180"/><path d="M240 215L380 305"/><path d="M600 180L710 180"/></g></svg><figcaption>手机本地执行与电脑连接在同一个应用内；试用网关是独立服务，不占用电脑端代理密钥。</figcaption></figure>
+<div class="table"><table><thead><tr><th>模块</th><th>实现位置</th><th>职责</th></tr></thead><tbody><tr><td>移动界面</td><td>SalesScreen.kt</td><td>六页导航、移动表单、权限、分析授权与导入预览。</td></tr><tr><td>业务状态</td><td>SalesViewModel.kt / SalesDomain.kt</td><td>客户、沟通记录、专家职责、报告模式、任务取消及稳定重试标识。</td></tr><tr><td>持久化</td><td>SalesStore.kt</td><td>账号作用域下的 AtomicFile + Android Keystore AES-GCM，保存客户、报告、模型密钥等。</td></tr><tr><td>媒体</td><td>SalesMedia.kt</td><td>AudioRecord PCM → WAV；MediaCodec 将系统音频解码为 WAV；图片采样压缩为 JPEG。</td></tr><tr><td>网络</td><td>SalesApi.kt</td><td>OkHttp HTTPS、取消传播、响应上限；MiMo ASR/TTS 与视觉格式；配对导入后注销临时会话。</td></tr><tr><td>电脑连接</td><td>desktop-bridge/bridge.py / exporter.py</td><td>复用已认证桌面入口，校验配对及账号空间，优先完整导出，旧版只读适配。</td></tr><tr><td>五次额度</td><td>trial-gateway/gateway.py</td><td>签名租约认证、固定小米上游、原子预留、成功计次、失败退款、加密结果缓存。</td></tr></tbody></table></div>
+<p>客户资料与模型密钥保存在当前云账号/空间对应的加密状态文件，禁止 Android 备份。原始录音及图片位于应用私有 noBackup 目录；它们当前没有单独的文件级加密。通用聊天继续使用原有 Store 和本机 AgentRuntime。</p>
+<p>录音最长 10 分钟，解码后的音频最多 20 MB；图片压缩后最多 5 MB；单条沟通文字最多 12,000 字；资源导入包最多 4 MB。长文件应分段。小米接口请求格式依据官方 <a href="https://mimo.mi.com/docs/en-US/api/audio/Speech-Recognition">ASR 文档</a>、<a href="https://mimo.mi.com/docs/en-US/quick-start/usage-guide/audio/speech-synthesis-v2.5">TTS 文档</a>和<a href="https://mimo.mi.com/docs/en-US/quick-start/usage-guide/multimodal-understanding/image-understanding">视觉文档</a>实现。</p></section>
+
+<section id="desktop"><h2>电脑版需要配合的接口</h2><p><strong>沿用 0.3 的连接协议和账号隔离要求，在电脑端新增完整资源导出。</strong>本次没有修改 D:\octop 的桌面业务代码；独立连接桥已增加适配，方便迁移期使用。</p><h3>1. 完整导出接口</h3><pre><code>GET /api/mobile/export?include_secrets=0
+# 电脑版 Go 账号桥代理到已认证的 Python 后端
+# 连接桥对手机公开 GET /mobile/export?include_secrets=0
+# 手机请求必须同时具有配对 Cookie 和精确 Origin
+# include_secrets=1 必须由用户主动勾选；缺省不导出密钥
+# Cache-Control: no-store
+
+{
+  "format": "xfriend-mobile-export",
+  "version": 1,
+  "experts": [{
+    "id": "sales-adviser", "name": "销售顾问", "prompt": "完整专家提示词",
+    "skills": ["sales-method"], "knowledge": ["product-guide"]
+  }],
+  "teams": [{"id": "sales-team", "name": "客情分析团队", "members": ["sales-adviser"]}],
+  "skills": [{"id": "sales-method", "name": "销售方法", "content": "Markdown 技能正文"}],
+  "knowledge": [{"id": "product-guide", "name": "产品知识", "content": "可读知识正文"}],
+  "providers": [{
+    "id": "xiaomi", "name": "小米 MiMo", "base_url": "https://api.xiaomimimo.com/v1",
+    "models": ["mimo-v2.6-flash"], "api_key": ""
+  }],
+  "warnings": []
+}</code></pre><p>对接文件：<a href="mobile-export-v1.schema.json">JSON Schema</a> · <a href="mobile-export-v1.example.json">无密钥示例包</a>。此外必须校验引用完整性、唯一 ID、总字节数及 HTTPS URL。</p><p>独立连接桥会追加来自当前桌面会话的 <code>source.user_id / source.space_id</code>，手机在线导入要求与当前手机登录身份一致。通过文件手动导入则先由用户确认资源与密钥。手机把桌面 ID 映射到稳定的 desktop 命名空间，重复导入更新同一资源。</p>
+<ul><li>专家提示词需要导出实际生效的 SOUL / AGENTS / 自定义提示词组合，保持顺序；技能和知识引用必须随包携带，禁止悬空引用。</li><li>团队 <code>members</code> 使用本包 expert ID，最多 8 位。当前手机执行顺序协作与汇总，不导入桌面运行中的任务、工具授权或工作区路径。</li><li>知识库应导出用户有权读取的文本资料，不能直接打包远程存储凭据、数据库、全量客户文件或向量索引。</li><li>模型配置导出 HTTPS Base URL 和字符串模型 ID 列表；密钥仅在显式同意后导出。不得混入桌面本地 Bearer、云账号 access/refresh token、Cookie 或授权私钥。</li><li>所有资源均按当前登录用户和空间权限过滤；导出过程中再次校验身份，切换账号/空间后撤销配对。</li><li>包上限 4 MB；不要默默截断。电脑版建议提供资源勾选界面和体积预估。</li></ul>
+<h3>2. 现有代码落点</h3><div class="table"><table><thead><tr><th>位置</th><th>建议改动</th></tr></thead><tbody><tr><td>src/octop/api/routers/experts.py</td><td>复用专家模板与已发布快照读取服务；导出实际提示词和依赖。</td></tr><tr><td>src/octop/api/routers/teams.py</td><td>从有权访问的团队与成员生成导出关系。</td></tr><tr><td>src/octop/api/routers/providers.py</td><td>复用 provider 元数据，单独控制敏感密钥导出权限。</td></tr><tr><td>infra/ 下新增资源导出服务</td><td>业务拼装放 infra；路由只做鉴权、参数校验和返回，保持现有模块边界。</td></tr><tr><td>api/app.py / openapi_meta.py</td><td>注册 typed response_model、summary、tags，并在 Scalar /api/docs 复核。</td></tr><tr><td>desktop/src/desktop_server.go</td><td>增加 /mobile/export 或转发桥能力；保持 Host / Origin / Cookie / JWT 现有边界。</td></tr><tr><td>dashboard 设置/专家管理</td><td>资源勾选、导出 JSON、是否包含密钥的明确确认，以及手机连接入口。</td></tr></tbody></table></div>
+<p class="note">旧版兼容适配仅包含专家目录中的可读提示词、随专家暴露的 Markdown 技能及 HTTPS 模型配置。完整团队、独立技能包、知识库必须由电脑版完整导出接口提供；手机预览会显示兼容范围提示。</p>
+<h3>3. 保留远程电脑能力</h3><p>原有 <code>/mobile/status</code> → <code>/mobile/pair</code> → HttpOnly 配对 Cookie → <code>/chat</code> 流程保持不变。HTTP、SSE 与 WebSocket 继续转发；手机切回“此手机”时注销连接，不退出电脑云账号。完整浏览器、工作区、远程桌面等仍由电脑版按已有权限执行。</p></section>
+
+<section id="trial"><h2>五次免密钥体验与订阅预留</h2><p>服务器保存共享 MiMo 密钥。APK 和资源导出包中没有该共享密钥。试用用户不选择内部模型，只看到剩余次数；自己的模型配置页面可填写自有密钥和模型。</p><div class="table"><table><thead><tr><th>规则</th><th>实现</th></tr></thead><tbody><tr><td>认证</td><td>X-Xfriend-Lease 传输已有云账号 Ed25519 签名租约；服务器用已发布公钥验证产品、时间、用户与空间字段。租约是 Bearer 凭据，只能走 HTTPS，不能记录到日志。</td></tr><tr><td>额度</td><td>同一 user_id 共 5 次，跨设备/空间共用。一次分析含转写/识图、专家或团队分析及汇总；播报是独立任务。</td></tr><tr><td>并发</td><td>SQLite WAL + BEGIN IMMEDIATE 原子预留；最多 4 个上游任务同时运行。该实现要求一个网关进程独占数据库。</td></tr><tr><td>失败与重试</td><td>失败退回次数。request_id + 请求指纹防止同一任务重试重复扣次；重复 ID 不同内容返回 409。手机对相同分析输入生成稳定标识。</td></tr><tr><td>内部模型</td><td>服务端默认对话/视觉 MiMo 2.6 Flash，ASR 2.5，预置 TTS 2.5；不从客户端接受任意上游地址或模型名。</td></tr><tr><td>缓存与账本</td><td>结果由 Fernet 加密缓存用于重试，额度账本持久化；启动时清理 24 小时前缓存并恢复未完成预留。不要删除额度数据库来升级。</td></tr><tr><td>退出与撤销</td><td>当前按云租约有效期验证，最长 72 小时，不提供立即撤销查询。正式订阅建议由账号服务提供即时租约/会话撤销检查。</td></tr></tbody></table></div>
+<h3>部署步骤</h3><pre><code># 在独立服务器的 trial-gateway 目录
+uv sync --frozen --no-dev
+# 使用系统 Secret / 环境变量注入 MIMO_API_KEY，不写进源码或镜像
+# XFRIEND_TRIAL_DB 指向持久化卷；默认 data/trial.sqlite
+uv run --no-sync python gateway.py
+# 默认仅监听 127.0.0.1:8787
+# 受信任 HTTPS 反向代理 → 127.0.0.1:8787
+# 客户端填入该 HTTPS 基础地址
+
+GET  /health           # 不含用户、密钥或模型配置
+GET  /v1/quota         # X-Xfriend-Lease，返回 remaining / limit
+POST /v1/tasks         # request_id、operation、kind、text/media、prompt、roles
+# operation: analyze | speak；kind: text | audio | image
+# 200: text/report 或 audio，加 remaining
+# 401 授权失效；402 五次用完；409 重试冲突；502 上游失败且退款</code></pre>
+<p>手机版已预置 HTTPS 基础地址 https://113.219.170.192。服务器已安装非 root 网关服务、持久化账本、Nginx、Certbot 5.8 及 HTTPS 启用脚本。公网 80/443 实际可达后，执行 /opt/xfriend-trial/activate-https.sh 签发六天 IP 证书并设置每天两次自动续期检查。当前不会关闭证书验证，也不会用 HTTP 传输账号租约和客户资料。共享密钥没有硬编码；真实小米实测仅使用合成文本、语音和纯色图片，未发送真实客户数据。<a href="https://letsencrypt.org/2026/03/11/shorter-certs-certbot.html">证书方案依据：Let's Encrypt 官方说明</a>。</p>
+<h3>自有模型</h3><p>支持配置 MiMo 2.6 Pro / Flash、2.5 Pro / 2.5、2.5 ASR、2.5 TTS、VoiceDesign 与 VoiceClone。语音模型使用 Chat Completions 协议，TTS 文本位于 assistant 消息，语音结果读取 audio.data。VoiceClone 要求用户确认授权并选择 WAV 样本；VoiceDesign 使用文字描述，不传预置音色参数。其他供应商对话可使用 OpenAI 兼容接口，语音能力需要兼容小米格式。</p><p>订阅入口已预留，支付、套餐、权益校验和购买恢复尚未实现；不要仅凭手机本地会员状态放开共享密钥额度。</p></section>
+
+<section id="verify"><h2>验证证据与当前限制</h2><p>验证命令及日志随项目交付，最终检查结果见 <code>verify-final-0.4.log</code>、<code>python-tests-final-0.4.log</code> 与 <code>smoke-sales-0.4.log</code>。</p><div class="table"><table><thead><tr><th>验证</th><th>范围</th><th>结果依据</th></tr></thead><tbody><tr><td>Android 单元测试</td><td>保留原 31 项，新增 14 项导入关系、去重、URL、ASR/TTS 与 WAV 格式测试。</td><td>Gradle :app:testDebugUnitTest。</td></tr><tr><td>Android 构建与 Lint</td><td>正式默认配置构建 APK；不包含 .qa FixtureActivity；开发签名。</td><td>:app:assembleDebug :app:lintDebug。</td></tr><tr><td>服务端与连接桥</td><td>五次并发上限、重试、失败退款、重启持久化、签名过期、密钥不回传；原 HTTP/WS 连接及导出权限。</td><td>31 项 pytest；使用合成上游与签名测试账号。</td></tr><tr><td>模拟器</td><td>独立 .qa 包验证移动页面、客户录入、录音权限、WAV 保存、原文编辑及录音/客户重启恢复。模式持久化由单元测试验证；后续 UI 验收受 Android 37 预览模拟器系统无响应影响。</td><td>ADB/UI Automator 记录与截图；不读取真实客户数据。</td></tr></tbody></table></div>
+<ul><li>Android 普通应用无法保证直接获取电话上下行音频；当前支持系统通话录音导入和麦克风采集，不请求系统专属 CAPTURE_AUDIO_OUTPUT 权限。</li><li>READ_SMS 是 Android 的受限权限，安装器/系统可能不授予。拒绝时不伪装成功，保留文本文件导入。参见 <a href="https://developer.android.com/reference/android/Manifest.permission#READ_SMS">Android 官方权限说明</a>。</li><li>录音为前台采集，切到后台会停止并保存；没有后台录音服务，也没有实时字幕。勾选自动分析后，停止可发起完整转写。</li><li>图片提取需要人工校正，当前先在沟通详情展示识别原文与报告，再由用户关联或编辑客户；不自动把图片中的姓名/电话直接批量写入客户资料。</li><li>本机销售分析按专家提示词、关联的 Markdown 技能与文本知识执行，不等同于电脑版全部工具沙箱、向量 RAG 和并行调度能力。完整能力通过连接电脑继续使用。</li><li>当前报告正文以可选择的文本显示，Markdown 标记保留并可导出；未接入富文本排版库。</li><li>尚需真机验证 OEM 通话录音文件、权限拒绝/恢复、长录音、移动网络及小米 API 复杂业务识别效果；尚未完成生产版签名与应用商店发布。</li></ul></section>
+
+<section id="handoff"><h2>交给另一边的实施指令</h2><pre><code>请按 D:\xfriend-android\docs\DESKTOP-INTEGRATION-0.4.html 配合 Android 0.4。
+
+优先实现：
+1. 电脑版新增 GET /api/mobile/export?include_secrets=0|1，严格采用报告中的
+   xfriend-mobile-export/version=1 格式，导出当前用户/空间有权访问的
+   专家、团队、Markdown 技能、文本知识及 HTTPS 模型配置。
+2. 导出实际生效的专家提示词，保持成员及技能/知识引用完整。
+   默认不含密钥；用户主动勾选且有权限时才包含 provider API Key。
+   禁止导出电脑本地 Bearer、云账号 token、Cookie 和任意认证私钥。
+3. 保留 0.3 手机配对协议和 HTTP/WS 能力，配对后提供 /mobile/export；
+   同时提供电脑端资源选择与 JSON 下载入口，包体不超过 4 MB。
+4. trial-gateway 已部署到 113.219.170.192，手机已预置该 HTTPS 地址。
+   继续核实公网 80/443 连接超时原因；端口可达后执行服务器上的
+   /opt/xfriend-trial/activate-https.sh，并检查证书续期定时器。
+   升级时保留额度账本和缓存密钥，不要重置五次额度。
+5. 加入跨账号/空间导出拒绝、重复导入、缺失引用、敏感字段过滤测试。
+   按仓库 AGENTS.md 运行 make all、前端 typecheck/build、i18n 与 API 文档检查。
+
+验收：同一账号手机配对后预览导入全部所选资源；密钥默认不导出；
+专家关联资料可用于手机分析；同一账号跨手机累计五次试用，第六次 402；
+失败退款、相同任务重试不重复扣次；手机退出不退出电脑账号。
+
+订阅阶段再接入真实支付、服务端权益、购买恢复及账号服务即时撤销查询。
+请不要把共享 API Key 放到网页、APK、桌面导出包或提交到 Git。</code></pre></section>
+<footer>Xfriend Android 0.4.0 · 本报告区分已实现、离线验证与待上线事项。保留 0.3 交付供回退。报告中的模型请求示例均不含真实密钥。</footer>
+</main></body></html>

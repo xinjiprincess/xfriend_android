@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Xfriend Android 合并版与电脑版对接报告</title>
+<style>
+:root{color-scheme:light;--rose:#e85d75;--ink:#111827;--muted:#4b5563;--line:#e5e7eb;--paper:#fff;--bg:#f5f6f8}
+*{box-sizing:border-box}body{overflow-wrap:anywhere;margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 system-ui,"Microsoft YaHei",sans-serif}main{max-width:1020px;margin:auto;padding:44px 24px 80px}header{border-bottom:2px solid var(--rose);padding-bottom:24px}h1{font-size:30px;line-height:1.4;margin:10px 0 18px}h2{font-size:22px;margin:38px 0 12px}h3{font-size:18px;margin:24px 0 8px}p{margin:10px 0}a{color:#b13250}nav{display:flex;gap:16px;flex-wrap:wrap;margin:20px 0}section{scroll-margin-top:20px}.meta,figcaption{font-size:13px;color:var(--muted)}.lead{font-size:18px}.note{border-left:3px solid var(--rose);padding:12px 18px;background:var(--paper);margin:18px 0}.table{overflow-x:auto}table{width:100%;border-collapse:collapse;background:var(--paper);font-size:14px}th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}th{background:#fdebf0}code{font-family:Consolas,monospace;font-size:.9em;overflow-wrap:anywhere}pre{background:#fff;border:1px solid var(--line);padding:18px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.7 Consolas,monospace}li{margin:8px 0}figure{margin:24px 0;padding:20px;background:var(--paper);border:1px solid var(--line);border-radius:10px}svg{width:100%;height:auto}footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;color:var(--muted);font-size:13px}@media(max-width:560px){main{padding:24px 16px 50px}h1{font-size:24px}figure{padding:10px}th,td{padding:9px;min-width:120px}}@media print{body{background:#fff}main{padding:0}nav{display:none}h2,h3{break-after:avoid}figure,pre,tr{break-inside:avoid}a{color:inherit}}
+</style></head><body><main>
+<header><div class="meta">工程对接报告 · Android 0.3.0 · 协议 v1 · 2026 年 10 月 13 日</div><h1>Xfriend 一个手机应用连接本机与电脑</h1><p class="lead">Android 已合并为一个应用。电脑版只需提供本文定义的手机连接服务，即可让同一个 APK 访问电脑原版界面、同一份工作空间与已有电脑控制能力。</p><p>交付对象：负责修改电脑版的工程师。手机工程 <code>D:/xfriend-android</code>；电脑版基准 <code>D:/octop</code> 当前工作树（Xfriend 1.4.7）。本文说明已实现内容、双方接口、修改位置、验收标准与尚未验证的部分。本轮不修改电脑版源码。</p></header>
+<nav><a href="#delivery">当前交付</a><a href="#architecture">连接架构</a><a href="#protocol">v1 协议</a><a href="#desktop">电脑版任务</a><a href="#acceptance">验收</a><a href="#handoff">交接指令</a></nav>
+<section id="delivery"><h2>1 当前 Android 交付</h2>
+<p>仅保留一个构建包，应用 ID 为 <code>com.singu.xfriend.mobile</code>，版本 <code>0.3.0 / versionCode 3</code>。原星星图标、玫瑰色主色、登录注册、专家、团队、技能包、知识库和平台连接继续保留。入口在登录页与登录后的侧栏；电脑页面顶栏可以断开或返回“此手机”。</p>
+<div class="table"><table><thead><tr><th>模式</th><th>执行与数据</th><th>授权方式</th></tr></thead><tbody><tr><td>此手机</td><td>Android Kotlin 智能体循环；手机私有数据目录；模型经 HTTPS 调用。团队顺序执行，知识为文本检索。</td><td>原版云账号登录注册、签名授权；按手机账号和空间隔离。</td></tr><tr><td>连接电脑</td><td>WebView 加载电脑原 React 页面；HTTP / WebSocket 访问电脑上的同一份数据。电脑运行 Harness 与已启用的控制能力。</td><td>电脑登录当前账号，手机输入电脑连接地址与配对码。手机云账号不参与电脑授权。</td></tr></tbody></table></div>
+<p>切换到电脑时，若手机任务正在执行，会确认停止任务；已有对话保留。返回手机时会请求撤销电脑会话并清除网页凭证。网络不可达时远端撤销是尽力请求，剩余会话由 TTL 或电脑端关闭服务撤销。模式偏好保存在手机，配对码不持久保存。</p>
+<div class="note">“同步”表示实时使用电脑同一份数据。当前不复制或合并手机本地库与电脑库；设备上的浏览器偏好也不保证同步。电脑版退出账号、切换账号或切换空间，应撤销已配对的手机会话。</div>
+<p>新包可覆盖升级 0.2 本地版并保留数据。0.2 同步版使用另一个应用 ID，其私有地址配置不能自动跨应用读取；在合并版重新输入即可。旧 APK 与旧数据不主动删除。</p></section>
+<section id="architecture"><h2>2 电脑版连接服务的边界</h2>
+<figure><svg viewBox="0 0 920 220" role="img" aria-label="Android 通过手机连接服务访问电脑版现有账号桥和原运行时"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="currentColor"/></marker></defs><g fill="#fff" stroke="currentColor"><rect x="10" y="48" width="170" height="112" rx="10"/><rect x="245" y="48" width="185" height="112" rx="10"/><rect x="495" y="48" width="185" height="112" rx="10"/><rect x="745" y="48" width="165" height="112" rx="10"/></g><g fill="currentColor" font-size="15" text-anchor="middle" font-family="sans-serif"><text x="95" y="89">Android 合并版</text><text x="95" y="120">电脑模式 WebView</text><text x="338" y="89">手机连接服务 v1</text><text x="338" y="120">配对 / 会话 / TLS</text><text x="588" y="89">原 Go 账号桥</text><text x="588" y="120">现有账号与资源</text><text x="827" y="89">原电脑运行时</text><text x="827" y="120">Harness / 控制能力</text></g><g stroke="currentColor" fill="none" marker-end="url(#arrow)"><path d="M180 104H240"/><path d="M430 104H490"/><path d="M680 104H740"/></g><g fill="currentColor" font-size="12" text-anchor="middle"><text x="212" y="190">HTTPS 或 USB</text><text x="463" y="190">仅本机回环</text><text x="713" y="190">原鉴权</text></g></svg><figcaption>当前独立 Python 连接桥已实现 v1。电脑版可新增同样协议的 Go 手机服务或将连接桥作为受控子进程集成，不必更改 Android 协议。</figcaption></figure>
+<p>现有 <code>desktop/src/desktop_server.go</code> 的 <code>listen()</code> 绑定 <code>127.0.0.1</code>，<code>ServeHTTP()</code> 严格检查 Host / Origin，并由电脑端注入本机服务 Bearer。保留这些边界，另建手机入口。不要把原账号桥直接改成对所有网卡监听，也不要把本机 Bearer、云刷新令牌或任意代理目标下发给手机。</p>
+<p>手机入口提供受信任 HTTPS；USB 调试可使用 <code>adb reverse tcp:8765 tcp:8765</code> 与 <code>http://127.0.0.1:8765</code>。局域网明文 HTTP、自签证书错误忽略、自动公网穿透均不属于当前协议。端口 8765 是默认配置，手机支持其他明确端口。</p></section>
+<section id="protocol"><h2>3 手机连接协议 v1</h2>
+<p>四类入口必须处于同一个 Origin。手机先发现协议，再用原生 WebView 表单配对；所有后续资源和 API 均通过该 Origin。</p>
+<div class="table"><table><thead><tr><th>入口</th><th>输入和响应</th><th>约束</th></tr></thead><tbody>
+<tr><td><code>GET /mobile/status</code></td><td>未配对可读，JSON，见下例。</td><td>只公开兼容性和就绪状态，不包含用户、空间 ID、配对码、路径或令牌。<code>Cache-Control: no-store</code>。</td></tr>
+<tr><td><code>POST /mobile/pair</code></td><td><code>application/x-www-form-urlencoded</code>，字段 <code>code</code>。成功 <code>303 Location: /chat</code> 并设置会话 Cookie。</td><td>有效高熵配对码始终必需。Android <code>postUrl</code> 的首次请求可能携带 <code>Origin: null</code> 或无 Origin，仅此入口允许；其他跨站 Origin 拒绝。</td></tr>
+<tr><td><code>POST /mobile/logout</code></td><td>已有 Cookie，<code>Origin</code> 与连接地址严格一致；有效会话 200 并过期 Cookie，已失效会话可返回 401。</td><td>撤销当前手机会话，不退出电脑云账号；关闭关联 WebSocket。</td></tr>
+<tr><td><code>/chat</code>、静态资源、<code>/api/**</code></td><td>已配对 Cookie；原 React 页面、HTTP / SSE / 文件上传和 WebSocket 原样转发。</td><td>鉴权和账号空间绑定覆盖所有资源。写请求及 WebSocket 要求同源。未配对 401。</td></tr>
+</tbody></table></div>
+<h3>3.1 状态发现</h3><pre>{
+  "application": "xfriend",
+  "protocol": 1,
+  "state": "ready",
+  "implementation": "native-desktop",
+  "entry_path": "/chat",
+  "pairing_required": true,
+  "session_ttl_seconds": 28800,
+  "transports": ["http", "websocket", "sse", "upload"]
+}</pre>
+<p>Android 0.3 已检查 <code>application / protocol / state / entry_path</code>；<code>protocol</code> 必须为整数 1，入口固定为 <code>/chat</code>。公开 Schema 为 <a href="mobile-status-v1.schema.json">mobile-status-v1.schema.json</a>。当前桥将 implementation 设为 external-bridge；内置实现可用 native-desktop。</p>
+<ul><li><code>ready</code>：手机服务和电脑账号已可用，可以尝试配对；后端尚在启动时原页面仍处理 SERVICE_STARTING。</li><li><code>login_required</code>：HTTP 200，提示先在电脑登录。手机不会提交配对码。</li><li><code>starting</code>：HTTP 200，客户端提示尚未就绪。</li><li><code>unavailable</code>：HTTP 503，电脑账号桥或运行服务不可达；客户端提示服务不可用。</li><li>404、重定向、其他产品、协议版本不符或入口异常均停止连接；Android 不跟随状态接口重定向，响应上限 64KB。</li></ul>
+<p>兼容字段可以增补；不要更名或改变既有字段含义。协议破坏性变更需新版本和手机配套升级。当前客户端不读取可选能力列表，具体控制能力仍由原页面显示与鉴权。</p>
+<h3>3.2 配对与会话</h3>
+<pre>POST /mobile/pair
+Content-Type: application/x-www-form-urlencoded
+Origin: null
+
+code=&lt;电脑显示的随机配对码&gt;
+
+HTTP/1.1 303 See Other
+Location: /chat
+Set-Cookie: xfriend_mobile=&lt;随机会话&gt;; Path=/; HttpOnly; SameSite=Strict; Secure
+Cache-Control: no-store</pre>
+<p>HTTPS 必须设置 Secure；USB 回环 HTTP 可不设置 Secure。Cookie 名可由服务自定，现桥为 xfriend_mobile。会话标识至少 32 随机字节，服务器保存会话并绑定配对时的电脑 user_id 和 space_id；Cookie 中不放云令牌。现桥使用 24 随机字节的 URL-safe 配对码，手机表单最低长度 16，故 6 位验证码与当前 APK 不兼容。</p>
+<ul><li>现桥会话最长 8 小时，每服务最多 16 个有效会话；无效配对限制为同来源每分钟 5 次，超限 429，错误配对码 401。</li><li>电脑版应提供“手机连接”开关、复制地址、复制配对码、刷新配对码及撤销连接功能。停用服务须撤销全部手机会话。</li><li>桌面退出、账号或空间改变时须撤销会话并断开已建立的 WebSocket。当前桥每次请求比对身份，流连接约每 2 秒检查一次，另计身份接口网络超时；内置实现建议直接订阅账号变化事件。</li><li>已配对请求不能通过手机修改电脑云账号；拒绝登录、注册、切空间、退出账号等 <code>/api/desktop/**</code> 变更请求。保留 GET <code>/api/desktop/auth/status</code> 和 GET <code>/api/desktop/startup</code> 供原页面使用。</li><li>断线或杀进程不保证即时服务端注销，必须同时有服务器 TTL 和电脑端主动撤销能力。手机切换模式会清除 Cookie、缓存和 WebStorage，并尽力请求 logout。</li></ul>
+<h3>3.3 原页面和传输要求</h3>
+<p>复用原 React SPA、样式、图标和响应式布局；首页及 SPA 路由带现有 <code>data-xfriend-desktop</code>、<code>data-xfriend-cloud</code> 标记，使原账号和启动流程正常工作。资源与 API 保持同源，避免返回硬编码回环 URL。<code>dashboard/src/api/config.ts</code> 已根据当前 Origin 构造 HTTP / WS 地址，可作为兼容依据。</p>
+<p>连接服务只代理固定的本机 Go 账号桥。请求重建 Host / Origin / Referer，丢弃手机传入的 Authorization、Cookie 与转发伪造头；电脑账号桥继续负责注入真实本机 Bearer。Cookie 只在手机入口鉴权使用，不能送入 Python。WebSocket 支持文本、二进制与关闭传播；SSE 不整体缓冲；上传保留 multipart 流与原服务限制。需要 WebSocket 子协议的新增能力，应另补协商测试，当前桥未专门实现其转发。</p>
+<div class="table"><table><thead><tr><th>现有电脑能力</th><th>需原样支持的路径</th><th>验收内容</th></tr></thead><tbody><tr><td>智能体聊天</td><td><code>/api/agents/{agent_id}/chat/ws</code></td><td>流式消息、工具事件、停止、历史。</td></tr><tr><td>终端</td><td><code>/api/agents/{agent_id}/terminal/ws</code></td><td>文本/二进制帧、输入、断开。</td></tr><tr><td>远程桌面</td><td><code>/api/desktop/status</code><br><code>/api/desktop-stream/ws</code></td><td>已启用时的图像和触控映射，旋转与缩放。</td></tr><tr><td>浏览器</td><td><code>/api/browser/env-status</code><br><code>/api/browser-stream/ws</code></td><td>已有浏览器运行能力和流显示。</td></tr><tr><td>专家 / 团队 / 技能 / 知识 / 平台</td><td>原页面已有 <code>/api/**</code></td><td>同账号同空间的真实读写、资料上传；保持原权限。</td></tr></tbody></table></div>
+<p>当前 Android WebView 已接入系统文件选择器；未实现系统下载管理器、摄像头/麦克风权限、第三方 OAuth 弹窗、后台常驻或剪贴板跨端同步。电脑版对接第一阶段应避免把这些能力作为必需路径；后续可按真实用例单独扩展。</p></section>
+<section id="desktop"><h2>4 电脑版工程实施清单</h2>
+<ol><li><strong>新增手机连接服务。</strong>建议在 desktop/src 新建独立 mobile_server.go 与对应测试，持有明确的开关和生命周期。主桌面账号桥继续绑定回环。实现 /mobile/status、/mobile/pair、/mobile/logout、配对会话与固定上游代理。</li><li><strong>绑定账号生命周期。</strong>参考 desktop/src/cloud_account.go 中 context()、status()、cloudHTTP()。手机服务仅在账号有效时配对，账号/空间改变和退出立即撤销手机连接，不修改原云签名授权。</li><li><strong>增加桌面管理入口。</strong>在原设置中增加“手机连接”，展示监听方式、地址、高熵配对码、连接数和停用/撤销操作。保持原 UI 组件和图标风格。地址不能显示为 0.0.0.0；应展示可访问且与证书匹配的域名或 USB 回环地址。</li><li><strong>复用原资产和路由。</strong>参考 desktop/src/desktop_server.go 的 SPA 回落、资产缓存、桌面标记和账号注入；不要重做另一套专家/知识库页面。模块依赖保持原仓库边界。</li><li><strong>完成桌面侧测试和真实联调。</strong>独立桥测试可作为行为参考，不能把合成页面测试宣称为真实电脑控制验收。若选择受控子进程方案，应固定本机目标并管理退出、日志与配对码展示，不读取终端任意文本作为认证依据。</li></ol>
+<p>现成参考：<code>D:/xfriend-android/desktop-bridge/bridge.py</code> 和 <code>test_bridge.py</code>。手机端相关代码为 UnifiedRoot.kt、AccountScreen.kt、MainActivity.kt、CompanionScreen.kt、DesktopProtocol.kt。当前支持“独立桥过渡”与“内置 v1 服务”两种部署，无需手机识别具体实现。</p></section>
+<section id="acceptance"><h2>5 验收标准与当前证据</h2>
+<p>Android 与独立桥的本轮结果单列于 <a href="VERIFICATION-0.3.html">0.3 验证记录</a>。电脑版另一边至少需要完成以下真实环境验收：</p>
+<ol><li>在全新手机安装一个 APK，确认原登录注册可见；从登录页进入电脑连接，返回此手机仍能继续登录。</li><li>使用已登录电脑配对，手机和电脑显示相同专家、团队、会话、技能及知识库；手机新增一条测试资料，电脑可见；电脑修改后手机刷新可见。</li><li>错误/过期配对码、未知协议、未登录电脑、错误 TLS 证书均不能进入电脑工作空间。</li><li>聊天 WebSocket 真实流式运行；手机触发已启用的终端、桌面、浏览器功能；测试文本、二进制、触摸与旋转，而非仅看状态开关。</li><li>上传真实 TXT/Markdown 测试文件；验证 MIME、大小限制、取消与错误提示。SSE 恢复路径按原页面行为联调。</li><li>手机断开、电脑版停用服务、电脑退出账号、切空间后，HTTP 被拒绝且已有长连接关闭；重新配对不能读取前一账号数据。</li><li>手机模式已经创建的数据在反复切换、重启及升级后保留；电脑连接不把电脑资料写入手机本地知识库。</li><li>运行原仓库规定的 make all、前端类型检查及构建；新增 API 文档和中英文字符串遵循原 AGENTS.md。发行包完成正式签名和至少一台 Android 真机验收。</li></ol>
+<div class="note">此前自动审批阻止启动真实电脑连接桥及 ADB 转发，理由仅为策略阻止。真实电脑远程控制尚未验证。本轮继续使用隔离合成服务验证手机协议，不绕过该阻止；真实云账号登录与模型调用也未用个人凭据验收。</div></section>
+<section id="handoff"><h2>6 可直接交给另一边的指令</h2><pre>请在 D:/octop 的现有 Xfriend 电脑版中新增手机连接能力，
+按 D:/xfriend-android/docs/DESKTOP-INTEGRATION-0.3.html 的 v1 协议实现。
+
+Android 已合并为单包 com.singu.xfriend.mobile 0.3.0。
+必须兼容 GET /mobile/status、POST /mobile/pair（原生 WebView 表单）、
+POST /mobile/logout，以及配对后同源 /chat、静态资源、/api/** 和 WebSocket。
+
+保留原 Go 账号桥的回环监听和 Host / Origin 检查；新建受控手机入口，
+不要向手机暴露本机 Bearer 或云刷新令牌。会话绑定电脑当前账号/空间，
+退出或切换账号空间时撤销并关闭长连接。网络使用受信任 HTTPS。
+
+增加原版风格的手机连接设置页，展示地址、高熵配对码和撤销开关。
+复用电脑版原 React 页面与运行时，不创建第二套业务数据库。
+参考 desktop-bridge/bridge.py 和 test_bridge.py，完成报告验收清单。
+先检查当前工作树和 AGENTS.md，只修改相关文件，不覆盖已有改动，不擅自提交推送。
+</pre></section>
+<footer>本报告为工程对接约定。源码依据为本机当前工作树；实现与验收状态以 0.3 验证记录为准。无需把云账号凭据或电脑用户资料发送给另一边。</footer>
+</main></body></html>
+

@@ -1,0 +1,289 @@
+{
+  "date": "2026-10-17",
+  "version": "0.11.0",
+  "version_code": 11,
+  "status": "ready_for_delivery",
+  "scope": "UI design-system migration only; business logic, runtime, network, sync unchanged",
+  "design_source": {
+    "concept": "D:/octop/docs/design/redesign-concept.html",
+    "spec": "docs/design/redesign-concept-android-spec.md",
+    "design_screens": "docs/design/screens/",
+    "design_screens_count": 23
+  },
+  "design_system": {
+    "tokens_file": "app/src/main/java/com/singu/xfriend/XfDesign.kt",
+    "components_file": "app/src/main/java/com/singu/xfriend/XfComponents.kt",
+    "icons_file": "app/src/main/java/com/singu/xfriend/XfIcons.kt",
+    "appearance_file": "app/src/main/java/com/singu/xfriend/XfAppearance.kt",
+    "components_count": 28,
+    "icons_count": 60,
+    "accents": ["indigo", "teal", "amber", "rose", "violet"],
+    "defaults": { "Xfriend": "indigo", "Xsalers": "violet" },
+    "theme_modes": ["system", "light", "dark"],
+    "appearance_persistence": "SharedPreferences xf_appearance (mode, accent); local only, not account-synced",
+    "light": {
+      "canvas": "#F6F5F1",
+      "surface": "#FFFFFF",
+      "ink": "#1B1C1F",
+      "line": "#E5E2DA",
+      "accent_default": "#4F5DF0",
+      "accent_solid_default": "#4351E8"
+    },
+    "dark": {
+      "canvas": "#0E0F12",
+      "surface": "#181A1F",
+      "ink": "#F1F2F4",
+      "line": "#282A31",
+      "accent_default": "#8B95FF",
+      "accent_solid_default": "#4F5DF0"
+    },
+    "bottom_bar": "Haze frosted surface (surface @92%), 80dp content height + 1dp top line + navigation bar insets, selected pill accentSoft",
+    "top_bar": "XfTopBar 56dp + status bar insets"
+  },
+  "products": {
+    "Xfriend": {
+      "package": "com.singu.xfriend.mobile",
+      "label": "Xfriend",
+      "version_name": "0.11.0",
+      "version_code": 11,
+      "min_sdk": 26,
+      "target_sdk": 34,
+      "apk_path": "D:/build_apk/XFriend-Android-0.11.0-debug.apk",
+      "apk_bytes": 26451921,
+      "sha256": "46693C8F2A57BBC1161F43318533235B470234B67B31F38FF2DD97EC2845457E",
+      "apk_mtime": "2026-10-18T00:18:19+08:00",
+      "badging_verified": true,
+      "build_status": "passed"
+    },
+    "Xsalers": {
+      "package": "com.singu.xsalers.mobile",
+      "label": "Xsalers",
+      "version_name": "0.11.0",
+      "version_code": 11,
+      "min_sdk": 26,
+      "target_sdk": 34,
+      "apk_path": "D:/build_apk/XSalers-Android-0.11.0-debug.apk",
+      "apk_bytes": 26451941,
+      "sha256": "E4C4A9A7C36124F0E55E64B725272476BB2291114CCA230A3F3D2BED323CA0C6",
+      "apk_mtime": "2026-10-18T00:17:24+08:00",
+      "badging_verified": true,
+      "build_status": "passed"
+    }
+  },
+  "build": {
+    "command": "gradlew --no-daemon --max-workers=4 -Pkotlin.compiler.execution.strategy=in-process :app:assembleXfriendDebug :app:assembleXsalersDebug --console=plain",
+    "log": "build-0.11-final.log",
+    "attempt_log": "build-0.11-a.log",
+    "first_success_log": "build-0.11-b.log",
+    "qa_fixture_log": "build-0.11-qa.log",
+    "result": "BUILD SUCCESSFUL",
+    "duration": "9m 46s",
+    "tasks": "77 actionable tasks: 15 executed, 62 up-to-date",
+    "compile_errors": 0,
+    "warnings": 16,
+    "warning_note": "历史弃用/未用变量 warning（PhoneStateListener / ArrowBack / unused variables 等），不影响构建",
+    "tests": "passed: 574 tests total across both flavors, 0 failures, 0 errors, 0 skipped (test-0.11.log BUILD SUCCESSFUL in 5m 11s)",
+    "test_log": "test-0.11.log",
+    "test_results_dir": "app/build/test-results/testXfriendDebugUnitTest/, testXsalersDebugUnitTest/",
+    "lint": "not_run",
+    "release_copies": "D:/xfriend-suite/.artifacts/0.11-release/",
+    "notes": [
+      "首次构建 build-0.11-a.log 因页面 Xf/Material API 不匹配失败（BUILD FAILED in 4m59s）；修复后重跑 build-0.11-b.log 成功。",
+      "QA 首轮 P0/P1/P2 修复后重编 build-0.11-final.log：BUILD SUCCESSFUL in 9m46s，77 tasks（15 executed / 62 up-to-date），最终 APK 已覆盖旧值。",
+      "release-0.11.ps1 default builds QA fixture first, then formal debug APKs and copies them to D:/build_apk.",
+      "-WithTests runs both flavor unit tests; -QaOnly builds .qa fixture only.",
+      "build.ps1 runs test + assemble + lint (not executed for 0.11 as of this record)."
+    ]
+  },
+  "qa": {
+    "status": "passed",
+    "owner": "visual-qa",
+    "report": "docs/qa-0.11/report.md",
+    "report_section": "§11 最终构建回归（结论：通过）",
+    "report_time": "2026-10-18T00:35:47+08:00",
+    "prep": "docs/qa-0.11/prep.md",
+    "evidence_dir": "docs/qa-0.11/",
+    "environment": "Android API 35 emulator (AVD XfriendSuiteQA), wm size 1080x2400, 420dpi (411x914dp)",
+    "screens_status": "final (first-round + regression screenshots)",
+    "fixture_apk": {
+      "status": "built_first_round_pre_fix",
+      "log": "build-0.11-qa.log",
+      "result": "BUILD SUCCESSFUL",
+      "duration": "6m 35s",
+      "tasks": "77 actionable tasks: 33 executed, 44 up-to-date",
+      "packages": {
+        "Xfriend": "com.singu.xfriend.mobile.qa",
+        "Xsalers": "com.singu.xsalers.mobile.qa"
+      },
+      "version": "0.11.0 / versionCode 11",
+      "paths": [
+        "app/build/outputs/apk/xfriend/debug/app-xfriend-debug.apk",
+        "app/build/outputs/apk/xsalers/debug/app-xsalers-debug.apk"
+      ],
+      "bytes": {
+        "Xfriend": 26467805,
+        "Xsalers": 26467893
+      },
+      "sha256": {
+        "Xfriend": "E0BA58F8FE2B3E520799E6EDEEB8B8136417301D320A0D4E2937D84D401E5681",
+        "Xsalers": "EAB232AE4BF73C4700B4B5CBEF38960925A5FC50F7F9913C726487FE22C730D1"
+      },
+      "note": "独立 .qa 包名，仅用于模拟器截图验收；不属于交付安装包。交付包为 D:/build_apk 下两个 0.11.0 debug APK。",
+      "optional_copy": ".artifacts/0.11-qa/（如脚本复制；当前未创建）"
+    },
+    "fixture_apk_final": {
+      "status": "built_final_for_regression",
+      "log": "build-0.11-qa-final.log",
+      "result": "BUILD SUCCESSFUL",
+      "duration": "10m 17s",
+      "tasks": "77 actionable tasks: 19 executed, 14 from cache, 44 up-to-date",
+      "packages": {
+        "Xfriend": "com.singu.xfriend.mobile.qa",
+        "Xsalers": "com.singu.xsalers.mobile.qa"
+      },
+      "version": "0.11.0 / versionCode 11",
+      "paths": [
+        ".artifacts/0.11-qa/Xfriend-0.11-qa.apk",
+        ".artifacts/0.11-qa/Xsalers-0.11-qa.apk"
+      ],
+      "bytes": {
+        "Xfriend": 26468093,
+        "Xsalers": 26468205
+      },
+      "sha256": {
+        "Xfriend": "C6EAB9646C57C0806203E0308DEF8C0CDF4F6DE60F35A9C28006C45AAAAFBB44",
+        "Xsalers": "0B53FF5FE77D41E000A01321C9450D575EB65E2B87A25116435FB951AF41DBF8"
+      },
+      "note": "修复后重建的 QA fixture，仅用于回归截图验收；不属于交付安装包。"
+    },
+    "screens": [
+      "xf-login-light.png",
+      "xs-login-light.png",
+      "xf-chat-light.png",
+      "xf-chat-dark.png",
+      "xf-chat-systemdark.png",
+      "xf-workbench-light.png",
+      "xf-workbench-dark.png",
+      "xf-resources-light.png",
+      "xf-resources-dark.png",
+      "xf-profile-light.png",
+      "xf-profile-dark.png",
+      "xf-appearance-light.png",
+      "xf-appearance-follow-light.png",
+      "xf-appearance-dark.png",
+      "xs-today-light.png",
+      "xs-today-dark.png",
+      "xs-customers-light.png",
+      "xs-customers-dark.png",
+      "xs-customer-detail-light.png",
+      "xs-review-detail-light.png",
+      "xs-today-reg.png",
+      "xs-customers-reg.png",
+      "xs-review-reg.png",
+      "xs-experts-reg.png",
+      "xs-profile-reg.png",
+      "xs-appearance-reg-light.png",
+      "xs-appearance-reg-dark.png",
+      "xf-chat-reg.png",
+      "xf-workbench-reg.png"
+    ],
+    "p0": [
+      {
+        "id": "P0-1",
+        "title": "XSalers 主壳底部 5-tab 导航栏完全未渲染（无法导航）",
+        "root_cause": "SalesScreen.kt 使用 WindowInsets.isImeVisible 在该组合下误报 true，底栏被跳过",
+        "status": "verified_passed_in_final",
+        "fix": "改为 WindowInsets.ime.getBottom(LocalDensity.current) == 0"
+      }
+    ],
+    "p1": [
+      {
+        "id": "P1-1",
+        "title": "XfSegmented 选中项阴影在浅色下呈较重灰色描边",
+        "status": "verified_passed_in_final",
+        "fix": "选中项 shadow 改为 1dp line 细边框"
+      }
+    ],
+    "p2": [
+      {
+        "id": "P2-1",
+        "title": "底栏 64dp 偏低、文字距手势区偏近（观感）",
+        "status": "verified_passed_in_final",
+        "fix": "bottomBarHeight 64dp -> 80dp"
+      }
+    ],
+    "non_issues": [
+      "XSalers 客户详情“点不开”为截图脚本点击坐标误触，非产品缺陷",
+      "QA fixture 顶部紫色“界面验收·独立 QA 安装·示例数据”提示条为 QA 构建专有，正式包无"
+    ],
+    "uncovered": [
+      "首轮未截的 XSalers 专家/我的/外观页已在回归补截（xs-experts-reg / xs-profile-reg / xs-appearance-reg-light/dark）",
+      "XSalers 复盘详情深色、客户档案深色未截",
+      "未做真实登录/云同步/模型调用；QA fixture 无真实后端",
+      "未做像素级 diff；模拟器非真机"
+    ],
+    "fixes_applied_before_final_build": [
+      "SalesScreen.kt:146 IME 判断改为 WindowInsets.ime.getBottom(LocalDensity.current) == 0",
+      "XfComponents XfSegmented 选中项 shadow -> 1dp line 边框",
+      "XfDesign bottomBarHeight 64 -> 80dp",
+      "PlatformScreen 设备在线判断容忍 TRUE/1"
+    ],
+    "final_build": {
+      "log": "build-0.11-final.log",
+      "status": "completed",
+      "result": "BUILD SUCCESSFUL in 9m 46s",
+      "apk_values": {
+        "Xfriend": { "bytes": 26451921, "sha256": "46693C8F2A57BBC1161F43318533235B470234B67B31F38FF2DD97EC2845457E", "mtime": "2026-10-18T00:18:19+08:00" },
+        "Xsalers": { "bytes": 26451941, "sha256": "E4C4A9A7C36124F0E55E64B725272476BB2291114CCA230A3F3D2BED323CA0C6", "mtime": "2026-10-18T00:17:24+08:00" }
+      }
+    },
+    "final_regression": {
+      "report_section": "§11 最终构建回归（结论：通过）",
+      "result": "passed",
+      "p0": "XSalers 底栏 5 tab 全部出现且可切换；含「我的→外观」浅/深（首轮 missing 为未滚动误报）",
+      "p1": "分段控件选中项为白底 + 1dp 细边框，无灰晕",
+      "p2": "XFriend 底栏实测 80dp（210px @2.625）",
+      "logcat": "回归期间 0 FATAL EXCEPTION / ANR（_logs/logcat-final-regression.txt）",
+      "screenshots": [
+        "xs-today-reg.png", "xs-customers-reg.png", "xs-review-reg.png",
+        "xs-experts-reg.png", "xs-profile-reg.png",
+        "xs-appearance-reg-light.png", "xs-appearance-reg-dark.png",
+        "xf-chat-reg.png", "xf-workbench-reg.png"
+      ],
+      "new_issues": "无"
+    },
+    "real_device": "not_tested",
+    "notes": [
+      "首轮报告基于修复前 APK；P0/P1/P2 已修复并在最终构建 + 最终 QA 回归中验证通过（report.md §11）。",
+      "模拟器截图只代表该环境；字体缩放、TalkBack、对比度与 Haze 跨 API 未验证。",
+      "QA fixture 为独立 .qa 包名，仅用于截图验收；交付物为 D:/build_apk 下两个正式 0.11.0 debug APK。"
+    ]
+  },
+  "limits": [
+    "0.11 真机验收未执行",
+    "0.11 lint 未执行（release 脚本默认只 assemble）；单元测试已通过（574 项，0 failures/errors）",
+    "QA 首轮 P0/P1/P2 已修复并在最终构建 + 最终 QA 回归中验证通过（report.md §11）",
+    "字体缩放、TalkBack、对比度未在设备上实测",
+    "少量 Material 图标/typography 仍残留（约 17 处 Material 图标）",
+    "群聊/会议/决策档案未实现，无入口",
+    "云端智能体执行未启用；XFriend 免密钥试用未接通",
+    "交付为开发签名 APK，非商店发布包",
+    "服务器部署、桌面安装包、生产签名与上架不在本次范围"
+  ],
+  "evidence_files": [
+    "build-0.11-final.log",
+    "build-0.11-b.log",
+    "build-0.11-a.log",
+    "build-0.11-qa.log",
+    "build-0.11-qa-final.log",
+    "test-0.11.log",
+    ".artifacts/0.11-qa/",
+    "docs/XFAMILY-0.11-交付说明.txt",
+    "docs/XFRIEND-REDESIGN-0.11.md",
+    "docs/DELIVERY-0.11.html",
+    "docs/design/redesign-concept-android-spec.md",
+    "docs/design/screens/",
+    "docs/qa-0.11/prep.md",
+    "docs/qa-0.11/report.md"
+  ]
+}

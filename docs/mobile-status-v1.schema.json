@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Xfriend Mobile Status Protocol 1",
+  "type": "object",
+  "required": ["application", "protocol", "state", "entry_path", "pairing_required"],
+  "properties": {
+    "application": { "const": "xfriend" },
+    "protocol": { "const": 1 },
+    "state": { "enum": ["ready", "login_required", "starting", "unavailable"] },
+    "entry_path": { "const": "/chat" },
+    "pairing_required": { "const": true },
+    "implementation": { "type": "string", "examples": ["external-bridge", "native-desktop"] },
+    "session_ttl_seconds": { "type": "integer", "minimum": 1, "maximum": 28800 },
+    "transports": { "type": "array", "uniqueItems": true, "items": { "enum": ["http", "websocket", "sse", "upload"] } }
+  },
+  "additionalProperties": true,
+  "description": "Public discovery response. Must never include user IDs, space IDs, pairing codes, cloud tokens, local service bearers or filesystem paths. Android 0.3 checks application, protocol, state and entry_path."
+}

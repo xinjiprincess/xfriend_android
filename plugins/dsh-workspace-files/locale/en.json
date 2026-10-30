@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Workspace Files",
+    "description": "Browse the workspace: one click opens a file with the system default application; the context menu copies paths, picks an open-with handler, or reveals the entry in the file manager."
+  }
+}

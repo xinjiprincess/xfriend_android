@@ -1,0 +1,127 @@
+Xfriend trial gateway v2 — 父代理部署交接清单（仅准备；本轮未部署）
+日期：2026-10-13
+0.7发布要求以 release/DEPLOYMENT-0.7.txt 为准。113 hostkey未核验（报告mismatch），未部署。
+
+1. 先核实现有位置和健康状态
+   - 用户本轮报告：公网 https://113.219.170.192/health 为 TLS EOF；
+     https://www.ciyuancenter.cc/xfriendmanager/health 为 HTTP 200。
+     本轮未复测公网；激活站可用不能证明试用网关或其 TLS 正常。
+   - 本目录现有 unit/README 声明服务 xfriend-trial.service，代码 /opt/xfriend-trial，
+     Python /opt/xfriend-trial/venv/bin/python，监听 127.0.0.1:8787，
+     EnvironmentFile=/etc/xfriend-trial/gateway.env，账本 /var/lib/xfriend-trial/trial.sqlite。
+     父代理必须先核对真实 unit 的 WorkingDirectory/ExecStart/User/StateDirectory，不能假定线上完全一致。
+   - 检查 loopback HTTP /health 与公网 TLS 分别定位：进程/8787、Nginx 443监听、
+     证书路径/有效期/完整链、公网防火墙和 short-lived 证书续期 timer。
+     不关闭 TLS 校验、不用自签证书替代、不为了健康检查修改激活站。
+   - 不打印 EnvironmentFile、MIMO_API_KEY、Bearer、签名租约或 .cache-key 内容；
+     只检查路径、存在性、属主/权限和必要的脱敏状态。
+
+2. 发布文件与依赖
+   - 代码：gateway.py、reviews.py、review_store.py、review_pipeline.py。
+   - 依赖：pyproject.toml、uv.lock；交付文档：review-protocol.json、README.md、本清单。
+   - 测试：test_gateway.py、test_reviews.py、test_review_integration.py，可作为发布前验证，生产不必安装测试依赖。
+   - 新增运行依赖 Pillow >=11,<13；锁文件已包含对应版本和轮子。
+     保留 aiohttp >=3.12,<4、cryptography >=44，Python >=3.12。
+   - FFmpeg：当前服务端没有 subprocess/ffmpeg 调用，不新增 FFmpeg 运行依赖。
+     Android 上传归一化 PCM WAV；服务端用 stdlib wave 验证实际帧数并切 WAV。
+     不要安装 ffmpeg-python 以为它会提供 ffmpeg 可执行文件。
+     若未来要直接接受 AAC/M4A/MP3，需另外实现并验证服务端解码；本版不支持这些格式。
+   - 本地 uv 默认使用 .venv，但现有 systemd 指向 venv：父代理必须将锁定依赖安装到
+     实际 ExecStart 对应环境，或明确切换服务解释器；只创建 .venv 不会更新现有服务。
+   - 现有激活脚本/续期 unit 也可能使用 /opt/xfriend-trial/venv/bin/certbot。
+     不要用会清除额外包的同步操作把共享环境中的 Certbot 删除。
+     确认路径后可使用 UV_PROJECT_ENVIRONMENT=<实际服务venv> uv sync --frozen --no-dev --inexact；
+     或使用独立新环境并保留原续期环境。同步后验证服务 Python 可导入 aiohttp/cryptography/PIL，
+     及现有 Certbot --version 仍正常。命令仅供父代理执行，本轮未运行服务器命令。
+
+3. 数据、systemd 与 env
+   - 维护窗口内先停止旧网关，避免新旧进程同时使用同一数据库。
+   - 使用 SQLite backup API 备份账本，保留相邻 trial.cache-key；不要只复制活动中的主 db
+     而丢弃 WAL，不要初始化新账本，不能重置已使用的五次额度。
+   - 新表自动创建，无手工迁移命令。原 tasks 保留并与 v2 共用。
+   - 原始媒体目录为 <XFRIEND_TRIAL_DB>.media，例如
+     /var/lib/xfriend-trial/trial.sqlite.media/。服务用户需可读写数据库、WAL/SHM、
+     .cache-key 与该媒体目录。现有 StateDirectory/ReadWritePaths=/var/lib/xfriend-trial
+     已覆盖默认位置；如果实际 DB 在别处，要核对 systemd 的 ProtectSystem/ReadWritePaths。
+   - 继续单进程运行：无外部队列，不要启动多个网关实例或多 gunicorn worker。
+     保留 Restart=on-failure、UMask=0077、非 root 服务用户及当前沙箱限制。
+     正常停止会释放工作者租约，重启从检查点继续；崩溃租约最多 60 秒后可接管。
+   - 保留现有 MIMO_API_KEY、XFRIEND_TRIAL_DB、PORT（默认8787）。不得将凭据写入发布文件。
+   - 可选 XFRIEND_SESSION_INTROSPECTION_URL，必须是受信任 HTTPS 会话内省接口。
+     必须同时配置仅服务端env的 XFRIEND_GATEWAY_INTROSPECTION_SECRET（与激活站一致，32..200无空白ASCII）。
+     网关 POST {"token":"客户端访问token"}，Authorization: Bearer <服务secret>，要求返回
+     {"active":true,"user_id":"与现有租约一致的canonical account ID"}。
+     实际契约为 /api/v2/auth/introspect，公网代理前缀需核对；这不是 health URL。
+     缺服务secret或服务凭据被拒返回503且不回显秘密；
+     Android 继续使用既有 X-Xfriend-Lease。新 bearer 无配置时返回401。
+
+4. Nginx 上传与 SSE（现有 nginx.conf 未修改，父代理按线上配置合并）
+   - 当前模板 client_max_body_size 30m 会阻止长音频：v2 上传需要至少128m，建议130m。
+     可仅在 /v2/reviews/ 路径启用较大上限；/v1/tasks 保留原30m兼容限制。
+   - 长 WAV 上传的 location 建议 proxy_request_buffering off，减少代理落盘和等待。
+     客户端可能经弱网上传，client_body_timeout 应按允许的两次读取间隔配置；
+     它不是整段上传总时限。建议至少120s，结合线上资源/网络策略确认。
+   - SSE location 使用 proxy_http_version 1.1、proxy_buffering off、proxy_cache off、
+     gzip off；不要缓存鉴权响应。应用也返回 X-Accel-Buffering: no 与 Cache-Control: no-store。
+     透传 X-Xfriend-Lease、Authorization、Last-Event-ID，不要把凭据写访问日志。
+   - 现有 proxy_read_timeout/proxy_send_timeout 640s 可保留。
+     SSE有 keepalive，单连接最多120s；客户端要用最后事件ID重连，或者每2秒GET轮询。
+   - 参考专用 v2 location（需合并已有 Host、TLS及安全头，不是完整 nginx.conf）：
+       location ^~ /v2/reviews {
+           client_max_body_size 130m;
+           client_body_timeout 120s;
+           proxy_pass http://127.0.0.1:8787;
+           proxy_http_version 1.1;
+           proxy_request_buffering off;
+           proxy_buffering off;
+           proxy_cache off;
+           gzip off;
+           proxy_read_timeout 640s;
+           proxy_send_timeout 640s;
+           proxy_set_header Host $host;
+           proxy_set_header X-Forwarded-Proto https;
+           add_header Cache-Control "no-store" always;
+       }
+   - Nginx改动需 nginx -t 通过再 reload。本轮未修改 nginx.conf、service 或激活脚本。
+
+5. 资源与保留期
+   - 单次音频<=128MiB；图片<=10MiB；文本<=2MiB；每份清单最多100个source。
+     全部音频以实际PCM样本计数累计<=3600秒，不信任客户端时长。
+     推荐16kHz单声道16-bit完整WAV；60分钟约115.2MB，服务端内部90秒/2秒重叠。
+   - 上传缓冲、加解密、音频帧处理会使用内存，瞬时占用高于文件大小；
+     父代理按主机内存和预期同时上传数设置容量，不能只按音频文件大小估算 RSS。
+   - 媒体终态后24小时，由每30秒清理循环删除；停机期间需等重启补做。
+     未启动草稿24小时过期。转写、证据、结果、事件、检查点和额度账本仍保留。
+     不要把“原始媒体删除”误当全量个人数据删除。备份、磁盘容量与保留策略需单独管理。
+
+6. 上线后验收（父代理执行；真实成功复盘会使用真实账号的一次试用）
+   - local /health和公开HTTPS /health都正常，使用受信任证书、不加curl -k。
+   - 无凭据访问v2返回401；保留v1/quota、v1/tasks和TTS兼容。
+   - 测试账号create→raw upload→start→GET/SSE；进度只展示percent，不显示片段/团队信息。
+     partial_report按快照覆盖保存，未成功前result=null，不能应用画像/行动。
+   - 单独核验>30MiB WAV可通过公网代理，避免只验证loopback导致遗漏Nginx限制。
+   - 主动断开SSE再用Last-Event-ID恢复；GET与最后事件一致。最终结果/扣次同事务，
+     只有succeeded为100。同ID重试返回原结果，换租约/设备不新增五次额度。
+   - 完成前cancel释放预留；完成后cancel不退款；失败resume从检查点继续。
+     受控重启保留排队任务/检查点/预留，不应重新扣次或从头重做已完成阶段。
+   - 引用必须存在于result.evidence；quote来自rawTranscript/sourceRanges。
+     时间为块范围，并非强制对齐逐字时间；validated不保证ASR/OCR识别或模型结论正确。
+   - 最小ASR窗口仍截断时，不把残缺结果标成成功：failed可resume并不收费。
+
+7. 回滚边界
+   - 升级前备份代码、数据库和密钥；不改Android或激活站。
+   - 旧网关启动会删除所有pending账本项，不理解v2检查点：不能在尚有v2预留任务时
+     直接回退旧二进制。先停止接收新v2任务并让已有任务终止/完成，核对预留状态后再决定回滚。
+   - 不用过期数据库快照覆盖已经产生新成功扣次的账本，否则会恢复试用次数。
+     保留新表和最新账本；应用版本回退与数据恢复必须分开审查。
+
+8. 本地验证证据
+   - uv run --offline --locked pytest -q --junitxml=release/evidence/pytest.xml：57 passed in 18.29s，日志见 release/evidence/pytest.txt（合成签名/媒体/上游，无生产凭据）。
+   - Ruff format check；Ruff isolated E4,E7,E9,F,I,B 静态检查。
+   - Python compileall检查；锁文件通过 --locked 使用验证。
+   - 覆盖57项：v1兼容、账号共享额度、事务回滚、取消提交竞争、恢复检查点、
+     SSE真实分片解析和重放、流式部分报告、原文尾部、ASR截断拆分、图片批次、
+     跨租约/越权、媒体到期清理以及超过旧30MiB限制的完整60分钟WAV上传。
+   - 本轮没有真实上游调用、服务器依赖安装、systemd/nginx修改、重启或部署。
+
+   - mockHTTP完整700秒/>20MiB音频、截断拆分/摘要重试、断点恢复与一次扣费证据见 release/evidence。真实模型E2E未做。

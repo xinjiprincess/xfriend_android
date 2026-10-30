@@ -1,0 +1,12 @@
+﻿=== 0.11 QA env-check  2026-10-17T23:20:56.8239728+08:00 ===
+adb path              : C:\Users\zhang\AppData\Local\Android\Sdk\platform-tools\adb.exe
+qa root               : D:\xfriend-suite\docs\qa-0.11
+adb devices           : List of devices attached | emulator-5554	device
+boot                  : Ok=True elapsed=0s detail=device=emulator-5554 boot_completed='1'
+wm size               : 1080x2400   (raw: Physical size: 2560x1600 | Override size: 1080x2400)
+wm density            : 420 (dp scale 2.625)
+android release       : 15
+sdk                   : 35
+model                 : Pixel Tablet
+setup                 : stayon=true, keyguard dismissed, animations=0
+screencap+pull        : OK D:\xfriend-suite\docs\qa-0.11\setup-boot.png (2,183,001 bytes)

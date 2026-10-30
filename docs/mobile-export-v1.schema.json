@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Xfriend mobile export v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "experts",
+    "teams",
+    "skills",
+    "knowledge",
+    "providers"
+  ],
+  "properties": {
+    "format": {
+      "const": "xfriend-mobile-export"
+    },
+    "version": {
+      "const": 1
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "string",
+        "maxLength": 1000
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "space_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "user_id",
+        "space_id"
+      ]
+    },
+    "experts": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64000
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "uniqueItems": true
+          },
+          "knowledge": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "prompt",
+          "skills",
+          "knowledge"
+        ]
+      }
+    },
+    "teams": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "uniqueItems": true,
+            "minItems": 1,
+            "maxItems": 8
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "members"
+        ]
+      }
+    },
+    "providers": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "base_url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "api_key": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "base_url",
+          "models"
+        ]
+      }
+    },
+    "skills": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "content"
+        ]
+      }
+    },
+    "knowledge": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "content"
+        ]
+      }
+    }
+  },
+  "$comment": "Total UTF-8 bytes <=4 MiB; IDs unique within each array; all expert/team references must exist in the bundle; HTTPS URL cannot contain credentials, query or fragment. Validate these application constraints in addition to JSON Schema."
+}

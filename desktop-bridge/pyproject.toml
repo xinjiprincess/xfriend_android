@@ -1,0 +1,11 @@
+[project]
+name = "xfriend-mobile-bridge"
+version = "0.3.0"
+requires-python = ">=3.12"
+dependencies = ["aiohttp>=3.12,<4"]
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

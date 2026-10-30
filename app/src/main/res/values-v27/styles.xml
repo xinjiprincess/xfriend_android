@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.Xfriend" parent="Base.Theme.Xfriend">
+        <item name="android:navigationBarColor">#F6F5F1</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

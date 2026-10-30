@@ -1,0 +1,52 @@
+{
+  "format": "xfriend-mobile-export",
+  "version": 1,
+  "experts": [
+    {
+      "id": "sales-adviser",
+      "name": "销售顾问",
+      "prompt": "根据原文证据分析客户需求，列出待确认问题和下一步行动。",
+      "skills": [
+        "sales-method"
+      ],
+      "knowledge": [
+        "product-guide"
+      ]
+    }
+  ],
+  "teams": [
+    {
+      "id": "sales-team",
+      "name": "客情分析团队",
+      "members": [
+        "sales-adviser"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "sales-method",
+      "name": "销售方法",
+      "content": "# 跟进方法\n先确认需求、预算、时间和决策人，不编造成交概率。"
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "product-guide",
+      "name": "产品知识",
+      "content": "这是合成示例资料，请替换为有权使用的产品信息。"
+    }
+  ],
+  "providers": [
+    {
+      "id": "xiaomi",
+      "name": "小米 MiMo",
+      "base_url": "https://api.xiaomimimo.com/v1",
+      "models": [
+        "mimo-v2.6-flash"
+      ],
+      "api_key": ""
+    }
+  ],
+  "warnings": []
+}

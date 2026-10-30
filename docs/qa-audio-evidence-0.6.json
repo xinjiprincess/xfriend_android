@@ -1,0 +1,46 @@
+{
+  "environment": "Android 35 emulator 1080x2400",
+  "synthetic_only": true,
+  "service_started": true,
+  "app_sent_to_background": true,
+  "result": {
+    "synthetic_only": true,
+    "tasks": [
+      {
+        "id": "qa-audio-highrate",
+        "operation": "import",
+        "title": "QA 大录音测试 0",
+        "payload": "redacted",
+        "status": "done",
+        "detail": "处理完成",
+        "created": 1791884008504
+      },
+      {
+        "id": "qa-audio-long",
+        "operation": "import",
+        "title": "QA 大录音测试 1",
+        "payload": "redacted",
+        "status": "done",
+        "detail": "处理完成",
+        "created": 1791884008719
+      }
+    ],
+    "records": [
+      {
+        "id": "qa-audio-long",
+        "rate": 16000,
+        "channels": 1,
+        "bytes": 26214400,
+        "segments": 10
+      },
+      {
+        "id": "qa-audio-highrate",
+        "rate": 16000,
+        "channels": 1,
+        "bytes": 5760000,
+        "segments": 2
+      }
+    ]
+  },
+  "passed": true
+}

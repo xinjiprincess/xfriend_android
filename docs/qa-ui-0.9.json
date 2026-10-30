@@ -1,0 +1,41 @@
+{
+  "started": "2026-10-17T01:37:31.336530+00:00",
+  "passed": false,
+  "synthetic_only": true,
+  "avd": "XfriendSuiteQA",
+  "serial": "emulator-5560",
+  "requested_resolution": [
+    720,
+    1600
+  ],
+  "cold_start_timeout_seconds": 90,
+  "scenarios": [],
+  "limitations": [
+    "Fixture UI only; no real model, network, login or desktop connection verification.",
+    "Screenshots require visual review; no claim of contrast/font/accessibility acceptance."
+  ],
+  "apks": [
+    {
+      "path": ".artifacts\\Xfriend-0.9-qa.apk",
+      "package": "com.singu.xfriend.mobile.qa",
+      "sha256": "1cd6003c4bde9dab82d685957c829ae4181097a5c49d29e1a8ab0df973cc36ad",
+      "package_badging": "package: name='com.singu.xfriend.mobile.qa' versionCode='9' versionName='0.9.0' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'"
+    },
+    {
+      "path": ".artifacts\\Xsalers-0.9-qa.apk",
+      "package": "com.singu.xsalers.mobile.qa",
+      "sha256": "b33c401c5a8af49d594e47ff268b3794ff11bb707708aa7f01c7b6bc058f5b34",
+      "package_badging": "package: name='com.singu.xsalers.mobile.qa' versionCode='9' versionName='0.9.0' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'"
+    }
+  ],
+  "error": "RuntimeError: Command failed (20): C:\\Users\\zhang\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe -s emulator-5560 shell svc data disable\ncmd: Can't find service: phone\n",
+  "crash_check": {
+    "checked": true,
+    "passed": false,
+    "matches": [
+      "10-17 01:39:20.792   946  1108 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 1108 (bt_stack_manage), pid 946 (droid.bluetooth)"
+    ],
+    "log": "docs/qa-ui-0.9-logcat.txt"
+  },
+  "finished": "2026-10-17T01:39:39.000060+00:00"
+}

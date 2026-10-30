@@ -1,0 +1,30 @@
+﻿=== 0.11 final regression 2026-10-18T00:29:22.9275288+08:00 ===
+XF QA: D:\xfriend-suite\.artifacts\0.11-qa\Xfriend-0.11-qa.apk
+XS QA: D:\xfriend-suite\.artifacts\0.11-qa\Xsalers-0.11-qa.apk
+install Xfriend-0.11-qa.apk: Performing Streamed Install | Success
+install Xsalers-0.11-qa.apk: Performing Streamed Install | Success
+com.singu.xfriend.mobile.qa -> versionName=0.11.0
+com.singu.xsalers.mobile.qa -> versionName=0.11.0
+
+--- [1] XSalers 底栏 / 5 tab / 外观 ---
+content ready: False
+bottom tabs detected: 5 -> 今日/客户/复盘/专家/我的
+  tab[1] tapped -> screenshot xs-customers-reg.png, first-title=?
+  tab[2] tapped -> screenshot xs-review-reg.png, first-title=?
+  tab[3] tapped -> screenshot xs-experts-reg.png, first-title=?
+  tab[4] tapped -> screenshot xs-profile-reg.png, first-title=?
+  -- 外观 entry --
+  !! appearance entry missing
+
+--- [2] Xfriend 底栏 80dp / 分段控件 ---
+Xfriend content ready: False
+Xfriend bottom tabs: 4 -> 对话/工作台/资源/我的
+  workbench screenshot: xf-workbench-reg.png (检查分段「专家」灰边)
+  bar pixel metrics:
+    TRANS [(2000, '#F7F6F2'), (2053, '#E5E2DA'), (2056, '#FFFFFF'), (2087, '#E5E2DA'), (2090, '#F6F5F1'), (2124, '#E5E2DA'), (2127, '#FEFEFE'), (2337, '#F6F5F1'), (2363, '#878784'), (2364, '#626260'), (2373, '#878784'), (2374, '#F6F5F1')]
+    PILL None
+
+--- [3] logcat 崩溃/ANR ---
+fatal/anr matches: 0
+
+=== regression done 2026-10-18T00:31:40.8510494+08:00 ===

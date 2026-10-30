@@ -1,0 +1,14 @@
+# @local/dsh-workspace-files bundle patch
+#
+# The row id is deliberately NOT `workspace-files`: that id belongs to the
+# built-in `@deepseek-ai/dsh-api-workspace-files` service, and a row that reused
+# it would collide with that one instead of mounting this package.
+#
+# The Host half is intentionally empty. The browser half talks to Host Remotes
+# this deployment already mounts (`session.list`, `workspaceFiles.list`,
+# `session.openWorkspacePath`, `session.workspacePathApplications`), so the
+# plugin needs no route, no config, and no restart to work. Its Client half adds
+# the "工作区文件" sidebar entry and the matching main panel.
+- insert:
+    - id: wsf-file-browser
+      name: "@local/dsh-workspace-files"

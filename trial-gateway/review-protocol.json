@@ -1,0 +1,204 @@
+{
+  "version": 2,
+  "base": "/v2/reviews",
+  "auth": {
+    "preferred": "X-Xfriend-Lease: existing signed lease",
+    "optional": "Authorization: Bearer <session>; available only with configured HTTPS introspection; active user_id must match lease identity when both supplied"
+  },
+  "create": {
+    "method": "POST",
+    "path": "/v2/reviews",
+    "body": {
+      "request_id": "client-stable-UUID",
+      "roles": [
+        "需求",
+        "风险"
+      ],
+      "prompt": "optional",
+      "sources": [
+        {
+          "source_id": "audio-1",
+          "kind": "audio"
+        },
+        {
+          "source_id": "text-1",
+          "kind": "text"
+        },
+        {
+          "source_id": "image-1",
+          "kind": "image"
+        }
+      ]
+    },
+    "response": "Review (201; identical retry 200). Ordered manifest; 1..100 sources. Same ID/different manifest = 409. request_id matches [A-Za-z0-9_.:-]{1,200}; source_id matches [A-Za-z0-9_.:-]{1,150}. Optional source asset:string and region:[x,y,width,height] integer array."
+  },
+  "upload": {
+    "method": "PUT",
+    "path": "/v2/reviews/{id}/uploads/{source_id}",
+    "body": "raw bytes (NOT base64/multipart): audio PCM WAV, image JPEG/PNG, text UTF-8",
+    "response": {
+      "source_id": "audio-1",
+      "uploaded": true
+    },
+    "notes": "Draft only. Identical bytes retry is safe; changed bytes = 409. Audio <=128 MiB/file, image <=10 MiB/file, text <=2 MiB/file. Entire review <=60 minutes actual decoded audio; validated again at start. No client duration trusted."
+  },
+  "start": {
+    "method": "POST",
+    "path": "/v2/reviews/{id}/start",
+    "body": {},
+    "response": "Review; all sources must be uploaded. Reserves ONE of five account credits."
+  },
+  "get": {
+    "method": "GET",
+    "path": "/v2/reviews/{id}",
+    "response": "Review; poll every 2 seconds if SSE unavailable"
+  },
+  "events": {
+    "method": "GET",
+    "path": "/v2/reviews/{id}/events?after=0",
+    "headers": {
+      "Last-Event-ID": "optional integer; overrides after"
+    },
+    "response": "text/event-stream; id: monotonic per-review integer; event: review; data: Review snapshot. Replay IDs > cursor, then live events/keepalives; closes at terminal. Reconnect/poll after network failure."
+  },
+  "cancel": {
+    "method": "POST",
+    "path": "/v2/reviews/{id}/cancel",
+    "response": "Review; before successful final persistence releases reservation; completed result is immutable and never refunded"
+  },
+  "resume": {
+    "method": "POST",
+    "path": "/v2/reviews/{id}/resume",
+    "response": "Review; retry failed/cancelled job from checkpoints while raw sources retained; reserves one credit if released. Running/queued/succeeded is idempotent. Purged unfinished job = 410."
+  },
+  "Review": {
+    "id": "client-stable-UUID",
+    "state": "draft|queued|running|failed|cancelled|succeeded",
+    "percent": 0,
+    "remaining": 5,
+    "last_event_id": 1,
+    "error": null,
+    "result": null,
+    "partial_report": ""
+  },
+  "result": {
+    "report": {
+      "summary": "中文摘要",
+      "findings": [
+        {
+          "text": "观察",
+          "citations": [
+            "e1"
+          ]
+        }
+      ],
+      "uncertainties": [
+        "待确认"
+      ]
+    },
+    "profile_suggestions": [
+      {
+        "text": "建议（待用户确认，不自动修改画像）",
+        "citations": [
+          "e1"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "id": "e1",
+        "source_id": "audio-1",
+        "quote": "原文",
+        "start_seconds": 0.0,
+        "end_seconds": 88.0,
+        "asset": "audio-1",
+        "region": null,
+        "startSeconds": 0.0,
+        "endSeconds": 88.0,
+        "validated": true
+      }
+    ],
+    "reportText": "中文完整报告（带 [e1, e2] 引用）",
+    "rawTranscript": "保留所有原始转写/OCR/文本，包含重叠",
+    "correctedText": "保守去除重叠边界逐字重复的文本",
+    "text": "correctedText compatibility alias",
+    "sourceRanges": [
+      {
+        "source_id": "audio-1",
+        "quote": "原始转写原文",
+        "start_seconds": 0.0,
+        "end_seconds": 90.0
+      }
+    ],
+    "analysisJson": {
+      "profile": {
+        "summary": "",
+        "preferences": [],
+        "needs": [],
+        "budget": "",
+        "timing": "",
+        "decisionRole": "",
+        "grade": "",
+        "evidenceIds": []
+      },
+      "actions": [
+        {
+          "title": "确认预算",
+          "dueDate": null,
+          "priority": "medium",
+          "evidenceIds": [
+            "e1"
+          ]
+        }
+      ],
+      "evidence": "same array as result.evidence",
+      "probability": {
+        "low": null,
+        "high": null,
+        "reason": "证据不足",
+        "evidenceIds": []
+      }
+    }
+  },
+  "ui": "Show percent only for progress; no chunks, counts, internal stage/team/retry details. partial_report is a persisted provisional text snapshot (replace, do not append); it may reset/revise on retry or synthesis. Provider streamed summary prefixes are persisted at most twice/second, validated findings accumulate at checkpoints. Render as unfinished; never apply profile/actions before succeeded. Final percent=100 only after atomic final+charge commit. result is null until succeeded.",
+  "status_codes": {
+    "400": "invalid request/media/cursor",
+    "401": "invalid/expired identity",
+    "402": "five credits exhausted or reserved",
+    "404": "absent or another owner's job",
+    "409": "ID/content/state conflict or uploads incomplete",
+    "410": "raw media expired",
+    "413": "size/duration limit",
+    "503": "configured introspection unavailable"
+  },
+  "durability": "SQLite jobs, numbered events, fenced worker leases and checkpoints survive restart. All ASR chunks, team calls and system retries share one reservation. Charge and final result persisted atomically. Account ledger persists across new leases/devices. Temporary raw uploads deleted 24h after terminal; results/evidence/ledger retained. Abandoned drafts expire after 24h. /v1/tasks and /v1/quota retained; both versions share five credits.",
+  "evidence_semantics": "validated=true means quote is an exact substring copied from the stored raw extraction, and returned structured citations use existing evidence IDs. It is NOT a guarantee of ASR/OCR accuracy or that a generated interpretation is true. Audio ranges conservatively cover the transcription chunk (source-local seconds), not forced-aligned word timestamps. Image asset defaults to source_id; region is [x,y,width,height]. Overlapping raw transcript is retained; correctedText only removes exact boundary duplicates. Missing/filtered/truncated provider completions never count as successful output.",
+  "session_introspection": {
+    "config": "XFRIEND_SESSION_INTROSPECTION_URL=https://trusted-service/api/v2/auth/introspect; XFRIEND_GATEWAY_INTROSPECTION_SECRET=server-only shared credential, 32..200 printable ASCII characters without whitespace",
+    "request": "POST configured URL, Authorization: Bearer <service secret from gateway env>, JSON {\"token\":\"client access token (20..200 chars)\"}, redirects disabled",
+    "response": {
+      "active": true,
+      "user_id": "same canonical account ID used in leases"
+    },
+    "notes": "Disabled by default. Missing URL ->401; missing/invalid service secret or upstream401/403 ->503; inactive/mismatched user ->401; transport/invalid response ->503. Service secret never accepted from clients or included in responses/logs. Existing signed leases remain usable. Every HTTP connection reauthenticates; SSE lifetime up to120 seconds then reconnect. Matches activation sync_api.py; deployed endpoint not contacted."
+  },
+  "limits": {
+    "source_audio_seconds_total": 3600,
+    "asr_window_seconds": 90,
+    "asr_overlap_seconds": 2,
+    "account_credits": 5,
+    "raw_terminal_retention_seconds": 86400,
+    "worker_lease_seconds": 60,
+    "heartbeat_seconds": 15,
+    "automatic_job_attempts": 3,
+    "quota_endpoint": "GET /v1/quota with X-Xfriend-Lease; v2 snapshots include remaining for bearer clients",
+    "mime_types": [
+      "audio/wav",
+      "image/jpeg",
+      "image/png",
+      "text/plain; charset=utf-8"
+    ]
+  },
+  "release": "0.7.0",
+  "resume_incomplete_upload": "Cancelled incomplete uploads resume to draft without reservation; retain existing uploads and upload missing sources before start. Expired media cannot resume."
+}

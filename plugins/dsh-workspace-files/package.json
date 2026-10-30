@@ -1,0 +1,44 @@
+{
+  "name": "@local/dsh-workspace-files",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Workspace file browser for the DSH GUI: click a file to open it with its default app, right-click to copy its path, reveal it, or pick another app.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "workspace",
+    "files"
+  ],
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "locale",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    },
+    "manifestVersion": 1
+  },
+  "icon": "./icon.svg",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}

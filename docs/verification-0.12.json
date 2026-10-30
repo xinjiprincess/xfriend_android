@@ -1,0 +1,273 @@
+{
+  "date": "2026-10-18",
+  "version": "0.12.0",
+  "version_code": 12,
+  "status": "delivered",
+  "scope": "XSalers 新增通话录音接管；复用既有 ASR → 复盘管道；设计系统/组件沿用 0.11，不新增 token/组件",
+  "feature": {
+    "name": "通话录音接管",
+    "summary": "扫描系统/录音机已保存的通话录音与 App 内 recordings 目录，用户勾选后复制/解码到 App 私有目录，复用既有转写→复盘链路；文字保存后支持删除源音频。",
+    "entry_points": [
+      "XSalers 今日页快捷入口「接管通话录音」（SalesScreen.kt:238）",
+      "XSalers 我的页设置行「通话录音接管」（SalesScreen.kt:395）",
+      "页面标题「通话录音接管」（SalesCallRecordingsScreen.kt:88）"
+    ],
+    "permissions": [
+      "android.permission.READ_MEDIA_AUDIO（Android 13+）",
+      "android.permission.READ_EXTERNAL_STORAGE（maxSdkVersion=32）"
+    ],
+    "settings": {
+      "callAutoScan": true,
+      "callDeleteAfterTranscribe": true,
+      "callSkipped_limit": 500
+    },
+    "limits": [
+      "不实现通话中录音；只接管已保存文件",
+      "无后台常驻服务；打开 App 自动扫描一次 + 页面手动重新扫描",
+      "转写需要配置模型/试用额度；无模型时只导入并提示",
+      "系统媒体库删除需 API 30+ 系统确认；API 26–29 直接删除",
+      "单条录音上限 4 小时 / 4 GB；候选最多 200 条"
+    ]
+  },
+  "design_system": {
+    "status": "unchanged_from_0.11",
+    "tokens_file": "app/src/main/java/com/singu/xfriend/XfDesign.kt",
+    "components_file": "app/src/main/java/com/singu/xfriend/XfComponents.kt",
+    "icons_file": "app/src/main/java/com/singu/xfriend/XfIcons.kt",
+    "appearance_file": "app/src/main/java/com/singu/xfriend/XfAppearance.kt",
+    "components_count": 28,
+    "icons_count": 60,
+    "accents": ["indigo", "teal", "amber", "rose", "violet"],
+    "defaults": { "Xfriend": "indigo", "Xsalers": "violet" },
+    "theme_modes": ["system", "light", "dark"],
+    "appearance_persistence": "SharedPreferences xf_appearance (mode, accent); local only, not account-synced",
+    "light": {
+      "canvas": "#F6F5F1",
+      "surface": "#FFFFFF",
+      "ink": "#1B1C1F",
+      "line": "#E5E2DA",
+      "accent_default": "#4F5DF0",
+      "accent_solid_default": "#4351E8"
+    },
+    "dark": {
+      "canvas": "#0E0F12",
+      "surface": "#181A1F",
+      "ink": "#F1F2F4",
+      "line": "#282A31",
+      "accent_default": "#8B95FF",
+      "accent_solid_default": "#4F5DF0"
+    },
+    "bottom_bar": "Haze frosted surface (surface @92%), 80dp content height + 1dp top line + navigation bar insets, selected pill accentSoft",
+    "top_bar": "XfTopBar 56dp + status bar insets"
+  },
+  "products": {
+    "Xfriend": {
+      "package": "com.singu.xfriend.mobile",
+      "label": "Xfriend",
+      "version_name": "0.12.0",
+      "version_code": 12,
+      "min_sdk": 26,
+      "target_sdk": 34,
+      "apk_path": "D:\\xfriend-suite\\.artifacts\\0.12-release\\Xfriend-0.12.0.apk",
+      "delivery_copy": "D:\\build_apk\\Xfriend-0.12.0.apk",
+      "apk_bytes": 26499349,
+      "sha256": "C3457F4301E1814D824A31BA34ABE63CA838DE78FA02E5A1FEF1740D0AA33C63",
+      "apk_mtime": "2026-10-18 03:28:27",
+      "badging_verified": "aapt2 badging 验证：package=com.singu.xfriend.mobile；versionName=0.12.0；versionCode=12；compileSdk=34",
+      "build_status": "success"
+    },
+    "Xsalers": {
+      "package": "com.singu.xsalers.mobile",
+      "label": "Xsalers",
+      "version_name": "0.12.0",
+      "version_code": 12,
+      "min_sdk": 26,
+      "target_sdk": 34,
+      "apk_path": "D:\\xfriend-suite\\.artifacts\\0.12-release\\Xsalers-0.12.0.apk",
+      "delivery_copy": "D:\\build_apk\\Xsalers-0.12.0.apk",
+      "apk_bytes": 26499509,
+      "sha256": "8B6FB83D686142C87478B7CE82FCF155E77829706932AC4015B41861B2CFC9C8",
+      "apk_mtime": "2026-10-18 03:25:49",
+      "badging_verified": "aapt2 badging 验证：package=com.singu.xsalers.mobile；versionName=0.12.0；versionCode=12；compileSdk=34",
+      "build_status": "success"
+    }
+  },
+  "build": {
+    "command": "gradlew --no-daemon --max-workers=4 -Pkotlin.compiler.execution.strategy=in-process -PsalesUiFixture=false :app:assembleXfriendDebug :app:assembleXsalersDebug :app:testXfriendDebugUnitTest :app:testXsalersDebugUnitTest --console=plain",
+    "log": "build-0.12-release.log",
+    "result": "BUILD SUCCESSFUL",
+    "duration": "13m 58s",
+    "tasks": "93 actionable tasks: 45 executed, 48 up-to-date",
+    "compile_errors": 0,
+    "warnings": 16,
+    "test_log": "build-0.12-release.log（同一构建日志含两 flavor 单测）",
+    "aapt_verification": "两个 APK 均经 aapt2 badging 校验：包名、versionName=0.12.0、versionCode=12、compileSdk=34",
+    "lint": "not_run_non_blocking",
+    "notes": [
+      "正式 APK 为 debug 双 flavor、-PsalesUiFixture=false，不含 QA fixture",
+      "APK 已复制到 D:\\build_apk 与 .artifacts\\0.12-release\\，两处同文件同 SHA-256",
+      "QA fixture 另行构建：.artifacts\\0.12-qa\\Xsalers-0.12-qa.apk，不属于交付安装包"
+    ]
+  },
+  "tests": {
+    "status": "passed",
+    "xfriend_debug": {
+      "tests": 300,
+      "failures": 0,
+      "errors": 0,
+      "suites": 38,
+      "source": "app/build/test-results/testXfriendDebugUnitTest/",
+      "verified_at": "2026-10-18"
+    },
+    "xsaler_debug": {
+      "tests": 300,
+      "failures": 0,
+      "errors": 0,
+      "suites": 38,
+      "source": "app/build/test-results/testXsalersDebugUnitTest/",
+      "verified_at": "2026-10-18",
+      "note": "SalesCallRecordingsTest 12 项；其余为既有 XSalers 单测"
+    },
+    "total": {
+      "tests": 600,
+      "failures": 0,
+      "errors": 0,
+      "suites": 76
+    },
+    "baseline_0_11": {
+      "total": 574,
+      "failures": 0,
+      "errors": 0,
+      "source": "test-0.11.log"
+    },
+    "notes": [
+      "两 flavor 单测均在同一 build-0.12-release.log 中执行并通过",
+      "lint 未执行（非阻断），不写成通过"
+    ]
+  },
+  "qa": {
+    "status": "passed_manual_visual_e2e_with_limits",
+    "screenshots_status": "delivered",
+    "end_to_end_deletion": "verified_with_seeded_transcribed_record",
+    "scope": "模拟器人工验证：授权前后、候选识别、接管并转写、去重、删除源录音；删除链路使用已转写种子记录验证",
+    "owner": "visual-qa / Lead",
+    "environment": "Pixel_9 emulator, Android 37, 1080x2424, 420dpi",
+    "device": "emulator-5554",
+    "fixture_packages": {
+      "Xfriend": "com.singu.xfriend.mobile.qa",
+      "Xsalers": "com.singu.xsalers.mobile.qa"
+    },
+    "fixture_apk": {
+      "path": "D:\\xfriend-suite\\.artifacts\\0.12-qa\\Xsalers-0.12-qa.apk",
+      "bytes": 28336288,
+      "sha256": "9D6AE5F708B1A7DD7A04904B1305A053929B44DA83CDBBFA698A7D4C1E673BED"
+    },
+    "fixture_note": "独立 .qa 包名，仅用于模拟器验收；不属于交付安装包",
+    "evidence_dir": "docs/qa-0.12/",
+    "screens": [
+      {
+        "file": "docs/qa-0.12/callrec-01-home.png",
+        "caption": "今日页入口「接管通话录音」",
+        "bytes": 295375,
+        "width": 1080,
+        "height": 2424,
+        "sha256": "5BDA848C4A4093B012831959B3D5EDDD4BBF1141A03086A6F5FF4C8560B83F29"
+      },
+      {
+        "file": "docs/qa-0.12/callrec-02-permission.png",
+        "caption": "授权前：权限 banner + 候选",
+        "bytes": 375349,
+        "width": 1080,
+        "height": 2424,
+        "sha256": "CBD18D06DC8A3CE5331240FFFD2AD3BAC5813D07E2F24457AD85FC2A11CE1BB4"
+      },
+      {
+        "file": "docs/qa-0.12/callrec-03-candidates.png",
+        "caption": "候选列表（标题/日期/时长/大小）",
+        "bytes": 356152,
+        "width": 1080,
+        "height": 2424,
+        "sha256": "F64EF95652EE143A223EC9C0235CFB0299A5D494B7A2B9E5ED2B1736C7EB2B3F"
+      },
+      {
+        "file": "docs/qa-0.12/callrec-04-granted.png",
+        "caption": "授权后（banner 消失，待清理卡片在下部）",
+        "bytes": 357843,
+        "width": 1080,
+        "height": 2424,
+        "sha256": "216FE578536955289C8669847F589B12761B2D683A63D858EC8FDC44DEA16D0D"
+      },
+      {
+        "file": "docs/qa-0.12/callrec-05-takeover.png",
+        "caption": "接管完成（候选清空/提示刷新）",
+        "bytes": 274943,
+        "width": 1080,
+        "height": 2424,
+        "sha256": "A5CAF868B1BEA9E12D035F7534B94F91D3D3BC925A39420FF48DB6ACB01BA73D"
+      },
+      {
+        "file": "docs/qa-0.12/callrec-06-pending-delete.png",
+        "caption": "待清理源录音（04-granted 底部卡片裁剪，非独立全屏截图）",
+        "bytes": 42072,
+        "width": 1080,
+        "height": 540,
+        "sha256": "D8F5A546B5EE6BDA8F1C9780513FD98650CA00744776EC4360066D6A34E851C2",
+        "crop_note": "此图是 callrec-04-granted.png 底部「待清理源录音」卡片的裁剪，内容与实机一致；不是独立全屏截图"
+      },
+      {
+        "file": "docs/qa-0.12/callrec-07-deleted.png",
+        "caption": "删除后（卡片消失，文字/报告保留）",
+        "bytes": 356307,
+        "width": 1080,
+        "height": 2424,
+        "sha256": "4A7B196BD784A8973FD446CB77604A8C7B700AD0735E27CB3BE105E1EEBFEB61"
+      }
+    ],
+    "verified": [
+      "未授权时显示权限提示 + 授权按钮；pm grant READ_MEDIA_AUDIO 后提示消失，候选列表正常显示",
+      "全选 → 接管并转写(1) → 今日页「待分析」由 1 变 2，新增「通话录音」记录，无崩溃（crash buffer 空）",
+      "扫描过滤已导入记录（seeded 记录 sourceName 命中后只剩 1 条候选）",
+      "待清理卡片 → 删除源录音 → 对话框「删除源录音？…」→ 确认删除 → 卡片消失",
+      "adb ls 确认外部文件 通话录音_20261016_1432.wav 已删除，文字/报告保留，无应用异常",
+      "7 张截图已落盘并校验尺寸/SHA-256；06 为 04 底部卡片裁剪"
+    ],
+    "not_covered": [
+      "真实 ASR 转写端到端：fixture 无法配置模型，接管只完成复制/解码并生成待分析记录，不产生真实转写文字；删除链路用「已转写」种子记录验证",
+      "真实账号/真实模型/真实客户数据链路",
+      "真机、不同厂商录音机目录、字体缩放、TalkBack、对比度",
+      "权限拒绝后再次授权、API 26–29 删除分支、外部存储异常路径（MP3/高采样率/无权限等由单元测试覆盖）"
+    ],
+    "issues": []
+  },
+  "limits": [
+    "正式 APK 为 debug 双 flavor、开发签名；不是应用商店发布包",
+    "fixture 无法配置模型，真实 ASR 转写未端到端验证；删除链路用已转写种子记录验证",
+    "06-pending-delete.png 是 04-granted.png 底部「待清理源录音」卡片的裁剪，不是独立全屏截图",
+    "模拟器验证不代表真机；未做真机/多机型、厂商录音机目录、字体缩放、TalkBack、对比度",
+    "lint 未执行（非阻断）",
+    "MP3/高采样率/无权限/外部存储异常路径由 SalesCallRecordingsTest 单元测试覆盖",
+    "通话中录音不支持（Android 10+ 平台限制）；无后台常驻/定时扫描",
+    "接管、复制与解码在本机完成，不写入本应用自有服务器；转写沿用现有模型链路，会把音频发送给所配置的 ASR 服务（默认 MiMo 云端 https://api.xiaomimimo.com/v1，mimo-v2.5-asr），不是端到端离线",
+    "删除不可恢复：系统媒体库删除需系统确认；App 内录音直接删除；删除后文字/原文/复盘报告保留"
+  ],
+  "evidence_files": [
+    "build-0.12-release.log",
+    "D:\\xfriend-suite\\.artifacts\\0.12-release\\Xfriend-0.12.0.apk",
+    "D:\\xfriend-suite\\.artifacts\\0.12-release\\Xsalers-0.12.0.apk",
+    "D:\\build_apk\\Xfriend-0.12.0.apk",
+    "D:\\build_apk\\Xsalers-0.12.0.apk",
+    "D:\\xfriend-suite\\.artifacts\\0.12-qa\\Xsalers-0.12-qa.apk",
+    "app/build/test-results/testXfriendDebugUnitTest/",
+    "app/build/test-results/testXsalersDebugUnitTest/",
+    "docs/qa-0.12/（7 张截图，含 06 裁剪图）",
+    "docs/CALL-RECORDING-0.12.md",
+    "docs/DELIVERY-0.12.html",
+    "docs/XFAMILY-0.12-交付说明.txt",
+    "docs/verification-0.12.json"
+  ],
+  "completion": {
+    "status": "all_placeholders_filled",
+    "resolved_at": "2026-10-18",
+    "note": "0.12 正式 APK、构建、两 flavor 单测、7 张截图与删除链路均已回填；本文件不含待填值"
+  }
+}

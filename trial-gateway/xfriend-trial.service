@@ -1,0 +1,25 @@
+[Unit]
+Description=Xfriend mobile five-task trial gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=xfriend-trial
+Group=xfriend-trial
+WorkingDirectory=/opt/xfriend-trial
+EnvironmentFile=/etc/xfriend-trial/gateway.env
+ExecStart=/opt/xfriend-trial/venv/bin/python /opt/xfriend-trial/gateway.py
+Restart=on-failure
+RestartSec=5
+StateDirectory=xfriend-trial
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/xfriend-trial
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

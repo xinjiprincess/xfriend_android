@@ -1,0 +1,285 @@
+﻿--------- beginning of system
+10-17 16:12:28.420 I/ActivityManager(  546): Force stopping com.singu.xsalers.mobile.qa appid=10217 user=0: from pid 8370
+10-17 16:12:28.434 I/ActivityManager(  546): Killing 8169:com.singu.xsalers.mobile.qa/u0a217 (adj 0): stop com.singu.xsalers.mobile.qa due to from pid 8370
+10-17 16:12:28.439 W/ActivityTaskManager(  546): Force removing ActivityRecord{3f293a9 u0 com.singu.xsalers.mobile.qa/com.singu.xfriend.SalesFixtureActivity t40 f}}: app died, no saved state
+10-17 16:12:28.459 V/WindowManagerShell(  777): Transition requested (#66): android.os.BinderProxy@1a0ca7d TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=40 displayId=0 isRunning=false baseIntent=Intent { flg=0x10000000 cmp=com.singu.xsalers.mobile.qa/com.singu.xfriend.SalesFixtureActivity } baseActivity=null topActivity=null origActivity=null realActivity=ComponentInfo{com.singu.xsalers.mobile.qa/com.singu.xfriend.SalesFixtureActivity} numActivities=0 lastActiveTime=3383285 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@8d67d72} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=null launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= falseisLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false topActivityEligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatControlState=hidden freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 66 }
+--------- beginning of main
+10-17 16:12:28.463 I/TopTaskTracker(  985): onTaskMovedToFront: (moved taskInfo to front) taskId=20, baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity }
+10-17 16:12:28.515 D/NexusLauncherModelDelegate(  985): notifySmartspaceEvent: SmartspaceTargetEvent{mSmartspaceTarget=null, mSmartspaceActionId='null', mEventType=6}
+10-17 16:12:28.516 W/AppSearchIcing(  546): icing-search-engine.cc:321: Error: 5, Message: Document (com.google.android.googlequicksearchbox$OneSearchZeroStateGoogleSuggestions/default, zp) not found.
+10-17 16:12:28.521 D/WindowManagerShell(  777): setLauncherKeepClearAreaHeight: visible=false, height=527
+10-17 16:12:28.523 D/WindowManagerShell(  777): setLauncherKeepClearAreaHeight: visible=true, height=527
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): AppSearch 0-state cache not available, fallback to AGA
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): java.util.concurrent.CompletionException: java.util.NoSuchElementException: No value present
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:308)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:323)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at java.util.concurrent.CompletableFuture$UniAccept.tryFire(CompletableFuture.java:684)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:486)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at java.util.concurrent.CompletableFuture.completeExceptionally(CompletableFuture.java:2138)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at com.google.android.apps.nexuslauncher.allapps.E0.onResult(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:67)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at android.app.appsearch.SearchSessionUtil$1.lambda$onResult$0(go/retraceme 64eee9e9f568ff45978879ad2ff83146f2618ee8a88278736fbdf5fae931976e:144)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at android.app.appsearch.SearchSessionUtil$1.$r8$lambda$CEk3q8sDAQVhU3rQwVueB8FAj_M(go/retraceme 64eee9e9f568ff45978879ad2ff83146f2618ee8a88278736fbdf5fae931976e:1)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at android.app.appsearch.SearchSessionUtil$1$$ExternalSyntheticLambda0.run(go/retraceme 64eee9e9f568ff45978879ad2ff83146f2618ee8a88278736fbdf5fae931976e:22)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at android.os.Handler.handleCallback(Handler.java:959)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at android.os.Handler.dispatchMessage(Handler.java:100)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at android.os.Looper.loopOnce(Looper.java:232)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at android.os.Looper.loop(Looper.java:317)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at android.os.HandlerThread.run(HandlerThread.java:85)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): Caused by: java.util.NoSuchElementException: No value present
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at java.util.Optional.get(Optional.java:143)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	at com.google.android.apps.nexuslauncher.allapps.E0.onResult(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:28)
+10-17 16:12:28.525 D/OneSearchSuggestProvider(  985): 	... 8 more
+10-17 16:12:28.528 D/OneSearchSuggestProvider(  985): Created the binder channel successfully for end point service =com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService , mChannel=i1{delegate=f{logId=33, target=directaddress:///AndroidComponentAddress%5BIntent%20%7B%20act=grpc.io.action.BIND%20cmp=com.google.android.googlequicksearchbox/com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService%20%7D%5D}} , mOneSearchConnection=m2.Z@b33228
+10-17 16:12:28.543 I/BpBinder(  420): onLastStrongRef automatically unlinking death recipients: 
+10-17 16:12:28.553 D/DisplayManagerService(  546): Drop pending events for gone uid 10217
+10-17 16:12:28.567 W/Looper  (  546): Slow dispatch took 131ms android.ui h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@4116ed3 m=0
+10-17 16:12:28.604 D/BaseDepthController(  985): setSurface:
+10-17 16:12:28.604 D/BaseDepthController(  985): 	mWaitingOnSurfaceValidity: false
+10-17 16:12:28.604 D/BaseDepthController(  985): 	mSurface: Surface(name=com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity)/@0x1701e40
+10-17 16:12:28.760 D/InetDiagMessage(  546): Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-17 16:12:28.761 D/InetDiagMessage(  546): Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-17 16:12:28.761 I/AiAiEcho( 2196): Predicting[0]:  [CONTEXT sampling_count=5 ]
+10-17 16:12:28.763 I/AiAiEcho( 2196): EchoTargets: 
+10-17 16:12:28.763 I/AiAiEcho( 2196): Filtered by AiAi flag check: 
+10-17 16:12:28.763 I/AiAiEcho( 2196): [CONTEXT ratelimit_period="10 SECONDS" ]
+10-17 16:12:28.763 D/InetDiagMessage(  546): Destroyed live tcp sockets for uids={10217} in 4ms
+10-17 16:12:28.763 I/AiAiEcho( 2196): Ranked targets strategy: SORT, count: 0, ranking metadata:  [CONTEXT ratelimit_period="10 SECONDS" ]
+10-17 16:12:28.764 I/AiAiEcho( 2196): #remoteViewsTwiddler: feature disabled.
+10-17 16:12:28.764 D/InetDiagMessage(  546): Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET, states=14
+10-17 16:12:28.767 I/AiAiEcho( 2196): #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-17 16:12:28.767 D/InetDiagMessage(  546): Destroyed 0 sockets, proto=IPPROTO_TCP, family=AF_INET6, states=14
+10-17 16:12:28.768 D/InetDiagMessage(  546): Destroyed live tcp sockets for uids={20217} in 4ms
+10-17 16:12:28.768 I/AppsFilter(  546): interaction: PackageSetting{c5f751e com.singu.xfriend.mobile/10214} -> PackageSetting{9ab2719 com.singu.xsalers.mobile.qa/10217} BLOCKED
+10-17 16:12:28.768 I/AppsFilter(  546): interaction: PackageSetting{2f45600 com.singu.xfriend.mobile.qa/10216} -> PackageSetting{9ab2719 com.singu.xsalers.mobile.qa/10217} BLOCKED
+10-17 16:12:28.768 I/AppsFilter(  546): interaction: PackageSetting{252d9f3 com.singu.xsalers.mobile/10215} -> PackageSetting{9ab2719 com.singu.xsalers.mobile.qa/10217} BLOCKED
+10-17 16:12:28.897 W/Looper  (  546): Slow dispatch took 127ms android.ui h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@4116ed3 m=0
+10-17 16:12:29.053 D/ActivityManager(  546): sync unfroze 4560 com.google.android.googlequicksearchbox:search for 6
+10-17 16:12:29.128 D/ActivityManager(  546): sync unfroze 6880 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 6
+10-17 16:12:29.157 D/StatsLog(  985): LAUNCHER_ALLAPPS_COUNT
+10-17 16:12:29.202 D/SsBaseTemplateCard(  985): No text view can be set up
+10-17 16:12:29.202 D/SsBaseTemplateCard(  985): Passed-in item info is null
+10-17 16:12:29.202 D/SsBaseTemplateCard(  985): Passed-in item info is null
+10-17 16:12:29.202 D/SsBaseTemplateCard(  985): Passed-in item info is null
+10-17 16:12:29.202 I/SsBaseTemplateCard(  985): Secondary card pane is null
+10-17 16:12:29.273 I/adbd    (  425): Remote process closed the socket (on MSG_PEEK)
+10-17 16:12:29.275 I/ImeTracker(  546): com.singu.xsalers.mobile.qa:1b50a62c: onRequestHide at ORIGIN_SERVER reason HIDE_REMOVE_CLIENT fromUser false
+10-17 16:12:29.275 I/ImeTracker(  546): com.singu.xsalers.mobile.qa:1b50a62c: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-17 16:12:29.279 V/ActivityManager(  546): Got obituary of 8169:com.singu.xsalers.mobile.qa
+10-17 16:12:29.281 I/WindowManager(  546): WIN DEATH: Window{6624017 u0 com.singu.xsalers.mobile.qa/com.singu.xfriend.SalesFixtureActivity}
+10-17 16:12:29.283 W/InputManager-JNI(  546): Input channel object '6624017 com.singu.xsalers.mobile.qa/com.singu.xfriend.SalesFixtureActivity (client)' was disposed without first being removed with the input manager!
+10-17 16:12:29.284 W/A       ( 4560): (REDACTED) Queue length for executor %s is now %d. Perhaps some tasks are too long, or the pool is too small.
+10-17 16:12:29.287 W/A       ( 4560): (REDACTED) Task %s was queued for %dms before starting on executor %s
+10-17 16:12:29.297 V/WindowManager(  546): Unknown focus tokens, dropping reportFocusChanged
+10-17 16:12:29.305 W/ActivityManager(  546): setHasOverlayUi called on unknown pid: 8169
+10-17 16:12:29.319 I/Zygote  (  348): Process 8169 exited due to signal 9 (Killed)
+10-17 16:12:29.347 W/Looper  (  546): Slow dispatch took 213ms android.ui h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@4116ed3 m=0
+10-17 16:12:29.366 W/Looper  (  546): Slow delivery took 213ms android.ui h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@4116ed3 m=0
+10-17 16:12:29.475 I/HWUI    (  985): Davey! duration=855ms; Flags=0, FrameTimelineVsyncId=84326, IntendedVsync=3446203172192, Vsync=3446686505506, InputEventId=0, HandleInputStart=3446691693600, AnimationStart=3446691732400, PerformTraversalsStart=3446691876000, DrawStart=3446692450200, FrameDeadline=3446719838838, FrameInterval=3446690740900, FrameStartTime=16666666, SyncQueued=3446692617300, SyncStart=3446692887300, IssueDrawCommandsStart=3446809415100, SwapBuffers=3446810652000, FrameCompleted=3447059069300, DequeueBufferDuration=39200, QueueBufferDuration=2042800, GpuCompleted=3447058854500, SwapBuffersCompleted=3447059069300, DisplayPresentTime=0, CommandSubmissionCompleted=3446810652000, 
+10-17 16:12:29.492 W/Looper  (  546): Drained
+10-17 16:12:29.522 V/WindowManagerShell(  777): onTransitionReady(transaction=2345052148689)
+10-17 16:12:29.541 V/WindowManager(  546): Sent Transition (#66) createdAt=10-17 16:12:28.439 via request=TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=40 displayId=0 isRunning=false baseIntent=Intent { flg=0x10000000 cmp=com.singu.xsalers.mobile.qa/com.singu.xfriend.SalesFixtureActivity } baseActivity=null topActivity=null origActivity=null realActivity=ComponentInfo{com.singu.xsalers.mobile.qa/com.singu.xfriend.SalesFixtureActivity} numActivities=0 lastActiveTime=3383285 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{456d795 Task{4fc8d2e #40 type=standard A=10217:com.singu.xsalers.mobile.qa}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=null launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= falseisLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false topActivityEligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatControlState=hidden freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 66 }
+10-17 16:12:29.592 V/WindowManager(  546):     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-17 16:12:29.592 V/WindowManager(  546):     info={id=66 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+10-17 16:12:29.592 V/WindowManager(  546):         {WCT{RemoteToken{863d6f6 Task{947c18 #1 type=home}}} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0xfe04b48 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},
+10-17 16:12:29.592 V/WindowManager(  546):         {WCT{RemoteToken{456d795 Task{4fc8d2e #40 type=standard A=10217:com.singu.xsalers.mobile.qa}}} m=CLOSE f=NONE leash=Surface(name=Task=40)/@0x94b3aab sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},
+10-17 16:12:29.592 V/WindowManager(  546):         {null m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{73908aa token=android.os.Binder@fc61f95})/@0xf82513a sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}
+10-17 16:12:29.592 V/WindowManager(  546):     ]}
+10-17 16:12:29.602 I/libprocessgroup(  546): Removed cgroup /sys/fs/cgroup/uid_10217/pid_8169
+10-17 16:12:29.629 W/UserManagerService(  546): Requested status bar icon for non-badged user 0
+10-17 16:12:29.643 V/WindowManagerShell(  777): onTransitionReady (#66) android.os.BinderProxy@1a0ca7d: {id=66 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@42b7558} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x5b855c3 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@e51f6b1} m=CLOSE f=NONE leash=Surface(name=Task=40)/@0x1701e40 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},{null m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{73908aa token=android.os.Binder@fc61f95})/@0xb749179 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-17 16:12:29.651 W/ActivityTaskManager(  546): callingPackage for (uid=2000, pid=8377) has no WPC
+10-17 16:12:29.653 W/OptProp (  546): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE
+10-17 16:12:29.653 W/OptProp (  546): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE
+10-17 16:12:29.653 W/OptProp (  546): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE
+10-17 16:12:29.667 V/WindowManagerShell(  777): Playing animation for (#66) android.os.BinderProxy@1a0ca7d@0
+10-17 16:12:29.667 V/WindowManagerShell(  777):  try handler com.android.wm.shell.transition.DefaultMixedHandler@72b7789
+10-17 16:12:29.667 V/WindowManagerShell(  777):  try handler com.android.wm.shell.keyguard.KeyguardTransitionHandler@8e3d38e
+10-17 16:12:29.668 V/WindowManagerShell(  777):  try handler com.android.wm.shell.pip.PipTransition@14a87af
+10-17 16:12:29.668 V/WindowManagerShell(  777):  try handler com.android.wm.shell.activityembedding.ActivityEmbeddingController@26d47bc
+10-17 16:12:29.668 V/WindowManagerShell(  777):  try handler com.android.wm.shell.splitscreen.StageCoordinator@bcb0345
+10-17 16:12:29.668 V/WindowManagerShell(  777):  try handler com.android.wm.shell.desktopmode.DesktopTasksController@ccd9a9a
+10-17 16:12:29.668 V/WindowManagerShell(  777):  try handler com.android.wm.shell.recents.RecentsTransitionHandler@5c1efcb
+10-17 16:12:29.668 V/ShellRecents(  777): RecentsTransitionHandler.startAnimation: no controller found
+10-17 16:12:29.668 V/WindowManagerShell(  777):  try handler com.android.wm.shell.transition.RemoteTransitionHandler@ca523a8
+10-17 16:12:29.668 V/WindowManagerShell(  777): Transition doesn't have explicit remote, search filters for match for {id=66 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@42b7558} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1)/@0x5b855c3 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@e51f6b1} m=CLOSE f=NONE leash=Surface(name=Task=40)/@0x1701e40 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},{null m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{73908aa token=android.os.Binder@fc61f95})/@0xb749179 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-17 16:12:29.668 V/WindowManagerShell(  777):  Checking filter Pair{{types=[] flags=0x0] notFlags=0x0 checks=[{atype=undefined independent=true modes=[OPEN,TO_FRONT] flags=IN_TASK_WITH_EMBEDDED_ACTIVITY mustBeTask=false order=ANY topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null},{atype=undefined independent=true modes=[CLOSE,TO_BACK] flags=IN_TASK_WITH_EMBEDDED_ACTIVITY mustBeTask=false order=ANY topActivity=null launchCookie=null}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@ff62796, appThread = android.app.IApplicationThread$Stub$Proxy@fe2bf17, debugName = OverlaySwipeBack }}
+10-17 16:12:29.668 V/WindowManagerShell(  777):  Checking filter Pair{{types=[] flags=0x0] notFlags=0x0 checks=[{atype=dream independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null},{atype=home independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@c8e8f04, appThread = android.app.IApplicationThread$Stub$Proxy@95e4ced, debugName = LauncherToDream }}
+10-17 16:12:29.668 V/WindowManagerShell(  777):  Checking filter Pair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@4e52722, appThread = android.app.IApplicationThread$Stub$Proxy@dca35b3, debugName = QuickstepLaunchHome }}
+10-17 16:12:29.668 D/RemoteTransitionHandler(  777): Found filterPair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@4e52722, appThread = android.app.IApplicationThread$Stub$Proxy@dca35b3, debugName = QuickstepLaunchHome }}
+10-17 16:12:29.668 V/WindowManagerShell(  777):  Delegate animation for (#66) to RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@4e52722, appThread = android.app.IApplicationThread$Stub$Proxy@dca35b3, debugName = QuickstepLaunchHome }
+10-17 16:12:29.673 D/StateManager(  985): createAtomicAnimation - fromState: Background, toState: Normal, partial trace:
+10-17 16:12:29.673 D/StateManager(  985): 	at com.android.quickstep.util.WorkspaceRevealAnim.prepareToAnimate(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:22)
+10-17 16:12:29.673 D/StateManager(  985): 	at com.android.quickstep.util.WorkspaceRevealAnim.<init>(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:11)
+10-17 16:12:29.673 D/StateManager(  985): 	at com.android.launcher3.QuickstepTransitionManager.createWallpaperOpenAnimations(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:735)
+10-17 16:12:29.765 I/A       ( 4560): (REDACTED) Created gRPC endpoint for service %s
+10-17 16:12:29.770 V/GrammaticalInflectionUtils(  546): AttributionSource: android.content.AttributionSource@4c0e6a8f does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+10-17 16:12:29.821 W/Looper  (  546): Slow dispatch took 819ms main h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@1c8f8cb m=0
+10-17 16:12:29.822 W/Looper  (  546): Slow delivery took 916ms main h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@661f8a8 m=0
+10-17 16:12:29.824 W/Looper  (  546): Drained
+10-17 16:12:29.842 I/A       ( 4560): NGA Sync: beginOnDataPresent
+10-17 16:12:29.847 I/A       ( 4560): (REDACTED) NGA Sync: isNgaSyncEnabled: %s; enableFileGroupPopulator: %s; requiresMddAssets: %s
+10-17 16:12:29.850 I/A       ( 4560): NGA enabled in interactor.
+10-17 16:12:29.851 I/A       ( 4560): NGA Sync: beginOnDataPresent
+10-17 16:12:29.854 I/A       ( 4560): (REDACTED) NGA Sync: isNgaSyncEnabled: %s; enableFileGroupPopulator: %s; requiresMddAssets: %s
+10-17 16:12:29.854 I/A       ( 4560): NGA enabled in interactor.
+10-17 16:12:29.876 D/EGL_emulation(  777): app_time_stats: avg=1727.75ms min=419.73ms max=3035.76ms count=2
+10-17 16:12:29.950 W/OptProp (  546): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES
+10-17 16:12:30.101 W/OptProp (  546): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE
+10-17 16:12:30.140 D/EGL_emulation(  777): app_time_stats: avg=1357.29ms min=214.49ms max=3217.43ms count=3
+10-17 16:12:30.817 W/A       ( 4560): CompleteServer request has failed and can't show offline suggestions.
+10-17 16:12:30.817 W/A       ( 4560): com.google.frameworks.client.data.android.ac: Http networking stack error
+10-17 16:12:30.817 W/A       ( 4560): 	at com.google.frameworks.client.data.android.x.run(PG:36)
+10-17 16:12:30.817 W/A       ( 4560): 	at com.google.android.libraries.k.x.run(PG:3)
+10-17 16:12:30.817 W/A       ( 4560): 	at com.google.common.n.c.c.run(PG:50)
+10-17 16:12:30.817 W/A       ( 4560): 	at com.google.android.libraries.k.e.run(PG:8)
+10-17 16:12:30.817 W/A       ( 4560): 	at java.lang.Thread.run(Thread.java:1012)
+10-17 16:12:30.817 W/A       ( 4560): 	at com.google.android.libraries.k.d.b.run(PG:74)
+10-17 16:12:30.817 W/A       ( 4560): Caused by: org.chromium.net.impl.ct: Exception in CronetUrlRequest: net::ERR_INTERNET_DISCONNECTED, ErrorCode=2, InternalErrorCode=-106, Retryable=false
+10-17 16:12:30.817 W/A       ( 4560): 	at org.chromium.net.impl.CronetUrlRequest.onError(PG:80)
+10-17 16:12:30.818 W/A       ( 4560): #getSuggestions failed
+10-17 16:12:30.818 W/A       ( 4560): com.google.frameworks.client.data.android.ac: Http networking stack error
+10-17 16:12:30.818 W/A       ( 4560): 	at com.google.frameworks.client.data.android.x.run(PG:36)
+10-17 16:12:30.818 W/A       ( 4560): 	at com.google.android.libraries.k.x.run(PG:3)
+10-17 16:12:30.818 W/A       ( 4560): 	at com.google.common.n.c.c.run(PG:50)
+10-17 16:12:30.818 W/A       ( 4560): 	at com.google.android.libraries.k.e.run(PG:8)
+10-17 16:12:30.818 W/A       ( 4560): 	at java.lang.Thread.run(Thread.java:1012)
+10-17 16:12:30.818 W/A       ( 4560): 	at com.google.android.libraries.k.d.b.run(PG:74)
+10-17 16:12:30.818 W/A       ( 4560): Caused by: org.chromium.net.impl.ct: Exception in CronetUrlRequest: net::ERR_INTERNET_DISCONNECTED, ErrorCode=2, InternalErrorCode=-106, Retryable=false
+10-17 16:12:30.818 W/A       ( 4560): 	at org.chromium.net.impl.CronetUrlRequest.onError(PG:80)
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): Unable to get suggestions from AGA
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): io.grpc.StatusRuntimeException: UNKNOWN
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): 	at l3.e.a(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:77)
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): 	at j3.l.b(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:43)
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): 	at j3.l.a(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:27)
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): 	at j3.z.run(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:7)
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): 	at j3.m2.run(go/retraceme 6880898d8cae178d08f8c6e9adec44ea003840882148de9d3f2387cda32e2ac9:19)
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-17 16:12:30.819 E/OneSearchSuggestProvider(  985): 	at java.lang.Thread.run(Thread.java:1012)
+10-17 16:12:30.838 I/ActivityTaskManager(  546): START u0 {flg=0x10000000 cmp=com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-17 16:12:30.842 I/ImeTracker(  546): com.google.android.apps.nexuslauncher:1ef518b9: onRequestHide at ORIGIN_SERVER reason HIDE_UNSPECIFIED_WINDOW fromUser false
+10-17 16:12:30.846 I/ImeTracker(  546): com.google.android.apps.nexuslauncher:1ef518b9: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-17 16:12:30.855 I/GoogleInputMethodService( 2635): GoogleInputMethodService.onFinishInput():3157 
+10-17 16:12:30.857 I/GoogleInputMethodService( 2635): GoogleInputMethodService.updateDeviceLockedStatus():2248 repeatCheckTimes = 0, locked = false
+10-17 16:12:30.857 I/GoogleInputMethodService( 2635): GoogleInputMethodService.onStartInput():1986 onStartInput(EditorInfo{EditorInfo{packageName=com.google.android.apps.nexuslauncher, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+10-17 16:12:30.858 I/GoogleInputMethodService( 2635): GoogleInputMethodService.updateDeviceLockedStatus():2248 repeatCheckTimes = 1, locked = false
+10-17 16:12:30.858 I/AndroidIME( 2635): InputBundleManager.loadActiveInputBundleId():450 loadActiveInputBundleId: und-Latn-x-password, password
+10-17 16:12:30.859 W/PackageConfigPersister(  546): App-specific configuration not found for packageName: com.google.android.apps.nexuslauncher and userId: 0
+10-17 16:12:30.865 V/GrammaticalInflectionUtils(  546): AttributionSource: android.content.AttributionSource@4c0e6a8f does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+10-17 16:12:30.876 D/Zygote  (  348): Forked child process 8384
+10-17 16:12:30.888 I/ActivityManager(  546): Start proc 8384:com.singu.xfriend.mobile.qa/u0a216 for next-top-activity {com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity}
+10-17 16:12:30.952 D/SearchTargetUtil(  985): queryLength=0 size=0
+10-17 16:12:30.958 V/WindowManagerShell(  777):  animated by com.android.wm.shell.transition.RemoteTransitionHandler@ca523a8
+10-17 16:12:30.965 W/SplitSelectStateCtor(  985): Missing session instanceIds
+10-17 16:12:30.965 D/StatsLog(  985): LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED
+10-17 16:12:30.976 I/AppsFilter(  546): interaction: PackageSetting{c5f751e com.singu.xfriend.mobile/10214} -> PackageSetting{383b96d com.singu.xfriend.mobile.qa/10216} BLOCKED
+10-17 16:12:30.976 I/AppsFilter(  546): interaction: PackageSetting{9ab2719 com.singu.xsalers.mobile.qa/10217} -> PackageSetting{383b96d com.singu.xfriend.mobile.qa/10216} BLOCKED
+10-17 16:12:30.976 I/AppsFilter(  546): interaction: PackageSetting{252d9f3 com.singu.xsalers.mobile/10215} -> PackageSetting{383b96d com.singu.xfriend.mobile.qa/10216} BLOCKED
+10-17 16:12:30.983 W/WindowManager(  546): Failed looking up window session=Session{89c8e3 777:u0a10184} callers=com.android.server.wm.WindowManagerService.removeClientToken:2058 com.android.server.wm.Session.remove:274 android.view.IWindowSession$Stub.onTransact:685 
+10-17 16:12:30.987 I/TopTaskTracker(  985): onTaskMovedToFront: (moved taskInfo to front) taskId=41, baseIntent=Intent { flg=0x10000000 cmp=com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity }
+10-17 16:12:30.991 I/A       ( 4560): (REDACTED) disposing SearchServiceClient after timeout %s
+10-17 16:12:31.020 I/riend.mobile.qa( 8384): Late-enabling -Xcheck:jni
+10-17 16:12:31.236 I/riend.mobile.qa( 8384): Using CollectorTypeCMC GC.
+10-17 16:12:31.237 W/riend.mobile.qa( 8384): Unexpected CPU variant for x86: x86_64.
+10-17 16:12:31.237 W/riend.mobile.qa( 8384): Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, default
+10-17 16:12:31.272 W/Looper  (  546): Slow delivery took 276ms android.ui h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@4116ed3 m=0
+10-17 16:12:31.279 D/nativeloader( 8384): Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+10-17 16:12:31.304 W/Looper  (  546): Drained
+10-17 16:12:31.320 D/CompatChangeReporter( 8384): Compat change id reported: 242716250; UID 10216; state: ENABLED
+10-17 16:12:31.335 W/ziparchive( 8384): Unable to open '/data/app/~~Ki1FCLZg2DuxJmIUzlgDpQ==/com.singu.xfriend.mobile.qa-SklM0XGpN0TQq3kNORydZQ==/base.dm': No such file or directory
+10-17 16:12:31.336 W/ziparchive( 8384): Unable to open '/data/app/~~Ki1FCLZg2DuxJmIUzlgDpQ==/com.singu.xfriend.mobile.qa-SklM0XGpN0TQq3kNORydZQ==/base.dm': No such file or directory
+10-17 16:12:31.356 I/adbd    (  425): jdwp connection from 8384
+10-17 16:12:31.357 V/WindowManagerShell(  777): Transition animation finished (aborted=false), notifying core (#66) android.os.BinderProxy@1a0ca7d@0
+10-17 16:12:31.359 V/WindowManager(  546): Finish Transition (#66): created at 10-17 16:12:28.439 collect-started=0.135ms request-sent=1.041ms started=80.591ms ready=726.135ms sent=1049.74ms finished=2918.934ms
+10-17 16:12:31.364 E/IPCThreadState(  546): Binder transaction failure. id: 603225, BR_*: 29189, error: -22 (Invalid argument)
+10-17 16:12:31.364 W/ActivityManager(  546): pid 546 system sent binder code 7 with flags 1 to frozen apps and got error -32
+10-17 16:12:31.364 W/WindowManager(  546): Exception thrown during dispatchAppVisibility Window{6624017 u0 com.singu.xsalers.mobile.qa/com.singu.xfriend.SalesFixtureActivity EXITING}
+10-17 16:12:31.364 W/WindowManager(  546): android.os.DeadObjectException
+10-17 16:12:31.364 W/WindowManager(  546): 	at android.os.BinderProxy.transactNative(Native Method)
+10-17 16:12:31.364 W/WindowManager(  546): 	at android.os.BinderProxy.transact(BinderProxy.java:586)
+10-17 16:12:31.364 W/WindowManager(  546): 	at android.view.IWindow$Stub$Proxy.dispatchAppVisibility(IWindow.java:553)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.WindowState.sendAppVisibilityToClients(WindowState.java:3253)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.WindowContainer.sendAppVisibilityToClients(WindowContainer.java:1289)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.WindowToken.setClientVisible(WindowToken.java:403)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.ActivityRecord.setClientVisible(ActivityRecord.java:7166)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.ActivityRecord.postApplyAnimation(ActivityRecord.java:5881)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.ActivityRecord.commitVisibility(ActivityRecord.java:5823)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.Transition.finishTransition(Transition.java:1286)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.TransitionController.finishTransition(TransitionController.java:937)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.WindowOrganizerController.finishTransition(WindowOrganizerController.java:494)
+10-17 16:12:31.364 W/WindowManager(  546): 	at android.window.IWindowOrganizerController$Stub.onTransact(IWindowOrganizerController.java:289)
+10-17 16:12:31.364 W/WindowManager(  546): 	at com.android.server.wm.WindowOrganizerController.onTransact(WindowOrganizerController.java:204)
+10-17 16:12:31.364 W/WindowManager(  546): 	at android.os.Binder.execTransactInternal(Binder.java:1505)
+10-17 16:12:31.364 W/WindowManager(  546): 	at android.os.Binder.execTransact(Binder.java:1444)
+10-17 16:12:31.365 W/Process (  546): Unable to open /proc/8169/status
+10-17 16:12:31.461 V/WindowManagerShell(  777): Track 0 became idle
+10-17 16:12:31.462 V/WindowManagerShell(  777): All active transition animations finished
+10-17 16:12:31.462 V/WindowManagerShell(  777): Transition requested (#67): android.os.BinderProxy@ed2936e TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=41 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity } baseActivity=ComponentInfo{com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity} topActivity=ComponentInfo{com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity} origActivity=null realActivity=ComponentInfo{com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity} numActivities=1 lastActiveTime=3448500 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@da87a0f} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{c86ba9c com.singu.xfriend.SalesFixtureActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= falseisLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false topActivityEligibleForUserAspectRatioButton= true topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1080 topActivityLetterboxHeight=2400 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatControlState=hidden freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 67 }
+10-17 16:12:31.462 D/ShellDesktopMode(  777): DesktopTaskRepo: visibleTaskCount= 0
+10-17 16:12:31.575 D/EGL_emulation(  985): app_time_stats: avg=425.03ms min=80.78ms max=1282.63ms count=6
+10-17 16:12:31.638 I/BpBinder(  420): onLastStrongRef automatically unlinking death recipients: 
+10-17 16:12:31.722 I/Choreographer(  777): Skipped 45 frames!  The application may be doing too much work on its main thread.
+10-17 16:12:31.723 D/WindowManagerShell(  777): setLauncherKeepClearAreaHeight: visible=false, height=527
+10-17 16:12:31.724 V/ShellDesktopMode(  777): Task Vanished: #40 closed=true
+10-17 16:12:31.725 I/TopTaskTracker(  985): onTaskRemoved: taskId=40
+10-17 16:12:31.726 I/TopTaskTracker(  985): onTaskRemoved: taskId=40
+10-17 16:12:31.730 W/UserManagerService(  546): Requested status bar icon for non-badged user 0
+10-17 16:12:31.731 W/UserManagerService(  546): Requested status bar icon for non-badged user 0
+10-17 16:12:32.008 D/CoreBackPreview(  546): Window{fc61320 u0 Splash Screen com.singu.xfriend.mobile.qa}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@ddb2e9e, mPriority=0, mIsAnimationCallback=false}
+10-17 16:12:32.211 V/WindowManagerShell(  777): onTransitionReady(transaction=2345052148717)
+10-17 16:12:32.220 V/WindowManager(  546): Sent Transition (#67) createdAt=10-17 16:12:30.121 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=41 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity } baseActivity=ComponentInfo{com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity} topActivity=ComponentInfo{com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity} origActivity=null realActivity=ComponentInfo{com.singu.xfriend.mobile.qa/com.singu.xfriend.SalesFixtureActivity} numActivities=1 lastActiveTime=3448500 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{b5f229b Task{6a28b5 #41 type=standard A=10216:com.singu.xfriend.mobile.qa}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{2ef2638 com.singu.xfriend.SalesFixtureActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= falseisLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false topActivityEligibleForUserAspectRatioButton= true topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1080 topActivityLetterboxHeight=2400 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatControlState=hidden freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 67 }
+10-17 16:12:32.221 V/WindowManager(  546):     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-17 16:12:32.221 V/WindowManager(  546):     info={id=67 t=OPEN f=0x0 trk=1 r=[0@Point(0, 0)] c=[
+10-17 16:12:32.221 V/WindowManager(  546):         {WCT{RemoteToken{b5f229b Task{6a28b5 #41 type=standard A=10216:com.singu.xfriend.mobile.qa}}} m=OPEN f=NONE leash=Surface(name=Task=41)/@0xc5e2595 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},
+10-17 16:12:32.221 V/WindowManager(  546):         {WCT{RemoteToken{863d6f6 Task{947c18 #1 type=home}}} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xfe04b48 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1}
+10-17 16:12:32.221 V/WindowManager(  546):     ]}
+10-17 16:12:32.300 V/WindowManagerShell(  777): onTransitionReady (#67) android.os.BinderProxy@ed2936e: {id=67 t=OPEN f=0x0 trk=1 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@f7d94f7} m=OPEN f=NONE leash=Surface(name=Task=41)/@0xeaf8915 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@9e5df64} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0x7bff42a sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1}]}
+10-17 16:12:32.305 V/WindowManagerShell(  777): Playing animation for (#67) android.os.BinderProxy@ed2936e@1
+10-17 16:12:32.306 V/WindowManagerShell(  777):  try handler com.android.wm.shell.transition.DefaultMixedHandler@72b7789
+10-17 16:12:32.306 V/WindowManagerShell(  777):  try handler com.android.wm.shell.keyguard.KeyguardTransitionHandler@8e3d38e
+10-17 16:12:32.306 V/WindowManagerShell(  777):  try handler com.android.wm.shell.pip.PipTransition@14a87af
+10-17 16:12:32.306 V/WindowManagerShell(  777):  try handler com.android.wm.shell.activityembedding.ActivityEmbeddingController@26d47bc
+10-17 16:12:32.306 V/WindowManagerShell(  777):  try handler com.android.wm.shell.splitscreen.StageCoordinator@bcb0345
+10-17 16:12:32.306 V/WindowManagerShell(  777):  try handler com.android.wm.shell.desktopmode.DesktopTasksController@ccd9a9a
+10-17 16:12:32.306 V/WindowManagerShell(  777):  try handler com.android.wm.shell.recents.RecentsTransitionHandler@5c1efcb
+10-17 16:12:32.306 V/ShellRecents(  777): RecentsTransitionHandler.startAnimation: no controller found
+10-17 16:12:32.306 V/WindowManagerShell(  777):  try handler com.android.wm.shell.transition.RemoteTransitionHandler@ca523a8
+10-17 16:12:32.306 V/WindowManagerShell(  777): Transition doesn't have explicit remote, search filters for match for {id=67 t=OPEN f=0x0 trk=1 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@f7d94f7} m=OPEN f=NONE leash=Surface(name=Task=41)/@0xeaf8915 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@9e5df64} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0x7bff42a sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1}]}
+10-17 16:12:32.307 V/WindowManagerShell(  777):  Checking filter Pair{{types=[] flags=0x0] notFlags=0x0 checks=[{atype=undefined independent=true modes=[OPEN,TO_FRONT] flags=IN_TASK_WITH_EMBEDDED_ACTIVITY mustBeTask=false order=ANY topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null},{atype=undefined independent=true modes=[CLOSE,TO_BACK] flags=IN_TASK_WITH_EMBEDDED_ACTIVITY mustBeTask=false order=ANY topActivity=null launchCookie=null}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@ff62796, appThread = android.app.IApplicationThread$Stub$Proxy@fe2bf17, debugName = OverlaySwipeBack }}
+10-17 16:12:32.307 V/WindowManagerShell(  777):  Checking filter Pair{{types=[] flags=0x0] notFlags=0x0 checks=[{atype=dream independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null},{atype=home independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@c8e8f04, appThread = android.app.IApplicationThread$Stub$Proxy@95e4ced, debugName = LauncherToDream }}
+10-17 16:12:32.307 V/WindowManagerShell(  777):  Checking filter Pair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@4e52722, appThread = android.app.IApplicationThread$Stub$Proxy@dca35b3, debugName = QuickstepLaunchHome }}
+10-17 16:12:32.307 V/WindowManagerShell(  777):  Delegate animation for (#67) to null
+10-17 16:12:32.307 V/WindowManagerShell(  777):  try handler com.android.wm.shell.transition.DefaultTransitionHandler@f1d8ec1
+10-17 16:12:32.307 V/WindowManagerShell(  777): start default transition animation, info = {id=67 t=OPEN f=0x0 trk=1 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@f7d94f7} m=OPEN f=NONE leash=Surface(name=Task=41)/@0xeaf8915 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},{WCT{android.window.IWindowContainerToken$Stub$Proxy@9e5df64} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0x7bff42a sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1}]}
+10-17 16:12:32.307 V/WindowManagerShell(  777): loadAnimation: anim=android.view.animation.AnimationSet@34c2bef animAttr=0x13 type=OPEN isEntrance=false
+10-17 16:12:32.308 V/WindowManagerShell(  777): loadAnimation: anim=android.view.animation.AnimationSet@fd5bbda animAttr=0x12 type=OPEN isEntrance=true
+10-17 16:12:32.312 V/WindowManagerShell(  777):  animated by com.android.wm.shell.transition.DefaultTransitionHandler@f1d8ec1
+10-17 16:12:32.442 W/UserManagerService(  546): Requested status bar icon for non-badged user 0
+10-17 16:12:32.978 V/WindowManagerShell(  777): Transition animation finished (aborted=false), notifying core (#67) android.os.BinderProxy@ed2936e@1
+10-17 16:12:33.052 D/EGL_emulation(  777): app_time_stats: avg=3175.14ms min=3175.14ms max=3175.14ms count=1
+10-17 16:12:33.056 V/WindowManager(  546): Finish Transition (#67): created at 10-17 16:12:30.121 collect-started=0.077ms request-sent=712.0ms started=1504.994ms ready=2082.751ms sent=2087.277ms finished=2933.73ms
+10-17 16:12:33.058 D/VRI[NexusLauncherActivity](  985): visibilityChanged oldVisibility=true newVisibility=false
+10-17 16:12:33.190 E/BpTransactionCompletedListener(  420): Failed to transact (-32)
+10-17 16:12:33.238 V/WindowManagerShell(  777): Track 1 became idle
+10-17 16:12:33.238 V/WindowManagerShell(  777): All active transition animations finished
+10-17 16:12:33.255 D/NexusLauncherModelDelegate(  985): notifySmartspaceEvent: SmartspaceTargetEvent{mSmartspaceTarget=null, mSmartspaceActionId='null', mEventType=7}
+10-17 16:12:33.255 W/UserManagerService(  546): Requested status bar icon for non-badged user 0
+10-17 16:12:33.276 W/UserManagerService(  546): Requested status bar icon for non-badged user 0
+10-17 16:12:33.283 W/UserManagerService(  546): Requested status bar icon for non-badged user 0
+10-17 16:12:33.354 D/EGL_emulation(  777): app_time_stats: avg=3214.12ms min=3214.12ms max=3214.12ms count=1
+10-17 16:12:34.105 D/nativeloader( 8384): Configuring clns-7 for other apk /data/app/~~Ki1FCLZg2DuxJmIUzlgDpQ==/com.singu.xfriend.mobile.qa-SklM0XGpN0TQq3kNORydZQ==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~Ki1FCLZg2DuxJmIUzlgDpQ==/com.singu.xfriend.mobile.qa-SklM0XGpN0TQq3kNORydZQ==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.singu.xfriend.mobile.qa
+10-17 16:12:34.395 V/GraphicsEnvironment( 8384): Currently set values for:
+10-17 16:12:34.396 V/GraphicsEnvironment( 8384):   angle_gl_driver_selection_pkgs=[]
+10-17 16:12:34.396 V/GraphicsEnvironment( 8384):   angle_gl_driver_selection_values=[]
+10-17 16:12:34.396 V/GraphicsEnvironment( 8384): Global.Settings values are invalid: number of packages: 0, number of values: 0
+10-17 16:12:34.396 V/GraphicsEnvironment( 8384): Neither updatable production driver nor prerelease driver is supported.
+10-17 16:12:34.666 W/OptProp (  546): Cannot read opt property android.window.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS
+10-17 16:12:35.541 W/riend.mobile.qa( 8384): Verification of void com.singu.xfriend.SalesFixtureActivity.onCreate(android.os.Bundle) took 486.636ms (439.75 bytecodes/s) (8240B approximate peak alloc)
+10-17 16:12:36.270 W/riend.mobile.qa( 8384): Verification of void androidx.compose.ui.graphics.colorspace.ColorSpaces.<clinit>() took 492.008ms (2195.09 bytecodes/s) (18976B approximate peak alloc)
+10-17 16:12:37.022 W/riend.mobile.qa( 8384): Verification of java.lang.Object kotlin.collections.ArraysKt___ArraysJvmKt.minWith(java.lang.Object[], java.util.Comparator) took 246.253ms (60.91 bytecodes/s) (2432B approximate peak alloc)
+10-17 16:12:37.409 I/keystore2(  166): system/security/keystore2/watchdog/src/lib.rs:319 - Watchdog thread idle -> terminating. Have a great day.
+10-17 16:12:38.173 W/riend.mobile.qa( 8384): Verification of void androidx.compose.runtime.snapshots.SnapshotDoubleIndexHeap.validateHandle(int, int) took 135.099ms (784.61 bytecodes/s) (3704B approximate peak alloc)
+10-17 16:12:38.530 W/riend.mobile.qa( 8384): Verification of java.util.Iterator kotlin.sequences.SequencesKt__SequenceBuilderKt.iterator(kotlin.jvm.functions.Function2) took 110.199ms (217.79 bytecodes/s) (2640B approximate peak alloc)
+10-17 16:12:39.105 W/riend.mobile.qa( 8384): Verification of long kotlin.sequences.SequencesKt___SequencesKt.sumOfLong(kotlin.sequences.Sequence, kotlin.jvm.functions.Function1) took 194.531ms (200.48 bytecodes/s) (3032B approximate peak alloc)
+10-17 16:12:39.421 W/riend.mobile.qa( 8384): Verification of void kotlin.jvm.internal.Reflection.<clinit>() took 125.211ms (351.41 bytecodes/s) (3624B approximate peak alloc)
+10-17 16:12:39.823 W/riend.mobile.qa( 8384): Verification of void androidx.emoji2.text.EmojiCompatInitializer$LoadEmojiCompatRunnable.<init>() took 286.227ms (13.97 bytecodes/s) (2152B approximate peak alloc)

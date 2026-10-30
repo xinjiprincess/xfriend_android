@@ -1,0 +1,9 @@
+﻿=== 0.11.0 final regression summary 2026-10-18T00:35:56.0643555+08:00 ===
+P0 XSalers bottom bar: PASS (5 tabs detected, switchable)
+P0 appearance entry: PASS (reachable after scroll; light+dark captured)
+P1 segmented shadow: PASS (thin border, no gray halo)
+P2 bottom bar 80dp: PASS (white bar 210px = 80dp @420dpi)
+Crash/ANR: 0 hits
+Evidence: xs-today-reg/xs-customers-reg/xs-review-reg/xs-experts-reg/xs-profile-reg/xs-appearance-reg-light/xs-appearance-reg-dark/xf-chat-reg/xf-workbench-reg.png
+Log: _logs/logcat-final-regression.txt
+Report: report.md section 11

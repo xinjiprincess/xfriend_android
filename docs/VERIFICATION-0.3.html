@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Xfriend Android 0.3 验证记录</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#111827;font:16px/1.8 system-ui,"Microsoft YaHei",sans-serif;overflow-wrap:anywhere}main{max-width:960px;padding:36px 20px 70px;margin:auto}h1{font-size:28px}h2{font-size:21px;margin-top:32px}a{color:#b13250}table{width:100%;border-collapse:collapse;background:white;font-size:14px}th,td{padding:12px;text-align:left;border-bottom:1px solid #e5e7eb}th{background:#fdebf0}.scroll{overflow:auto}pre{background:white;border:1px solid #e5e7eb;padding:16px;white-space:pre-wrap;font:13px/1.7 Consolas,monospace}code{font-size:.9em}figure{margin:0}img{max-width:100%;border-radius:8px;border:1px solid #e5e7eb}.screens{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}figcaption{font-size:13px;color:#4b5563}.note{background:white;border-left:3px solid #e85d75;padding:16px;margin:20px 0}@media(max-width:560px){.screens{grid-template-columns:1fr}h1{font-size:23px}}@media print{main{padding:0}body{background:white}h2{break-after:avoid}figure,tr{break-inside:avoid}}
+</style></head><body><main><p>2026 年 10 月 13 日 · 单 APK 合并版</p><h1>Xfriend Android 0.3 验证记录</h1>
+<p>本轮将 0.2 本地版与同步版合并为单一应用。包名 <code>com.singu.xfriend.mobile</code>，版本名 <code>0.3.0</code>，versionCode 为 3。验证在隔离源码暂存目录执行，通过后将相关源码与产物复制回 <code>D:/xfriend-android</code>；原电脑版源码没有修改。</p>
+<h2>自动检查</h2><div class="scroll"><table><thead><tr><th>项目</th><th>结果与证据</th></tr></thead><tbody>
+<tr><td>Android 单元测试</td><td>31 项通过，0 失败。原运行时/授权/地址测试 25 项，新增连接协议与模式恢复测试 6 项。</td></tr>
+<tr><td>Gradle 构建与 Lint</td><td>BUILD SUCCESSFUL，2 分 48 秒；Lint 0 错误、3 警告。见 <a href="../verify-0.3.log">最终 Gradle 日志</a>。</td></tr>
+<tr><td>连接桥单元测试</td><td>16 项通过。覆盖公开协议发现、未登录状态、配对、账号切换撤销、同源检查、HTTP/SSE/上传、WebSocket 文本与二进制及请求头隔离。见 <a href="../desktop-bridge/bridge-tests-0.3.log">连接桥日志</a>。</td></tr>
+<tr><td>连接桥静态检查</td><td>Ruff format 与 F/I 检查通过。没有向真实电脑会话发送配对请求。</td></tr>
+<tr><td>APK 身份与签名</td><td>aapt 确认包名、版本与 Xfriend 应用标签；apksigner verify 通过，v2 开发签名，单一签名者。</td></tr>
+<tr><td>报告排版</td><td>无头 Chrome 检查标题和六个章节；1200px 和 400px 宽度下无整页横向溢出，并人工查看截图。</td></tr>
+</tbody></table></div>
+<p>Lint 警告为 HardwareIds（授权设备标识）、ObsoleteSdkInt（最低 API 26 的资源目录）和 MonochromeLauncherIcon（保留原彩色启动图标）。本轮未改原 Python/React 源码，因此未运行电脑版 make all；不宣称电脑版全套测试已通过。</p>
+<pre>$env:JAVA_HOME='C:/Program Files/Java/jdk-20'
+./gradlew.bat --offline --no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:testDebugUnitTest :app:assembleDebug :app:lintDebug --console=plain
+
+# desktop-bridge 目录
+uv run pytest test_bridge.py -q -p no:cacheprovider</pre>
+<h2>单应用端到端验证</h2><p>在已存在的 Android 37 预览模拟器中覆盖安装合并 APK，保留原本地应用数据。通过隔离合成服务完成以下完整流程：原登录页 → 连接电脑配置 → GET /mobile/status → WebView 配对 → HTTP 页面加载 → WebSocket 往返 → 点击“此手机” → 返回原登录页。结果为 PASSED，见 <a href="../smoke-unified-0.3.log">模拟器验证日志</a>。</p>
+<div class="screens"><figure><a href="android-unified-login-0.3.png"><img src="android-unified-login-0.3.png" alt="原版风格登录页和连接电脑入口"></a><figcaption>原登录页保留品牌、注册与连接电脑入口。</figcaption></figure><figure><a href="android-unified-desktop-0.3.png"><img src="android-unified-desktop-0.3.png" alt="合成测试服务的 HTTP 与 WebSocket 通过页面"></a><figcaption>隔离合成页面；HTTP 和 WebSocket 通过。</figcaption></figure><figure><a href="android-unified-return-0.3.png"><img src="android-unified-return-0.3.png" alt="断开电脑模式后返回手机登录页"></a><figcaption>断开电脑会话并返回此手机。</figcaption></figure></div>
+<p>测试服务只提供合成账号状态和回显消息，不读取真实电脑文件、账号、工作空间或控制功能。模拟器使用此前临时启动的 4GB 配置；不代表 Android 真机性能验收。</p>
+<h2>尚未验收的项目</h2><ul><li>真实云账号登录、注册、模型调用和平台账号连接未用个人凭据测试。</li><li>电脑版内置 v1 服务尚待另一边实现；真实桌面、终端和浏览器控制仍需按 <a href="DESKTOP-INTEGRATION-0.3.html#acceptance">对接报告验收清单</a> 联调。</li><li>手机已登录状态的侧栏切换、正在执行任务时的确认流程与真实本地资料跨升级保留未做端到端实机验收；其源码路径已接入，运行时原有单元测试继续通过。</li><li>网络断开时，手机注销请求可能失败；服务端依靠 8 小时 TTL 或电脑端主动撤销收回残留会话。当前没有离线双向数据合并。</li><li>当前是开发签名调试包；正式发行签名、下载/摄像头等扩展能力和真机兼容性需要后续验收。</li></ul>
+<div class="note">此前启动真实电脑连接桥及 ADB 转发的操作被自动审批以“blocked by policy”拒绝。本轮使用合成服务完成受影响链路的安全替代验证，没有绕过该限制。</div>
+<p><a href="DESKTOP-INTEGRATION-0.3.html">电脑版对接报告</a> · <a href="../dist/Xfriend-Android-0.3.0-debug.apk">合并 APK</a> · <a href="../dist/Xfriend-Desktop-Bridge-0.3.0.zip">升级连接桥</a> · <a href="../dist/SHA256SUMS-0.3.0.txt">SHA-256 校验</a></p>
+</main></body></html>

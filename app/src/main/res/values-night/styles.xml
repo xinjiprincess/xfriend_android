@@ -1,0 +1,13 @@
+<resources>
+    <!-- 深色模式：与重塑概念稿的暗色画布一致；Compose 启动后会再次按偏好覆盖系统栏颜色。 -->
+    <style name="Base.Theme.Xfriend" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#0E0F12</item>
+        <item name="android:navigationBarColor">#0E0F12</item>
+        <item name="android:windowBackground">#0E0F12</item>
+        <item name="android:colorAccent">#8B95FF</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <style name="Theme.Xfriend" parent="Base.Theme.Xfriend" />
+</resources>

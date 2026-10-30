@@ -1,0 +1,9 @@
+﻿=== final release verify 2026-10-18T00:19:00.1970544+08:00 ===
+Xfriend final: size=26451921 sha256=46693C8F2A57BBC1161F43318533235B470234B67B31F38FF2DD97EC2845457E expect=46693C8F2A57BBC1161F43318533235B470234B67B31F38FF2DD97EC2845457E match=True
+  install: Performing Streamed Install
+  install: Success
+Xsalers final: size=26451941 sha256=E4C4A9A7C36124F0E55E64B725272476BB2291114CCA230A3F3D2BED323CA0C6 expect=E4C4A9A7C36124F0E55E64B725272476BB2291114CCA230A3F3D2BED323CA0C6 match=True
+  install: Performing Streamed Install
+  install: Success
+com.singu.xfriend.mobile -> versionName=0.11.0
+com.singu.xsalers.mobile -> versionName=0.11.0

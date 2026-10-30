@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-13",
+  "version": "0.5.0",
+  "build": "passed",
+  "products": {
+    "Xfriend": {
+      "package": "com.singu.xfriend.mobile",
+      "tests": 80,
+      "failures": 0,
+      "lint_errors": 0,
+      "lint_warnings": 11,
+      "qa_fixture_excluded": true,
+      "shared_api_key_pattern_absent": true,
+      "apk_bytes": 21564495,
+      "sha256": "29c123cc2c89be37d3c866d17565c625a9993d67ca36ecb3b0d2cb3a6c13fbc1"
+    },
+    "Xsalers": {
+      "package": "com.singu.xsalers.mobile",
+      "tests": 80,
+      "failures": 0,
+      "lint_errors": 0,
+      "lint_warnings": 13,
+      "qa_fixture_excluded": true,
+      "shared_api_key_pattern_absent": true,
+      "apk_bytes": 21564515,
+      "sha256": "e985e3eeed2229b87e707e758eaaa39903f151a8f263051dd84c9611de278161"
+    }
+  },
+  "limits": [
+    "公网试用 HTTPS 未开通",
+    "订阅支付未接入",
+    "CRM 双向同步需要电脑版配合",
+    "模型、语音及真实账号端到端未在本次验收"
+  ],
+  "ui_screenshots": [],
+  "ui_checks": {
+    "environment": "Android 35 emulator, 1080x2400",
+    "sales_home": "启动并取得实际 UI 树，示例客户及待办显示正常",
+    "full_visual_acceptance": "未完成：host 与 software 渲染均出现 QEMU 线程挂起，无法取得有效截图",
+    "physical_device": "未测试"
+  }
+}

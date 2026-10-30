@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-13",
+  "version": "0.6.0",
+  "build": "passed",
+  "products": {
+    "Xfriend": {
+      "package": "com.singu.xfriend.mobile",
+      "tests": 92,
+      "failures": 0,
+      "lint_errors": 0,
+      "lint_warnings": 11,
+      "qa_fixture_excluded": true,
+      "shared_api_key_pattern_absent": true,
+      "apk_bytes": 21647487,
+      "sha256": "095fe61566f7410c6b29916f2c813ddb7c494d54f2268642beb3ffe326bf2bd5"
+    },
+    "Xsalers": {
+      "package": "com.singu.xsalers.mobile",
+      "tests": 92,
+      "failures": 0,
+      "lint_errors": 0,
+      "lint_warnings": 13,
+      "qa_fixture_excluded": true,
+      "shared_api_key_pattern_absent": true,
+      "apk_bytes": 22408689,
+      "sha256": "5b122a9f89b6a326c048357bf89d7a724fb0154b8ade7fd6342f38831c821986"
+    }
+  },
+  "limits": [
+    "公网试用 HTTPS 本次连接超时",
+    "长录音和长文字需要自有模型；现有试用网关仍受单请求限制",
+    "CRM 双向同步与订阅支付未接入",
+    "真实模型端到端本次未验收"
+  ],
+  "ui_screenshots": [
+    "suite-0.6-xsalers-home.png"
+  ],
+  "ui_checks": {
+    "physical_device": "未测试",
+    "visual_acceptance": "以本次 QA 证据记录为准"
+  },
+  "android_audio_import": {
+    "environment": "Android 35 emulator 1080x2400",
+    "synthetic_only": true,
+    "service_started": true,
+    "app_sent_to_background": true,
+    "result": {
+      "synthetic_only": true,
+      "tasks": [
+        {
+          "id": "qa-audio-highrate",
+          "operation": "import",
+          "title": "QA 大录音测试 0",
+          "payload": "redacted",
+          "status": "done",
+          "detail": "处理完成",
+          "created": 1791884008504
+        },
+        {
+          "id": "qa-audio-long",
+          "operation": "import",
+          "title": "QA 大录音测试 1",
+          "payload": "redacted",
+          "status": "done",
+          "detail": "处理完成",
+          "created": 1791884008719
+        }
+      ],
+      "records": [
+        {
+          "id": "qa-audio-long",
+          "rate": 16000,
+          "channels": 1,
+          "bytes": 26214400,
+          "segments": 10
+        },
+        {
+          "id": "qa-audio-highrate",
+          "rate": 16000,
+          "channels": 1,
+          "bytes": 5760000,
+          "segments": 2
+        }
+      ]
+    },
+    "passed": true
+  }
+}

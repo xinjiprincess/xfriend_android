@@ -1,0 +1,15 @@
+{
+  "environment": "Android 35 emulator 720x1600",
+  "synthetic_only": true,
+  "screens": [
+    "home",
+    "customers",
+    "customer-detail",
+    "customer-records",
+    "report",
+    "transcript",
+    "review",
+    "experts"
+  ],
+  "passed": true
+}

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Xfriend / Xsalers 0.12 · 通话录音接管交付报告</title>
+<style>
+:root{color-scheme:light dark;--bg:#F6F5F1;--surface:#FFFFFF;--text:#1B1C1F;--muted:#57585F;--line:#E5E2DA;--accent:#4F5DF0;--violet:#7055DE;--soft:#ECEEFE;--warn:#FFF6E5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.75 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}main{max-width:1080px;margin:auto;padding:48px 24px 64px}header{padding-bottom:28px;border-bottom:1px solid var(--line)}h1{font-size:clamp(28px,5vw,42px);line-height:1.25;margin:12px 0}h2{font-size:24px;margin:0 0 16px}h3{font-size:18px;margin:0 0 8px}p{margin:8px 0 16px}a{color:var(--accent);text-underline-offset:4px}a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}nav{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:20px}nav a{min-height:48px;display:inline-flex;align-items:center}.eyebrow,.muted{color:var(--muted)}.eyebrow{font-size:14px;letter-spacing:.08em}.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:14px;background:var(--surface)}section{margin-top:28px;padding:28px;background:var(--surface);border:1px solid var(--line);border-radius:16px;scroll-margin-top:20px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.brand{color:var(--accent)}.sales{color:var(--violet)}ul,ol{padding-left:24px;margin:8px 0}li+li{margin-top:8px}.note{padding:16px;border-left:3px solid var(--line);background:var(--bg);border-radius:0 8px 8px 0}.note.warn{border-left-color:#B26B00;background:var(--warn)}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:var(--bg)}code{font-size:.9em;overflow-wrap:anywhere}.placeholder{padding:18px;border:1px dashed var(--line);border-radius:12px;background:var(--bg);color:var(--muted)}.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0}.flow div{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:12px;font-size:14px;text-align:center}.flow b{display:block;color:var(--accent);font-size:13px;margin-bottom:4px}figure{margin:20px 0}figure img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line)}figcaption{font-size:13px;color:var(--muted);padding:8px}.shot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.shot-grid .placeholder{min-height:120px}.status{font-weight:600;color:var(--violet)}footer{margin-top:28px;color:var(--muted);font-size:14px}
+@media(prefers-color-scheme:dark){:root{--bg:#0E0F12;--surface:#181A1F;--text:#F1F2F4;--muted:#AAAEB8;--line:#282A31;--accent:#8B95FF;--violet:#C5BCFF;--soft:#272A3C;--warn:#2C2418}}
+@media(max-width:760px){main{padding:28px 16px 40px}section{padding:20px 16px}.grid,.flow,.shot-grid{grid-template-columns:1fr}th,td{padding:10px}nav{gap:4px 16px}}
+@media print{main{max-width:none;padding:0}body{background:white;color:black}section{break-inside:avoid}nav{display:none}}
+</style>
+</head>
+<body><main>
+<header>
+<div class="eyebrow">XSALERS FEATURE DELIVERY · 2026-10-18</div>
+<h1>Xfriend / Xsalers 0.12</h1>
+<p>本次新增：<strong>XSalers 通话录音接管</strong>。接管系统/录音机已保存的通话录音，复用既有「转写 → 复盘」链路；文字保存后可清理源音频。</p>
+<span class="tag">0.12.0 · versionCode 12</span>
+<span class="tag">两 flavor 单元测试 600 项通过</span>
+<span class="tag">正式 APK 已构建</span>
+<span class="tag">模拟器验证通过</span>
+<p class="muted">本报告记录 0.12 的功能实现、证据与限制；不把“已实现”写成“已全量验收”，APK/SHA 与 7 张截图已回填。</p>
+<nav aria-label="报告导航"><a href="#overview">版本概览</a><a href="#feature">本次新增</a><a href="#flow">用户流程</a><a href="#tech">技术实现</a><a href="#boundary">权限与边界</a><a href="#verify">验证证据</a><a href="#apk">APK 信息</a><a href="#limits">已知限制</a></nav>
+</header>
+
+<section id="overview"><h2>版本概览</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">项目</th><th scope="col">0.12.0</th></tr></thead><tbody>
+<tr><td>版本</td><td>versionName <code>0.12.0</code> / versionCode <strong>12</strong>（由 0.11.0 / 11 升级）</td></tr>
+<tr><td>范围</td><td>XSalers 新增「通话录音接管」功能；Xfriend 无新增功能；视觉系统沿用 0.11，<strong>不新增 token/组件</strong></td></tr>
+<tr><td>不改动</td><td>不新增后台常驻服务；不改动 CRM 成交状态；不实现通话中录音；既有转写/复盘管道复用</td></tr>
+<tr><td>安装升级</td><td>同签名覆盖安装即可；<strong>不要先卸载</strong>，避免清除本机数据</td></tr>
+<tr><td>交付状态</td><td>正式 debug APK 已构建（2026-10-18 03:28）；两 flavor 单测 600 项通过；模拟器授权/接管/去重/删除链路验证；lint 未执行（非阻断）</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="feature"><h2>本次新增：通话录音接管</h2>
+<p>Android 10 起第三方应用不能在通话中直接录音。0.12 的“接管”是读取系统/厂商录音机<strong>已经保存</strong>的通话录音，导入 App 私有目录后复用既有 ASR → 复盘流程。</p>
+<div class="grid">
+<article><h3 class="sales">能力</h3><ul>
+<li>今日页快捷入口「接管通话录音」；我的页设置行「通话录音接管」。</li>
+<li>扫描系统音频库（MediaStore）+ App 内 <code>recordings</code> 目录；按关键词/电话号码/日期/目录识别候选。</li>
+<li>用户勾选后复制/解码为 PCM16 WAV 到私有目录，生成 <code>kind=audio</code> 记录；匹配到客户时自动带上客户。</li>
+<li>转写需要配置模型/试用额度；无模型时只导入并提示后续转写。</li>
+<li>文字保存后出现「待清理源录音」；二次确认后可删除源音频，文字与复盘报告保留。</li>
+</ul></article>
+<article><h3 class="brand">边界</h3><ul>
+<li><strong>不做</strong>通话中录音、通话监听、后台定时扫描、后台常驻服务。</li>
+<li>打开 App 自动扫描一次（受开关控制）；页面可手动「重新扫描」。</li>
+<li>系统媒体库删除需系统确认（API 30+）；App 内录音直接删源文件。</li>
+<li>单条录音 ≤ 4 小时 / ≤ 4 GB；候选最多 200 条；已忽略 key 最多保留 500 条。</li>
+<li>接管、复制与解码在本机完成，不写入本应用自有服务器；转写沿用现有模型链路，会把音频发送给所配置的 ASR 服务（默认 MiMo 云端），不是端到端离线。</li>
+</ul></article>
+</div>
+<p class="note"><strong>入口：</strong>XSalers 今日页 → 快捷入口「接管通话录音」；或 我的 → 「通话录音接管」。页面标题「通话录音接管」。详细说明见 <a href="CALL-RECORDING-0.12.md"><code>docs/CALL-RECORDING-0.12.md</code></a>。</p>
+</section>
+
+<section id="flow"><h2>用户流程</h2>
+<div class="flow" aria-label="用户流程">
+<div><b>1 发现</b>打开 App 自动扫描，或进入页面点「重新扫描」</div>
+<div><b>2 授权</b>无音频权限时显示 banner，点击「授权」</div>
+<div><b>3 选择</b>候选列表显示标题、日期、时长、大小、来源、客户</div>
+<div><b>4 接管</b>勾选后「接管并转写」；复制/解码并生成记录</div>
+<div><b>5 清理</b>文字保存后「待清理源录音」→ 二次确认删除源音频</div>
+</div>
+<ol>
+<li>进入 XSalers「今日」，点击「接管通话录音」。</li>
+<li>首次使用显示「需要允许读取音频，才能发现系统通话录音」，点击「授权」完成系统权限弹窗。</li>
+<li>扫描完成后列出候选；标题、日期/时间、时长、大小、来源目录可见，匹配到客户时显示客户名。</li>
+<li>勾选一条或多条 →「接管并转写 (n)」；接管完成后候选清空并提示刷新。未配置模型时提示「配置模型后可打开记录开始转写」。</li>
+<li>转写并保存文字后，页面出现「待清理源录音」；点击「删除源录音」→「确认删除」/「保留源录音」。删除后文字与复盘报告保留，记录不再提示。</li>
+</ol>
+</section>
+
+<section id="tech"><h2>技术实现与文件</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">文件</th><th scope="col">类型</th><th scope="col">作用</th></tr></thead><tbody>
+<tr><td><code>SalesCallRecordings.kt</code></td><td>新增</td><td>扫描/识别/格式化/客户匹配/本地源删除；<code>CallRecording</code>、<code>CallRecordingSettings</code>、<code>CallRecordings</code></td></tr>
+<tr><td><code>SalesCallRecordingsScreen.kt</code></td><td>新增</td><td>页面：授权 banner、候选多选、接管并转写、忽略、设置、待清理源录音、删除确认</td></tr>
+<tr><td><code>SalesViewModel.kt</code></td><td>修改</td><td>自动/手动扫描、接管、忽略、设置持久化、待清理列表、删除源录音（API&lt;30 分支）</td></tr>
+<tr><td><code>SalesDomain.kt</code></td><td>修改</td><td><code>Communication</code> 增加 <code>sourceUri/sourceName/sourceDeleted</code>，JSON 向后兼容</td></tr>
+<tr><td><code>SalesStore.kt</code></td><td>修改</td><td><code>SalesData</code> 增加 <code>callAutoScan/callDeleteAfterTranscribe/callSkipped</code></td></tr>
+<tr><td><code>SalesScreen.kt</code></td><td>修改</td><td>今日页入口、我的页设置行、页面路由</td></tr>
+<tr><td><code>SalesMedia.kt</code></td><td>复用</td><td><code>decodeAudio</code>：MediaExtractor/MediaCodec 解码为 PCM16 WAV，限制 4 小时</td></tr>
+<tr><td><code>AndroidManifest.xml</code>（xsalers）</td><td>修改</td><td>新增 <code>READ_MEDIA_AUDIO</code>、<code>READ_EXTERNAL_STORAGE (maxSdkVersion=32)</code></td></tr>
+<tr><td><code>SalesCallRecordingsTest.kt</code></td><td>新增</td><td>12 个单测：文件名/日期/号码/标题、时长/大小、JSON 往返、旧数据默认值、WAV 时长</td></tr>
+</tbody></table></div>
+<p class="muted">0.12 不新增依赖；页面全部使用既有 Xf 组件与 0.11 设计令牌。</p>
+</section>
+
+<section id="boundary"><h2>权限与边界</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">项目</th><th scope="col">说明</th></tr></thead><tbody>
+<tr><td>音频读取</td><td>Android 13+ <code>READ_MEDIA_AUDIO</code>；Android 12 及以下 <code>READ_EXTERNAL_STORAGE</code>（manifest <code>maxSdkVersion=32</code>）。仅点击「授权」时申请。</td></tr>
+<tr><td>无权限时</td><td>只扫描 App 自己的 <code>recordings</code> 目录；页面显示受限提示，可稍后重新授权。</td></tr>
+<tr><td>删除系统录音</td><td>API 30+ 走 <code>MediaStore.createDeleteRequest</code> 系统确认；API 26–29 直接 <code>contentResolver.delete</code>（App 内二次确认后）。</td></tr>
+<tr><td>删除 App 内录音</td><td>删除 App 私有目录副本与源文件；不可恢复。</td></tr>
+<tr><td>保留内容</td><td>删除源音频后，文字、原文、复盘报告保留；<code>sourceDeleted=true</code> 后不再提示。</td></tr>
+<tr><td>隐私</td><td>接管、复制与解码在本机完成，不写入本应用自有服务器；转写会把音频发送给所配置的 ASR 服务（默认 MiMo 云端 <code>https://api.xiaomimimo.com/v1</code>，<code>mimo-v2.5-asr</code>），是否离开本机取决于模型配置。</td></tr>
+<tr><td>不做</td><td>通话中录音、后台常驻/定时扫描、云端录音存储、自动改写 CRM 成交状态。</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="verify"><h2>验证证据</h2>
+<h3>单元测试</h3>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">范围</th><th scope="col">结果</th><th scope="col">状态</th></tr></thead><tbody>
+<tr><td>XFriend debug 单测</td><td>38 suites / <strong>300 tests</strong>，0 failures / 0 errors</td><td>已通过（2026-10-18）</td></tr>
+<tr><td>XSalers debug 单测</td><td>38 suites / <strong>300 tests</strong>，0 failures / 0 errors</td><td>已通过（2026-10-18）</td></tr>
+<tr><td>两 flavor 合计</td><td><strong>600 tests</strong>，0 failures / 0 errors</td><td>已通过</td></tr>
+<tr><td>0.11 基线</td><td>574 tests，0 failures / 0 errors</td><td>历史基线</td></tr>
+<tr><td>lint</td><td>未执行</td><td>非阻断</td></tr>
+</tbody></table></div>
+<h3 style="margin-top:20px">构建与模拟器验证</h3>
+<p>构建：<code>build-0.12-release.log</code>，BUILD SUCCESSFUL in 13m 58s；93 actionable tasks（45 executed / 48 up-to-date）；0 compile errors / 16 warnings；同日志含两 flavor 单测。</p>
+<p>环境：Pixel_9 模拟器 / Android 37 / 1080×2424 / 420dpi；独立 QA fixture（<code>com.singu.xsalers.mobile.qa</code>）。已验证：未授权提示 + 授权；<code>pm grant READ_MEDIA_AUDIO</code> 后提示消失、候选正常；全选 → 接管并转写(1) → 今日「待分析」1→2、新增「通话录音」；去重后仅剩 1 条候选；删除源录音 → 确认 → 卡片消失、外部文件已删除、文字/报告保留；crash buffer 为空。</p>
+<p class="note warn"><strong>未覆盖：</strong>fixture 无法配置模型，真实 ASR 转写未端到端（接管只完成复制/解码并生成待分析记录）；删除链路用「已转写」种子记录验证；不声明真实 ASR 全流程通过。</p>
+<h3 style="margin-top:20px">截图（7 张，已回填）</h3>
+<p>以下截图在 <code>docs/qa-0.12/</code>；除 06 外均为 1080×2424 PNG；<code>06-pending-delete.png</code> 是 <code>04-granted.png</code> 底部「待清理源录音」卡片裁剪（1080×540），不是独立全屏截图。尺寸与 SHA-256 见 <a href="verification-0.12.json"><code>docs/verification-0.12.json</code></a>。</p>
+<div class="shot-grid">
+<figure><img src="qa-0.12/callrec-01-home.png" alt="今日页入口" loading="lazy"><figcaption>01 · 今日页入口「接管通话录音」</figcaption></figure>
+<figure><img src="qa-0.12/callrec-02-permission.png" alt="授权前" loading="lazy"><figcaption>02 · 授权前：权限 banner + 候选</figcaption></figure>
+<figure><img src="qa-0.12/callrec-03-candidates.png" alt="候选列表" loading="lazy"><figcaption>03 · 候选列表（标题/日期/时长/大小）</figcaption></figure>
+<figure><img src="qa-0.12/callrec-04-granted.png" alt="授权后" loading="lazy"><figcaption>04 · 授权后（banner 消失）</figcaption></figure>
+<figure><img src="qa-0.12/callrec-05-takeover.png" alt="接管完成" loading="lazy"><figcaption>05 · 接管完成</figcaption></figure>
+<figure><img src="qa-0.12/callrec-06-pending-delete.png" alt="待清理源录音（裁剪）" loading="lazy"><figcaption>06 · 待清理源录音（04 底部卡片裁剪）</figcaption></figure>
+<figure><img src="qa-0.12/callrec-07-deleted.png" alt="删除后" loading="lazy"><figcaption>07 · 删除后</figcaption></figure>
+</div>
+<p class="muted">截图路径以 <a href="CALL-RECORDING-0.12.md"><code>docs/CALL-RECORDING-0.12.md</code></a> 与 <a href="verification-0.12.json"><code>docs/verification-0.12.json</code></a> 的记录为准；06 为裁剪图，内容与页面一致。</p>
+</section>
+
+<section id="apk"><h2>APK 信息</h2>
+<p class="note"><strong>说明：</strong>0.12 正式 APK 已构建（2026-10-18，debug 双 flavor，<code>-PsalesUiFixture=false</code>）。以下值来自实际文件与 aapt2 badging 校验；两份副本同文件同 SHA-256。</p>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">项目</th><th scope="col">Xfriend</th><th scope="col">Xsalers</th></tr></thead><tbody>
+<tr><td>版本</td><td>0.12.0 / versionCode 12</td><td>0.12.0 / versionCode 12</td></tr>
+<tr><td>包名</td><td><code>com.singu.xfriend.mobile</code></td><td><code>com.singu.xsalers.mobile</code></td></tr>
+<tr><td>APK 文件名</td><td><code>Xfriend-0.12.0.apk</code></td><td><code>Xsalers-0.12.0.apk</code></td></tr>
+<tr><td>大小（bytes）</td><td>26,499,349</td><td>26,499,509</td></tr>
+<tr><td>SHA-256</td><td><code>C3457F4301E1814D824A31BA34ABE63CA838DE78FA02E5A1FEF1740D0AA33C63</code></td><td><code>8B6FB83D686142C87478B7CE82FCF155E77829706932AC4015B41861B2CFC9C8</code></td></tr>
+<tr><td>mtime</td><td>2026-10-18 03:28:27</td><td>2026-10-18 03:25:49</td></tr>
+<tr><td>构建日志 / 结果</td><td colspan="2"><code>build-0.12-release.log</code> / BUILD SUCCESSFUL 13m58s；93 tasks（45 executed / 48 up-to-date）</td></tr>
+<tr><td>aapt2 badging 校验</td><td colspan="2">包名、versionName=0.12.0、versionCode=12、compileSdk=34 均通过</td></tr>
+<tr><td>交付副本</td><td colspan="2"><code>D:\build_apk\Xfriend-0.12.0.apk</code> / <code>D:\build_apk\Xsalers-0.12.0.apk</code>（与 <code>.artifacts\0.12-release\</code> 同 SHA）</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="limits"><h2>已知限制</h2>
+<ul>
+<li>正式 APK 为 debug 双 flavor、开发签名；不是应用商店发布包。</li>
+<li>两 flavor 单测 600 项通过；lint 未执行（非阻断），不写成通过。</li>
+<li>截图 7 张已回填；06 是 04 底部「待清理源录音」卡片裁剪，不是独立全屏。</li>
+<li>fixture 无法配置模型，真实 ASR 转写未端到端；删除链路用「已转写」种子记录验证，不声明真实 ASR 全流程通过。</li>
+<li>Android 10+ 无法通话中录音，本功能只接管已保存文件；不做后台常驻扫描。</li>
+<li>音频接管/复制/解码在本机完成；转写沿用现有模型链路，会把音频发送给所配置的 ASR 服务（默认 MiMo 云端），不写入本应用自有服务器，但不是端到端离线方案。</li>
+<li>厂商录音目录/命名差异可能导致漏识别；模拟器合成数据验收，不代表真机；MP3/高采样率/无权限/外部存储异常路径由 SalesCallRecordingsTest 单测覆盖。</li>
+<li>交付为开发签名 APK；服务器部署、生产签名与上架不在本次范围。</li>
+</ul>
+</section>
+<footer>0.12 交付范围：XSalers 通话录音接管功能代码、页面、两 flavor 单测与模拟器验证；正式 APK 已构建并含 SHA-256。真实 ASR 转写、真机与无障碍未验收；06 为裁剪图。</footer>
+</main></body></html>
